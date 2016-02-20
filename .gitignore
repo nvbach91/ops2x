@@ -5,6 +5,6 @@ bower_components/
 .sass-cache
 *.css.map
 build/
-app/js/build.js
+public/js/build.js
 dist/
 maps/
