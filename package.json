@@ -4,7 +4,7 @@
   "description": "Online Point of Sale System",
   "main": "index.js",
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "gulp"
   },
   "author": "nvbach91",
   "contributors": [],
