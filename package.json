@@ -2,11 +2,11 @@
   "name": "ops",
   "version": "1.0.0",
   "description": "Online Point of Sale System",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "start": "gulp"
   },
-  "author": "nvbach91",
+  "author": "Nguyen Viet Bach <nvbach91@outlook.com>",
   "contributors": [],
   "license": "MIT",
   "devDependencies": {

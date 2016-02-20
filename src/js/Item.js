@@ -3,7 +3,11 @@
  *   Author     : Nguyen Viet Bach
  */
 
-var Item = function (id, ean, name, price, group, tax, tags, desc) {
+/*
+ * 
+ *
+ */
+App.Item = function (id, ean, name, price, group, tax, tags, desc) {
     this.id = id;
     this.ean = ean;
     this.name = name;
@@ -14,6 +18,6 @@ var Item = function (id, ean, name, price, group, tax, tags, desc) {
     this.desc = desc;
 };
 
-Item.prototype.valueOf = function () {
+App.Item.prototype.valueOf = function () {
     return this.ean;
 };

@@ -1,20 +1,12 @@
 
-
-/* 
- *   Created on : Jan 28, 2016, 12:24:53 PM
- *   Author     : Nguyen Viet Bach
- */
-
-Array.prototype.binaryIndexOf = binaryIndexOf;
-
 $(document).ready(function () {
     var kc = $("#kc");
     // reset checkout
     var jSaleList = $("#sale-list");
     $("#discard-sale").click(function () {
-        jSaleList.find(".sale-item").slideUp(getAnimationTime(), function () {
+        jSaleList.find(".sale-item").slideUp(App.getAnimationTime(), function () {
             $(this).remove();
-            recalculateTotalCost();
+            App.recalculateTotalCost();
         });
     });
 
@@ -22,7 +14,7 @@ $(document).ready(function () {
     var jPriceInput = $("#price-input");
     var jRegistrySession = $("#registry-session");
     jPriceInput.keydown(function (e) {
-        return checkPriceInput(e, kc, jPriceInput);
+        return App.checkPriceInput(e, kc, jPriceInput);
     }).blur(function () {
         var p = $(this).val();
         if (!/^\-?\d+\*?(\d+)?$/g.test(p) || p === "-") {
@@ -37,7 +29,7 @@ $(document).ready(function () {
             p = p.slice(1);
             sign = "-";
         }
-        var correctValue = correctPrice(p);
+        var correctValue = App.correctPrice(p);
         if (!correctValue) {
             jPriceInput.val("");
             return false;
@@ -71,9 +63,9 @@ $(document).ready(function () {
             jPriceInput.val("");
             return false;
         }
-        var mult = getMultiplicationNumber(jPriceInput);
+        var mult = App.getMultiplicationNumber(jPriceInput);
         
-        price = correctPrice(price);
+        price = App.correctPrice(price);
         jPriceInput.val(price);
         
         var id = t.text();
@@ -82,7 +74,7 @@ $(document).ready(function () {
         var tax = t.text();
         var tags = t.text();
         var desc = t.text();
-        addItemToCheckout(id, "", name, price, group, tax, tags, desc, mult);
+        App.addItemToCheckout(id, "", name, price, group, tax, tags, desc, mult);
         jRegistrySession.text("1");
     });
 
@@ -90,7 +82,7 @@ $(document).ready(function () {
     $("#quick-sales .qs-item button").click(function () {
         var t = $(this);
         var price = t.parent().find(".qs-price").text();
-        var mult = getMultiplicationNumber(jPriceInput);
+        var mult = App.getMultiplicationNumber(jPriceInput);
         jPriceInput.val(price);
         var name = t.text();
         var id = t.parent().find(".qs-id").text();
@@ -99,7 +91,7 @@ $(document).ready(function () {
         var tags = t.parent().find(".qs-tags").text();
         var desc = t.parent().find(".qs-desc").text();
         
-        addItemToCheckout(id, "", name, price, group, tax, tags, desc, mult);
+        App.addItemToCheckout(id, "", name, price, group, tax, tags, desc, mult);
 
         jRegistrySession.text("1");
     });
@@ -124,7 +116,7 @@ $(document).ready(function () {
         $("<div></div>").addClass("pb-header")
                 .append($("<div></div>").addClass("pb-title").text("Payment"))
                 .append($("<button></button>").addClass("pb-close").click(function () {
-                    $(this).parents("#curtain").fadeOut(getAnimationTime(), function () {
+                    $(this).parents("#curtain").fadeOut(App.getAnimationTime(), function () {
                         $(this).remove();
                     });
                 })).appendTo(paymentBox);
@@ -158,12 +150,12 @@ $(document).ready(function () {
                 .attr("maxlength", "6")
                 .val(parseFloat(total) < 0 ? 0 : total)
                 .keydown(function (e) {
-                    return checkNumericInput(e, this);
+                    return App.checkNumericInput(e, this);
                 })
                 .blur(function () {
                     var t = $(this);
                     var p = t.val();
-                    var correctValue = correctPrice(p);
+                    var correctValue = App.correctPrice(p);
                     if (!correctValue || !/^\-?\d+\.\d{2}$/g.test(correctValue)) {
                         t.addClass("invalid");
                         t.parent().find("button.cash-confirm").addClass("disabled");
@@ -212,12 +204,12 @@ $(document).ready(function () {
 
         paymentBody.appendTo(paymentBox);
 
-        showInCurtain(paymentBox);
+        App.showInCurtain(paymentBox);
     });
 
     var catalog = {items: []};
     for (var i = 0; i < 1; i++) {
-        catalog.items.push(new Item(
+        catalog.items.push(new App.Item(
                 Math.floor((Math.random() * 10) + 1) + i,
                 "40152233",
                 "Water " + i,
@@ -238,8 +230,8 @@ $(document).ready(function () {
             var i = catalog.items.binaryIndexOf(filter);
             if (i >= 0) {
                 var item = catalog.items[i];
-                var mult = getMultiplicationNumber(jPriceInput);
-                addItemToCheckout(
+                var mult = App.getMultiplicationNumber(jPriceInput);
+                App.addItemToCheckout(
                     item.id,
                     item.ean,
                     item.name,

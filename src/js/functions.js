@@ -4,20 +4,12 @@
  */
 
 
-var getAnimationTime = function () {
+App.getAnimationTime = function () {
     return window.innerWidth > 799 ? 100 : 0;
 }
 ;
 
-/**
- * Performs a binary search on the host array. 
- * Implement a valueOf function to your class which returns the value to be compared
- * i.e. Item.prototype.valueOf
- * The Host array must be sorted with Array.prototype.sort(function(lhs, rhs){});
- * @param {*} searchElement The item to search for within the array.
- * @return {Number} The index of the element which defaults to -1 when not found.
- */
-var binaryIndexOf = function (searchElement) {
+Array.prototype.binaryIndexOf = function (searchElement) {
     'use strict';
 
     var minIndex = 0;
@@ -43,13 +35,11 @@ var binaryIndexOf = function (searchElement) {
     return -1;
 };
 
-var endsWith = function (suffix) {
+String.prototype.endsWith = function (suffix) {
     return this.indexOf(suffix, this.length - suffix.length) !== -1;
 };
 
-String.prototype.endsWith = endsWith;
-
-var formatMoney = function (c, d, t) {
+Number.prototype.formatMoney = function (c, d, t) {
     var n = this,
             c = isNaN(c = Math.abs(c)) ? 2 : c,
             d = d === undefined ? "." : d,
@@ -61,21 +51,7 @@ var formatMoney = function (c, d, t) {
 }
 ;
 
-Number.prototype.formatMoney = formatMoney;
-
-var createFoundItem = function (name, price) {
-    return '<li class="dd-item">' +
-            '<div class="dd-name">' + name + '</div>' +
-            '<div class="dd-price">' + price + '</div>' +
-            '</li>';
-};
-
-var isFloat = function (n) {
-    return n === Number(n) && n % 1 !== 0;
-}
-;
-
-var beep = function () {
+App.beep = function () {
     var b = document.getElementById("beep");
     b.pause();
     b.currentTime = 0;
@@ -83,7 +59,7 @@ var beep = function () {
 }
 ;
 
-var correctPrice = function (pr) {
+App.correctPrice = function (pr) {
     var p = pr.replace(/\./g, "");
     var correctValue = "";
     while (p.length > 2 && p.charAt(0) === "0") {
@@ -103,7 +79,7 @@ var correctPrice = function (pr) {
 }
 ;
 
-var recalculateTotalCost = function () {
+App.recalculateTotalCost = function () {
     var saleList = $("#sale-list");
     if (saleList.children().size() === 1) {
         $("#si-placeholder").removeClass("hidden");
@@ -132,7 +108,7 @@ var recalculateTotalCost = function () {
 }
 ;
 
-var checkPriceInput = function (e, u, p) {
+App.checkPriceInput = function (e, u, p) {
     u.text("keyCode: " + e.keyCode);
     //var p = $("#price-input");
     if (e.keyCode === 13) { // allow enter 
@@ -170,7 +146,7 @@ var checkPriceInput = function (e, u, p) {
     }
 };
 
-var checkNumericInput = function (e, t) {
+App.checkNumericInput = function (e, t) {
     if (e.keyCode === 13) { // allow enter and blur upon press
         t.blur();
         return true;
@@ -184,19 +160,19 @@ var checkNumericInput = function (e, t) {
     }
 };
 
-var showInCurtain = function (s) {
+App.showInCurtain = function (s) {
     var curtain = $("<div></div>").attr("id", "curtain").click(function () {
-        $(this).fadeOut(getAnimationTime(), function () {
+        $(this).fadeOut(App.getAnimationTime(), function () {
             $(this).remove();
         });
     });
     curtain.append(s).hide();
     $("#app").append(curtain);
-    curtain.fadeIn(getAnimationTime());
+    curtain.fadeIn(App.getAnimationTime());
 }
 ;
 
-var getMultiplicationNumber = function (jpi) {
+App.getMultiplicationNumber = function (jpi) {
     var m = jpi.val();
     if (!m.match(/^\-?[1-9](\d+)?\*(\d+)?$/g)) {
         return 1;
@@ -205,12 +181,12 @@ var getMultiplicationNumber = function (jpi) {
 }
 ;
 
-var addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, mult) {
+App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, mult) {
     var jSaleList = $("#sale-list");
     var lastItem = jSaleList.find(".sale-item.last");
     if (id.toString() === lastItem.find(".si-id").text()) {
         if ($("#registry-session").text() === "1") {
-            incrementLastItem(lastItem);
+            App.incrementLastItem(lastItem);
             return true;
         }
     }
@@ -232,7 +208,7 @@ var addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
             .attr({maxlength: 3})
             .val(mult ? mult : 1)
             .keydown(function (e) {
-                checkNumericInput(e, this);
+                App.checkNumericInput(e, this);
             })
             .focus(function () {
                 $(this).select();
@@ -241,7 +217,7 @@ var addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
                 if (!$(this).val()) {
                     ($(this).val(0));
                 }
-                recalculateTotalCost();
+                App.recalculateTotalCost();
             })
             .appendTo(main);
     $("<div></div>").addClass("si-price").text(price).appendTo(main);
@@ -249,15 +225,15 @@ var addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
     $("<button></button")
             .addClass("si-remove")
             .click(function () {
-                $(this).parent().parent().slideUp(getAnimationTime(), function () {
+                $(this).parent().parent().slideUp(App.getAnimationTime(), function () {
                     $(this).remove();
-                    recalculateTotalCost();
+                    App.recalculateTotalCost();
                 });
             })
             .appendTo(main);
     main.children(".si-name, .si-price, .si-total").click(function () {
         $(this).parent().parent().find(".sale-item-extend")
-                .slideToggle(getAnimationTime(), function () {
+                .slideToggle(App.getAnimationTime(), function () {
                     var t = $(this);
                     if (t.is(":hidden")) {
                         t.parent().removeClass("expanded");
@@ -276,12 +252,12 @@ var addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
             .attr({maxlength: 7, placeholder: "e.g. 4200 = 42.00"})
             .val(price)
             .keydown(function (e) {
-                checkNumericInput(e, this);
+                App.checkNumericInput(e, this);
             })
             .blur(function () {
                 var t = $(this);
                 var p = t.val();
-                var correctValue = correctPrice(p);
+                var correctValue = App.correctPrice(p);
                 if (!correctValue || !/^\-?\d+\.\d{2}$/g.test(correctValue)) {
                     t.addClass("invalid");
                 } else {
@@ -290,7 +266,7 @@ var addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
                     t.parents().eq(2).find(".si-price").text(correctValue);
                     /**************ATTENTION****************/
                     if (jSaleList.find(".d-discount").val() <= 100) {
-                        recalculateTotalCost();
+                        App.recalculateTotalCost();
                     }
                 }
             })
@@ -305,13 +281,13 @@ var addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
             .attr({maxlength: 3, placeholder: "0 - 100"})
             .val(0)
             .keydown(function (e) {
-                checkNumericInput(e, this);
+                App.checkNumericInput(e, this);
             })
             .blur(function () {
                 var t = $(this);
                 if (/^\d{1,2}$|^100$/g.test(t.val())) {
                     t.removeClass("invalid");
-                    recalculateTotalCost();
+                    App.recalculateTotalCost();
                 } else {
                     t.addClass("invalid");
                 }
@@ -348,7 +324,7 @@ var addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
 
                 lbBody.appendTo(detailsBox);
 
-                showInCurtain(detailsBox);
+                App.showInCurtain(detailsBox);
             })
             .appendTo(openDetailsLightbox);
 
@@ -362,16 +338,16 @@ var addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
 
     jSaleList.animate({
         scrollTop: jSaleList[0].scrollHeight
-    }, getAnimationTime());
+    }, App.getAnimationTime());
 
-    recalculateTotalCost();
-    beep();
+    App.recalculateTotalCost();
+    App.beep();
 }
 ;
-var incrementLastItem = function (lastItem) {
+App.incrementLastItem = function (lastItem) {
     var lastQuantity = lastItem.find(".si-quantity");
     lastQuantity.val(parseInt(lastQuantity.val()) + 1);
-    recalculateTotalCost();
-    beep();
+    App.recalculateTotalCost();
+    App.beep();
 }
 ;
