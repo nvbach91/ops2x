@@ -1,11 +1,10 @@
-/* 
- *   Created on : Jan 28, 2016, 12:24:53 PM
- *   Author     : Nguyen Viet Bach
- */
 
+App.getWindowWidth = function () {
+    return window.innerWidth;
+}
 
 App.getAnimationTime = function () {
-    return window.innerWidth > 799 ? 100 : 0;
+    return App.getWindowWidth() > 799 ? 100 : 0;
 }
 ;
 
@@ -101,15 +100,16 @@ App.recalculateTotalCost = function () {
         totalCost += parseFloat($(this).text());
     });
     totalCost.toFixed(2);
-    var totalCostText = totalCost.formatMoney(2, ",", " ");
+    var totalCostText = totalCost.formatMoney(2, ".", " ");
     $("#checkout-total").text("Total: " + totalCostText + " Kč");
     $("#pay-amount").text(totalCostText + " Kč");
     $("#checkout-label").text("CHECKOUT (" + itemsCnt + " item" + (itemsCnt !== 1 ? "s" : "") + ")");
 }
 ;
 
-App.checkPriceInput = function (e, u, p) {
-    u.text("keyCode: " + e.keyCode);
+App.checkPriceInput = function (e, kc, p) {
+    e.stopPropagation();
+    kc.text("keyCode: " + e.keyCode);
     //var p = $("#price-input");
     if (e.keyCode === 13) { // allow enter 
         if (p.val().length) {
@@ -117,7 +117,7 @@ App.checkPriceInput = function (e, u, p) {
         }
         return true;
     }
-    if (e.keyCode === 8) { //allow backspace)
+    if (e.keyCode === 8 || e.keyCode === 9) { //allow backspace)
         return true;
     }
     if (e.keyCode === 109 || e.keyCode === 189 || e.keyCode === 173) { // check for multiple dashes
@@ -127,6 +127,9 @@ App.checkPriceInput = function (e, u, p) {
         return true;
         /*var q = p.val();
          return p.val().indexOf("-") < 0;*/
+    }
+    if (e.keyCode === 229) { // disable mobile unknown keys, not working?
+        return false;
     }
     // allow asterisk for scanner multiplication
     // do not allow more than 99*
@@ -157,6 +160,12 @@ App.checkNumericInput = function (e, t) {
 
     if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
         e.preventDefault();
+    }
+};
+
+App.setUpMobileNumericInput = function (jpi) {
+    if($.browser.mobile) {        
+        jpi.attr("type", "number");
     }
 };
 
@@ -208,7 +217,7 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
             .attr({maxlength: 3})
             .val(mult ? mult : 1)
             .keydown(function (e) {
-                App.checkNumericInput(e, this);
+                return App.checkNumericInput(e, this);
             })
             .focus(function () {
                 $(this).select();
@@ -252,7 +261,7 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
             .attr({maxlength: 7, placeholder: "e.g. 4200 = 42.00"})
             .val(price)
             .keydown(function (e) {
-                App.checkNumericInput(e, this);
+                return App.checkNumericInput(e, this);
             })
             .blur(function () {
                 var t = $(this);
@@ -281,7 +290,7 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
             .attr({maxlength: 3, placeholder: "0 - 100"})
             .val(0)
             .keydown(function (e) {
-                App.checkNumericInput(e, this);
+                return App.checkNumericInput(e, this);
             })
             .blur(function () {
                 var t = $(this);

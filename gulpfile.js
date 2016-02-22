@@ -8,8 +8,9 @@ var gulp = require('gulp'),
             nodemon = require('gulp-nodemon');
 
 gulp.task('scripts', function () {
-    gulp.src([
+    gulp.src([        
         'src/js/App.js',
+        'src/js/detectmobilebrowser.js',
         'src/js/scanner.js',
         'src/js/functions.js',
         'src/js/Item.js',

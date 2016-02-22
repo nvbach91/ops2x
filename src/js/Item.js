@@ -1,12 +1,4 @@
-/* 
- *   Created on : Jan 28, 2016, 12:24:53 PM
- *   Author     : Nguyen Viet Bach
- */
 
-/*
- * 
- *
- */
 App.Item = function (id, ean, name, price, group, tax, tags, desc) {
     this.id = id;
     this.ean = ean;

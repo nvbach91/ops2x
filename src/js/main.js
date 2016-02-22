@@ -1,6 +1,7 @@
 
+
 $(document).ready(function () {
-    var kc = $("#kc");
+    var jKc = $("#kc");
     // reset checkout
     var jSaleList = $("#sale-list");
     $("#discard-sale").click(function () {
@@ -12,9 +13,13 @@ $(document).ready(function () {
 
     // Price input accepts only numeric values, also only reacts to enter and backspace
     var jPriceInput = $("#price-input");
+
+    // call numpad on mobile devices
+    App.setUpMobileNumericInput(jPriceInput);
+
     var jRegistrySession = $("#registry-session");
     jPriceInput.keydown(function (e) {
-        return App.checkPriceInput(e, kc, jPriceInput);
+        return App.checkPriceInput(e, jKc, jPriceInput);
     }).blur(function () {
         var p = $(this).val();
         if (!/^\-?\d+\*?(\d+)?$/g.test(p) || p === "-") {
@@ -64,10 +69,10 @@ $(document).ready(function () {
             return false;
         }
         var mult = App.getMultiplicationNumber(jPriceInput);
-        
+
         price = App.correctPrice(price);
         jPriceInput.val(price);
-        
+
         var id = t.text();
         var name = t.text();
         var group = t.text();
@@ -90,7 +95,7 @@ $(document).ready(function () {
         var group = t.parent().find(".qs-group").text();
         var tags = t.parent().find(".qs-tags").text();
         var desc = t.parent().find(".qs-desc").text();
-        
+
         App.addItemToCheckout(id, "", name, price, group, tax, tags, desc, mult);
 
         jRegistrySession.text("1");
@@ -145,11 +150,12 @@ $(document).ready(function () {
         $("<div></div>").attr("id", "cash-pay-topay").text(total + " Kč").appendTo(payment);
         $("<div></div>").addClass("cash-pay-label").text("Amount tendered").appendTo(payment);
         var cashInputContainer = $("<div></div>").attr("id", "cash-input-container");
-        $("<input/>").attr("id", "cash-input")
+        var cashInput = $("<input/>").attr("id", "cash-input")
                 .attr("placeholder", "0.00")
                 .attr("maxlength", "6")
                 .val(parseFloat(total) < 0 ? 0 : total)
                 .keydown(function (e) {
+                    e.stopPropagation();
                     return App.checkNumericInput(e, this);
                 })
                 .blur(function () {
@@ -164,11 +170,12 @@ $(document).ready(function () {
                     t.removeClass("invalid");
                     t.parent().find("button.cash-confirm").removeClass("disabled");
                     t.val(correctValue);
-                    $("#cash-change").text(parseFloat(t.val()) - parseFloat(total) + " Kč");
+                    $("#cash-change").text((parseFloat(t.val()) - parseFloat(total)).formatMoney(2, ".", "") + " Kč");
                 })
                 .focus(function () {
                     $(this).select();
-                }).appendTo(cashInputContainer);
+                });
+        cashInput.appendTo(cashInputContainer);
         $("<button></button>").addClass("cash-confirm").text("OK")
                 .appendTo(cashInputContainer)
                 .click(function () {
@@ -190,14 +197,14 @@ $(document).ready(function () {
                         var cash = t.text();
                         $("#cash-input").val(cash + "00").blur();
                         t.parents("#payment").find("button.cash-confirm").removeClass("disabled");
-                        $("#cash-change").text(cash - parseFloat(total) + " Kč");
+                        $("#cash-change").text((cash - parseFloat(total)).formatMoney(2, ".", "") + " Kč");
                     })
                     .appendTo(quickCash);
         }
         quickCash.appendTo(payment);
 
         $("<div></div>").addClass("cash-pay-label").text("Change").appendTo(payment);
-        $("<div></div>").attr("id", "cash-change").text(0).appendTo(payment);
+        $("<div></div>").attr("id", "cash-change").text(Number(0).formatMoney(2, ".", "") + " Kč").appendTo(payment);
 
         payment.appendTo(paymentBody);
         $("<div></div>").addClass("receipt-container").append(receipt).appendTo(paymentBody);
@@ -205,49 +212,69 @@ $(document).ready(function () {
         paymentBody.appendTo(paymentBox);
 
         App.showInCurtain(paymentBox);
+        cashInput.focus();
     });
 
-    var catalog = {items: []};
-    for (var i = 0; i < 1; i++) {
-        catalog.items.push(new App.Item(
-                Math.floor((Math.random() * 10) + 1) + i,
-                "40152233",
-                "Water " + i,
-                (15 + i) + ".00",
-                "description"
-                ));
-    }
-    catalog.items.sort(function (a, b) {
+    var catalog = [];
+    catalog.push(new App.Item(
+            Math.floor((Math.random() * 10) + 1),
+            "40152233",
+            "Wax",
+            "45.00",
+            "description"
+            )
+            );
+    catalog.push(new App.Item(
+            Math.floor((Math.random() * 10) + 1),
+            "4043619653553",
+            "Audio Cable",
+            "105.00",
+            "description"
+            ));
+    catalog.sort(function (a, b) {
         return a.ean < b.ean ? -1 : 1;
     });
-    //g = catalog.items;
-    //var dropDown = $("#dropdown");
     var jSearchBox = $("#search");
     jSearchBox.keyup(function (e) {
         var t = $(this);
         if (e.keyCode === 13) {
             var filter = t.val();
-            var i = catalog.items.binaryIndexOf(filter);
+            var i = catalog.binaryIndexOf(filter);
             if (i >= 0) {
-                var item = catalog.items[i];
+                var item = catalog[i];
                 var mult = App.getMultiplicationNumber(jPriceInput);
                 App.addItemToCheckout(
-                    item.id,
-                    item.ean,
-                    item.name,
-                    item.price,
-                    item.group,
-                    item.tax,
-                    item.tags,
-                    item.desc,
-                    // multiplication number
-                    mult
-                );         
+                        item.id,
+                        item.ean,
+                        item.name,
+                        item.price,
+                        item.group,
+                        item.tax,
+                        item.tags,
+                        item.desc,
+                        // multiplication number
+                        mult
+                        );
                 jRegistrySession.text("0");
-                jPriceInput.val("");
+                jPriceInput.val(item.price);
                 t.removeClass("not-found");
             } else {
                 t.addClass("not-found");
+                var warning = $("<div></div>").attr("id", "warning-box")
+                        .click(function (e) {
+                            e.stopPropagation();
+                        });
+                $("<div></div>").addClass("wb-header")
+                        .append($("<div></div>").addClass("wb-title").text("Warning"))
+                        .append($("<button></button>").addClass("wb-close").click(function () {
+                            $(this).parents("#curtain").fadeOut(App.getAnimationTime(), function () {
+                                $(this).remove();
+                            });
+                        })).appendTo(warning);
+                var warningBody = $("<div></div>").addClass("wb-body");
+                warningBody.text("This EAN " + filter + " is not defined");
+                warningBody.appendTo(warning);
+                App.showInCurtain(warning);
             }
             t.val("");
         }
@@ -258,11 +285,39 @@ $(document).ready(function () {
     });
 
     $(document).scannerDetection(function (s) {
+        $("#curtain").remove();
         jPriceInput.blur();
         jSearchBox.val(s);
         var e = $.Event('keyup');
         e.keyCode = 13;
         jSearchBox.trigger(e);
+    });
+
+    // focus price input after hitting enter if price input is not yet focused
+    $(document).keydown(function (e) {
+        if (e.keyCode === 27) {
+            $("#curtain").remove();
+        }
+        if (e.keyCode === 13) {
+            if (!$("#curtain").size()) {
+                if (!jPriceInput.is(":focus")) {
+                    jPriceInput.focus();
+                    return true;
+                }
+            } else {
+                var ci = $("#curtain #cash-input");
+                if (ci.size()) {
+                    ci.focus();
+                }
+            }
+            /*if(!jPriceInput.val().length){
+             
+             }
+             if(!jPriceInput.is(":focus")){
+             jPriceInput.focus();
+             return true;
+             }*/
+        }
     });
     /*
      dropDown.html(createFoundItem(item.name, item.price));
