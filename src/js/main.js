@@ -2,8 +2,9 @@
 
 $(document).ready(function () {
     var jKc = $("#kc");
-    // reset checkout
     var jSaleList = $("#sale-list");
+
+    // reset checkout
     $("#discard-sale").click(function () {
         jSaleList.find(".sale-item").slideUp(App.getAnimationTime(), function () {
             $(this).remove();
@@ -11,22 +12,29 @@ $(document).ready(function () {
         });
     });
 
-    // Price input accepts only numeric values, also only reacts to enter and backspace
     var jPriceInput = $("#price-input");
 
     // call numpad on mobile devices
     App.setUpMobileNumericInput(jPriceInput);
 
+    // registry session means a session when user types in prices
+    // used to handle multiple articles in sale list
     var jRegistrySession = $("#registry-session");
+
+    // Price input accepts only numeric values, also only reacts to enter and backspace
     jPriceInput.keydown(function (e) {
         return App.checkPriceInput(e, jKc, jPriceInput);
     }).blur(function () {
-        var p = $(this).val();
+        var p = jPriceInput.val();
         if (!/^\-?\d+\*?(\d+)?$/g.test(p) || p === "-") {
-            $(this).val("");
+            jPriceInput.val("");
             return false;
         }
+        var a = p.indexOf("*");
         if (p.indexOf("*") >= 0) {
+            var mult = App.getMultiplicationNumber(jPriceInput);
+            var price = a >= 0 ? p.slice(a + 1, p.length) : p;
+            jPriceInput.val(mult + " * " + App.correctPrice(price));
             return true;
         }
         var sign = "";
@@ -51,7 +59,6 @@ $(document).ready(function () {
     // Clicking on sale-group buttons adds an item to the sale list
     $("#sale-groups button").click(function () {
         var t = $(this);
-        //var lastItem = jSaleList.find(".sale-item.last");
         // do not register an item of different group while price input is the same
         // user must type the same price for another sale group
         // reset the price input and play error sound
@@ -62,6 +69,9 @@ $(document).ready(function () {
             return false;
         }
         var v = jPriceInput.val();
+
+        // extract price and multiplication number
+        v = v.replace(/[\s\.]+/g, "");
         var a = v.indexOf("*");
         var price = a >= 0 ? v.slice(a + 1, v.length) : v;
         if (price.length === 0 || parseInt(price) === 0) {
@@ -286,11 +296,11 @@ $(document).ready(function () {
 
     $(document).scannerDetection(function (s) {
         $("#curtain").remove();
-        jPriceInput.blur();
         jSearchBox.val(s);
         var e = $.Event('keyup');
         e.keyCode = 13;
         jSearchBox.trigger(e);
+        jPriceInput.blur();
     });
 
     // focus price input after hitting enter if price input is not yet focused

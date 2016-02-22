@@ -182,7 +182,7 @@ App.showInCurtain = function (s) {
 ;
 
 App.getMultiplicationNumber = function (jpi) {
-    var m = jpi.val();
+    var m = jpi.val().replace(/[\s\.]+/g, "");
     if (!m.match(/^\-?[1-9](\d+)?\*(\d+)?$/g)) {
         return 1;
     }
