@@ -124,6 +124,8 @@ $(document).ready(function () {
         if (jSaleList.find(".sale-item").size() < 1) {
             return false;
         }
+        
+        //creating payment box
         var paymentBox = $("<div></div>").attr("id", "payment-box")
                 .click(function (e) {
                     e.stopPropagation();
@@ -153,8 +155,25 @@ $(document).ready(function () {
         });
         var total = $("#pay-amount").text().replace(/,/g, ".").replace(/[^\d\.\-]/g, "");
         receiptBody.appendTo(receipt);
+
+        //creating receipt summary
+        var receiptSummary = $("<div></div>").attr("id", "receipt-summary");
+        $("<div></div>").attr("id", "rs-total")
+                .append($("<div></div>").addClass("rs-label").text("Total:"))
+                .append($("<div></div>").addClass("rs-value").text(total))
+                .appendTo(receiptSummary);
+        $("<div></div>").attr("id", "rs-tender")
+                .append($("<div></div>").addClass("rs-label").text("Tendered:"))
+                .append($("<div></div>").addClass("rs-value").text(total)).appendTo(receiptSummary);
+        $("<div></div>").attr("id", "rs-change")
+                .append($("<div></div>").addClass("rs-label").text("Change:"))
+                .append($("<div></div>").addClass("rs-value").text(Number(0).formatMoney(2, ".", ""))).appendTo(receiptSummary);
+        receiptSummary.appendTo(receipt);
+
+        //creating receipt footer
         $("<div></div>").addClass("receipt-footer").text("EnterpriseApps").appendTo(receipt);
 
+        //creating payment section
         var payment = $("<div></div>").attr("id", "payment");
         $("<div></div>").addClass("cash-pay-label").text("Amount to pay").appendTo(payment);
         $("<div></div>").attr("id", "cash-pay-topay").text(total + " Kč").appendTo(payment);
@@ -162,7 +181,7 @@ $(document).ready(function () {
         var cashInputContainer = $("<div></div>").attr("id", "cash-input-container");
         var cashInput = $("<input/>").attr("id", "cash-input")
                 .attr("placeholder", "0.00")
-                .attr("maxlength", "6")
+                .attr("maxlength", "9")
                 .val(parseFloat(total) < 0 ? 0 : total)
                 .keydown(function (e) {
                     e.stopPropagation();
@@ -180,21 +199,24 @@ $(document).ready(function () {
                     t.removeClass("invalid");
                     t.parent().find("button.cash-confirm").removeClass("disabled");
                     t.val(correctValue);
-                    $("#cash-change").text((parseFloat(t.val()) - parseFloat(total)).formatMoney(2, ".", "") + " Kč");
+                    var newChange = (parseFloat(t.val()) - parseFloat(total)).formatMoney(2, ".", "");
+                    t.parents("#payment").find("#cash-change").text(newChange + " Kč");
+                    t.parents("#payment-box").find("#rs-tender .rs-value").text(t.val());
+                    t.parents("#payment-box").find("#rs-change .rs-value").text(newChange);
                 })
                 .focus(function () {
                     $(this).select();
                 });
         cashInput.appendTo(cashInputContainer);
-        $("<button></button>").addClass("cash-confirm").text("OK")
+        $("<button></button>")
+                .addClass("cash-confirm").text("OK")
                 .appendTo(cashInputContainer)
                 .click(function () {
                     var t = $(this);
                     if (!t.hasClass("disabled")) {
-
+                        window.print();
                     }
                 });
-
         cashInputContainer.appendTo(payment);
         var quickCashLabel = $("<div></div>").addClass("cash-quick-label").text("Quick cash payment");
         quickCashLabel.appendTo(payment);
@@ -225,6 +247,7 @@ $(document).ready(function () {
         cashInput.focus();
     });
 
+    //populating articles for scanning
     var catalog = [];
     catalog.push(new App.Item(
             Math.floor((Math.random() * 10) + 1),
@@ -232,8 +255,7 @@ $(document).ready(function () {
             "Wax",
             "45.00",
             "description"
-            )
-            );
+            ));
     catalog.push(new App.Item(
             Math.floor((Math.random() * 10) + 1),
             "4043619653553",
