@@ -6,4 +6,4 @@ var Retailer = new Schema({
     password: String
 });
 
-module.exports = mongoose.model("retailers", Retailer);
+module.exports = mongoose.model("settings", Retailer);

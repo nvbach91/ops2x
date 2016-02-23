@@ -2,7 +2,7 @@
 App.getWindowWidth = function () {
     return window.innerWidth;
 }
-
+;
 App.getAnimationTime = function () {
     return App.getWindowWidth() > 799 ? 100 : 0;
 }
@@ -170,7 +170,7 @@ App.setUpMobileNumericInput = function (jpi) {
 };
 
 App.showInCurtain = function (s) {
-    var curtain = $("<div></div>").attr("id", "curtain").click(function () {
+    var curtain = $("<div>").attr("id", "curtain").click(function () {
         $(this).fadeOut(App.getAnimationTime(), function () {
             $(this).remove();
         });
@@ -208,11 +208,11 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
     }
     // creating sale item and bind events
     var item = $("<li>").addClass("sale-item last");
-    var main = $("<div></div>").addClass("sale-item-main");
-    $("<div></div>").addClass("si-id").text(id).appendTo(main);
-    $("<div></div>").addClass("si-ean").text(ean).appendTo(main);
-    $("<div></div>").addClass("si-name").text(name).appendTo(main);
-    $("<input />")
+    var main = $("<div>").addClass("sale-item-main");
+    $("<div>").addClass("si-id").text(id).appendTo(main);
+    $("<div>").addClass("si-ean").text(ean).appendTo(main);
+    $("<div>").addClass("si-name").text(name).appendTo(main);
+    $("<input>")
             .addClass("si-quantity")
             .attr({maxlength: 3})
             .val(mult ? mult : 1)
@@ -229,9 +229,9 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
                 App.recalculateTotalCost();
             })
             .appendTo(main);
-    $("<div></div>").addClass("si-price").text(price).appendTo(main);
-    $("<div></div>").addClass("si-total").text(price).appendTo(main);
-    $("<button></button")
+    $("<div>").addClass("si-price").text(price).appendTo(main);
+    $("<div>").addClass("si-total").text(price).appendTo(main);
+    $("<button>")
             .addClass("si-remove")
             .click(function () {
                 $(this).parent().parent().slideUp(App.getAnimationTime(), function () {
@@ -252,15 +252,16 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
                 });
     });
     main.appendTo(item);
-    var details = $("<div></div>").addClass("sale-item-extend");
+    var details = $("<div>").addClass("sale-item-extend");
 
-    var individualPrice = $("<div></div>").addClass("change-price");
-    $("<div></div>").addClass("d-label").text("Individual Price").appendTo(individualPrice);
-    $("<input />")
+    var individualPrice = $("<div>").addClass("change-price");
+    $("<div>").addClass("d-label").text("Individual Price").appendTo(individualPrice);
+    $("<input>")
             .addClass("d-price")
             .attr({maxlength: 7, placeholder: "e.g. 4200 = 42.00"})
             .val(price)
             .keydown(function (e) {
+                e.stopPropagation();
                 return App.checkNumericInput(e, this);
             })
             .blur(function () {
@@ -284,12 +285,13 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
             })
             .appendTo(individualPrice);
 
-    var individualDiscount = $("<div></div>").addClass("change-discount");
-    $("<div></div>").addClass("d-label").text("Individual Discount (%)").appendTo(individualDiscount);
-    $("<input />").addClass("d-discount")
+    var individualDiscount = $("<div>").addClass("change-discount");
+    $("<div>").addClass("d-label").text("Individual Discount (%)").appendTo(individualDiscount);
+    $("<input>").addClass("d-discount")
             .attr({maxlength: 3, placeholder: "0 - 100"})
             .val(0)
             .keydown(function (e) {
+                e.stopPropagation();
                 return App.checkNumericInput(e, this);
             })
             .blur(function () {
@@ -306,30 +308,30 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
             })
             .appendTo(individualDiscount);
 
-    var openDetailsLightbox = $("<div></div>").addClass("open-detail");
-    $("<div></div>").addClass("d-label").text("Details").appendTo(openDetailsLightbox);
+    var openDetailsLightbox = $("<div>").addClass("open-detail");
+    $("<div>").addClass("d-label").text("Details").appendTo(openDetailsLightbox);
 
     // bind details button in sale list, generate details box
-    $("<button></button>").addClass("d-detail")
+    $("<button>").addClass("d-detail")
             .click(function () {
-                var detailsBox = $("<div></div>").attr("id", "details-box").click(function (e) {
+                var detailsBox = $("<div>").attr("id", "details-box").click(function (e) {
                     e.stopPropagation();
                 });
-                $("<div></div>").addClass("db-header")
-                        .append($("<div></div>").addClass("db-title").text("Product Details"))
-                        .append($("<button></button>").addClass("db-close").click(function () {
+                $("<div>").addClass("db-header")
+                        .append($("<div>").addClass("db-title").text("Product Details"))
+                        .append($("<button>").addClass("db-close").click(function () {
                             $(this).parents().eq(2).remove();
                         })).appendTo(detailsBox);
-                var lbBody = $("<div></div>").addClass("db-body");
-                var lbInfo = $("<div></div>").addClass("db-info");
-                $("<div></div>").addClass("db-name").text("Name: " + name).appendTo(lbInfo);
-                $("<div></div>").addClass("db-price").text("Price: " + price + " Kč").appendTo(lbInfo);
-                $("<div></div>").addClass("db-group").text("Group: " + group).appendTo(lbInfo);
-                $("<div></div>").addClass("db-tax").text("Tax: " + tax).appendTo(lbInfo);
-                $("<div></div>").addClass("db-tags").text("Tags: " + tags).appendTo(lbInfo);
-                $("<div></div>").addClass("db-desc").text("Description: " + desc).appendTo(lbInfo);
+                var lbBody = $("<div>").addClass("db-body");
+                var lbInfo = $("<div>").addClass("db-info");
+                $("<div>").addClass("db-name").text("Name: " + name).appendTo(lbInfo);
+                $("<div>").addClass("db-price").text("Price: " + price + " Kč").appendTo(lbInfo);
+                $("<div>").addClass("db-group").text("Group: " + group).appendTo(lbInfo);
+                $("<div>").addClass("db-tax").text("Tax: " + tax).appendTo(lbInfo);
+                $("<div>").addClass("db-tags").text("Tags: " + tags).appendTo(lbInfo);
+                $("<div>").addClass("db-desc").text("Description: " + desc).appendTo(lbInfo);
                 lbInfo.appendTo(lbBody);
-                $("<div></div>").addClass("db-img").appendTo(lbBody);
+                $("<div>").addClass("db-img").appendTo(lbBody);
 
                 lbBody.appendTo(detailsBox);
 
@@ -358,5 +360,64 @@ App.incrementLastItem = function (lastItem) {
     lastQuantity.val(parseInt(lastQuantity.val()) + 1);
     App.recalculateTotalCost();
     App.beep();
+}
+;
+App.bindSaleGroups = function (sg, jPriceInput, jSaleList, jRegistrySession) {
+    // Clicking on sale-group buttons adds an item to the sale list
+    sg.find("button").click(function () {
+        var t = $(this);
+        // do not register an item of different group while price input is the same
+        // user must type the same price for another sale group
+        // reset the price input and play error sound
+        var lastItem = jSaleList.find(".sale-item.last");
+        if (lastItem.size() && t.attr("sg-id") !== lastItem.find(".si-id").text()
+                && jRegistrySession.text() === "1") {
+            jPriceInput.val("");
+            return false;
+        }
+        var v = jPriceInput.val();
+
+        // extract price and multiplication number
+        v = v.replace(/[\s\.]+/g, "");
+        var a = v.indexOf("*");
+        var price = a >= 0 ? v.slice(a + 1, v.length) : v;
+        if (price.length === 0 || parseInt(price) === 0) {
+            jPriceInput.val("");
+            return false;
+        }
+        var mult = App.getMultiplicationNumber(jPriceInput);
+
+        price = App.correctPrice(price);
+        jPriceInput.val(price);
+
+        var id = t.attr("sg-id");
+        var name = t.text();
+        var group = t.text().toLowerCase();
+        var tax = t.find(".sg-tax").text();
+        var tags = t.text();
+        var desc = t.text();
+        App.addItemToCheckout(id, "", name, price, group, tax, tags, desc, mult);
+        jRegistrySession.text("1");
+    });
+}
+;
+App.bindQuickSales = function(qs, jPriceInput, jRegistrySession){
+    // bind quick sale buttons
+    qs.find(".qs-item button").click(function () {
+        var t = $(this);
+        var price = t.parent().find(".qs-price").text();
+        var mult = App.getMultiplicationNumber(jPriceInput);
+        jPriceInput.val(price);
+        var name = t.text();
+        var id = t.parent().find(".qs-id").text();
+        var tax = t.parent().find(".qs-tax").text();
+        var group = t.parent().find(".qs-group").text();
+        var tags = t.parent().find(".qs-tags").text();
+        var desc = t.parent().find(".qs-desc").text();
+
+        App.addItemToCheckout(id, "", name, price, group, tax, tags, desc, mult);
+
+        jRegistrySession.text("1");
+    });
 }
 ;

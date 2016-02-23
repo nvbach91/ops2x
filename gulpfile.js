@@ -1,14 +1,14 @@
-var gulp = require('gulp'),
-        browserSync = require('browser-sync'),
-        reload = browserSync.reload,
-        uglify = require('gulp-uglify'),
-        plumber = require('gulp-plumber'),
-        rename = require('gulp-rename'),
-        concat = require('gulp-concat'),
-            nodemon = require('gulp-nodemon');
+var gulp = require('gulp');
+var browserSync = require('browser-sync');
+var reload = browserSync.reload;
+var uglify = require('gulp-uglify');
+var plumber = require('gulp-plumber');
+var rename = require('gulp-rename');
+var concat = require('gulp-concat');
+var nodemon = require('gulp-nodemon');
 
 gulp.task('scripts', function () {
-    gulp.src([        
+    gulp.src([
         'src/js/App.js',
         'src/js/detectmobilebrowser.js',
         'src/js/scanner.js',

@@ -1,5 +1,8 @@
 
-
+/*
+ * 
+ * 
+ */
 $(document).ready(function () {
     var jKc = $("#kc");
     var jSaleList = $("#sale-list");
@@ -56,59 +59,34 @@ $(document).ready(function () {
         jRegistrySession.text("0");
     });
 
-    // Clicking on sale-group buttons adds an item to the sale list
-    $("#sale-groups button").click(function () {
-        var t = $(this);
-        // do not register an item of different group while price input is the same
-        // user must type the same price for another sale group
-        // reset the price input and play error sound
-        var lastItem = jSaleList.find(".sale-item.last");
-        if (lastItem.size() && t.text() !== lastItem.find(".si-id").text()
-                && jRegistrySession.text() === "1") {
-            jPriceInput.val("");
-            return false;
+    // generate sale groups and quick sale
+    $.getJSON("/api/buttons", function (data) {
+        var sg = $("#sale-groups");
+        for (var i = 0; i < data.saleGroups.length; i++) {
+            $("<button>", {
+                class: "sg",
+                "sg-id": "sg" + i,
+                text: data.saleGroups[i].text,
+                css: {"background-color": "#" + data.saleGroups[i].bg}
+            }).appendTo(sg);
         }
-        var v = jPriceInput.val();
+        App.bindSaleGroups(sg, jPriceInput, jSaleList, jRegistrySession);
 
-        // extract price and multiplication number
-        v = v.replace(/[\s\.]+/g, "");
-        var a = v.indexOf("*");
-        var price = a >= 0 ? v.slice(a + 1, v.length) : v;
-        if (price.length === 0 || parseInt(price) === 0) {
-            jPriceInput.val("");
-            return false;
+        var qs = $("#quick-sales");
+        for (var i = 0; i < data.quickSales.length; i++) {
+            var t = data.quickSales[i];
+            $("<div>")
+                    .addClass("qs-item")
+                    .append($("<button>").text(t.text))
+                    .append($("<div>").addClass("qs-id").text("qs" + i))
+                    .append($("<div>").addClass("qs-price").text(t.price))
+                    .append($("<div>").addClass("qs-group").text(t.group))
+                    .append($("<div>").addClass("qs-tax").text(t.tax))
+                    .append($("<div>").addClass("qs-tags").text(t.tags))
+                    .append($("<div>").addClass("qs-desc").text(t.desc))
+                    .appendTo(qs);
         }
-        var mult = App.getMultiplicationNumber(jPriceInput);
-
-        price = App.correctPrice(price);
-        jPriceInput.val(price);
-
-        var id = t.text();
-        var name = t.text();
-        var group = t.text();
-        var tax = t.text();
-        var tags = t.text();
-        var desc = t.text();
-        App.addItemToCheckout(id, "", name, price, group, tax, tags, desc, mult);
-        jRegistrySession.text("1");
-    });
-
-    // bind quick sell buttons
-    $("#quick-sales .qs-item button").click(function () {
-        var t = $(this);
-        var price = t.parent().find(".qs-price").text();
-        var mult = App.getMultiplicationNumber(jPriceInput);
-        jPriceInput.val(price);
-        var name = t.text();
-        var id = t.parent().find(".qs-id").text();
-        var tax = t.parent().find(".qs-tax").text();
-        var group = t.parent().find(".qs-group").text();
-        var tags = t.parent().find(".qs-tags").text();
-        var desc = t.parent().find(".qs-desc").text();
-
-        App.addItemToCheckout(id, "", name, price, group, tax, tags, desc, mult);
-
-        jRegistrySession.text("1");
+        App.bindQuickSales(qs, jPriceInput, jRegistrySession);
     });
 
     // bind control panel buttons
@@ -124,62 +102,62 @@ $(document).ready(function () {
         if (jSaleList.find(".sale-item").size() < 1) {
             return false;
         }
-        
+
         //creating payment box
-        var paymentBox = $("<div></div>").attr("id", "payment-box")
+        var paymentBox = $("<div>").attr("id", "payment-box")
                 .click(function (e) {
                     e.stopPropagation();
                 });
-        $("<div></div>").addClass("pb-header")
-                .append($("<div></div>").addClass("pb-title").text("Payment"))
-                .append($("<button></button>").addClass("pb-close").click(function () {
+        $("<div>").addClass("pb-header")
+                .append($("<div>").addClass("pb-title").text("Payment"))
+                .append($("<button>").addClass("pb-close").click(function () {
                     $(this).parents("#curtain").fadeOut(App.getAnimationTime(), function () {
                         $(this).remove();
                     });
                 })).appendTo(paymentBox);
-        var paymentBody = $("<div></div>").addClass("pb-body");
-        var receipt = $("<div></div>").addClass("receipt");
-        $("<div></div>").addClass("receipt-header").text("Receipt Preview").appendTo(receipt);
-        var receiptBody = $("<ul></ul>").addClass("receipt-body");
+        var paymentBody = $("<div>").addClass("pb-body");
+        var receipt = $("<div>").addClass("receipt");
+        $("<div>").addClass("receipt-header").text("Receipt Preview").appendTo(receipt);
+        var receiptBody = $("<ul>").addClass("receipt-body");
         jSaleList.find(".sale-item").each(function () {
             var t = $(this);
             var q = t.find(".si-quantity").val();
             var n = t.find(".si-name").text();
             var thisTotal = t.find(".si-total").text();
-            var receiptItem = $("<li></li>").addClass("receipt-item")
-                    .append($("<div></div>").addClass("ri-n").text(n))
-                    .append($("<div></div>").addClass("ri-x"))
-                    .append($("<div></div>").addClass("ri-q").text(q))
-                    .append($("<div></div>").addClass("ri-tt").text(thisTotal));
+            var receiptItem = $("<li>").addClass("receipt-item")
+                    .append($("<div>").addClass("ri-n").text(n))
+                    .append($("<div>").addClass("ri-x"))
+                    .append($("<div>").addClass("ri-q").text(q))
+                    .append($("<div>").addClass("ri-tt").text(thisTotal));
             receiptBody.append(receiptItem);
         });
         var total = $("#pay-amount").text().replace(/,/g, ".").replace(/[^\d\.\-]/g, "");
         receiptBody.appendTo(receipt);
 
         //creating receipt summary
-        var receiptSummary = $("<div></div>").attr("id", "receipt-summary");
-        $("<div></div>").attr("id", "rs-total")
-                .append($("<div></div>").addClass("rs-label").text("Total:"))
-                .append($("<div></div>").addClass("rs-value").text(total))
+        var receiptSummary = $("<div>").attr("id", "receipt-summary");
+        $("<div>").attr("id", "rs-total")
+                .append($("<div>").addClass("rs-label").text("Total:"))
+                .append($("<div>").addClass("rs-value").text(total))
                 .appendTo(receiptSummary);
-        $("<div></div>").attr("id", "rs-tender")
-                .append($("<div></div>").addClass("rs-label").text("Tendered:"))
-                .append($("<div></div>").addClass("rs-value").text(total)).appendTo(receiptSummary);
-        $("<div></div>").attr("id", "rs-change")
-                .append($("<div></div>").addClass("rs-label").text("Change:"))
-                .append($("<div></div>").addClass("rs-value").text(Number(0).formatMoney(2, ".", ""))).appendTo(receiptSummary);
+        $("<div>").attr("id", "rs-tender")
+                .append($("<div>").addClass("rs-label").text("Tendered:"))
+                .append($("<div>").addClass("rs-value").text(total)).appendTo(receiptSummary);
+        $("<div>").attr("id", "rs-change")
+                .append($("<div>").addClass("rs-label").text("Change:"))
+                .append($("<div>").addClass("rs-value").text(Number(0).formatMoney(2, ".", ""))).appendTo(receiptSummary);
         receiptSummary.appendTo(receipt);
 
         //creating receipt footer
-        $("<div></div>").addClass("receipt-footer").text("EnterpriseApps").appendTo(receipt);
+        $("<div>").addClass("receipt-footer").text("EnterpriseApps").appendTo(receipt);
 
         //creating payment section
-        var payment = $("<div></div>").attr("id", "payment");
-        $("<div></div>").addClass("cash-pay-label").text("Amount to pay").appendTo(payment);
-        $("<div></div>").attr("id", "cash-pay-topay").text(total + " Kč").appendTo(payment);
-        $("<div></div>").addClass("cash-pay-label").text("Amount tendered").appendTo(payment);
-        var cashInputContainer = $("<div></div>").attr("id", "cash-input-container");
-        var cashInput = $("<input/>").attr("id", "cash-input")
+        var payment = $("<div>").attr("id", "payment");
+        $("<div>").addClass("cash-pay-label").text("Amount to pay").appendTo(payment);
+        $("<div>").attr("id", "cash-pay-topay").text(total + " Kč").appendTo(payment);
+        $("<div>").addClass("cash-pay-label").text("Amount tendered").appendTo(payment);
+        var cashInputContainer = $("<div>").attr("id", "cash-input-container");
+        var cashInput = $("<input>").attr("id", "cash-input")
                 .attr("placeholder", "0.00")
                 .attr("maxlength", "9")
                 .val(parseFloat(total) < 0 ? 0 : total)
@@ -208,7 +186,7 @@ $(document).ready(function () {
                     $(this).select();
                 });
         cashInput.appendTo(cashInputContainer);
-        $("<button></button>")
+        $("<button>")
                 .addClass("cash-confirm").text("OK")
                 .appendTo(cashInputContainer)
                 .click(function () {
@@ -218,12 +196,12 @@ $(document).ready(function () {
                     }
                 });
         cashInputContainer.appendTo(payment);
-        var quickCashLabel = $("<div></div>").addClass("cash-quick-label").text("Quick cash payment");
+        var quickCashLabel = $("<div>").addClass("cash-quick-label").text("Quick cash payment");
         quickCashLabel.appendTo(payment);
-        var quickCash = $("<div></div>").addClass("cash-quick");
+        var quickCash = $("<div>").addClass("cash-quick");
         var qcs = [100, 200, 500, 1000, 2000, 5000];
         for (var i = 0; i < qcs.length; i++) {
-            $("<button></button>").addClass("cash-button").text(qcs[i])
+            $("<button>").addClass("cash-button").text(qcs[i])
                     .click(function () {
                         var t = $(this);
                         var cash = t.text();
@@ -235,11 +213,11 @@ $(document).ready(function () {
         }
         quickCash.appendTo(payment);
 
-        $("<div></div>").addClass("cash-pay-label").text("Change").appendTo(payment);
-        $("<div></div>").attr("id", "cash-change").text(Number(0).formatMoney(2, ".", "") + " Kč").appendTo(payment);
+        $("<div>").addClass("cash-pay-label").text("Change").appendTo(payment);
+        $("<div>").attr("id", "cash-change").text(Number(0).formatMoney(2, ".", "") + " Kč").appendTo(payment);
 
         payment.appendTo(paymentBody);
-        $("<div></div>").addClass("receipt-container").append(receipt).appendTo(paymentBody);
+        $("<div>").addClass("receipt-container").append(receipt).appendTo(paymentBody);
 
         paymentBody.appendTo(paymentBox);
 
@@ -292,18 +270,18 @@ $(document).ready(function () {
                 t.removeClass("not-found");
             } else {
                 t.addClass("not-found");
-                var warning = $("<div></div>").attr("id", "warning-box")
+                var warning = $("<div>").attr("id", "warning-box")
                         .click(function (e) {
                             e.stopPropagation();
                         });
-                $("<div></div>").addClass("wb-header")
-                        .append($("<div></div>").addClass("wb-title").text("Warning"))
-                        .append($("<button></button>").addClass("wb-close").click(function () {
+                $("<div>").addClass("wb-header")
+                        .append($("<div>").addClass("wb-title").text("Warning"))
+                        .append($("<button>").addClass("wb-close").click(function () {
                             $(this).parents("#curtain").fadeOut(App.getAnimationTime(), function () {
                                 $(this).remove();
                             });
                         })).appendTo(warning);
-                var warningBody = $("<div></div>").addClass("wb-body");
+                var warningBody = $("<div>").addClass("wb-body");
                 warningBody.text("This EAN " + filter + " is not defined");
                 warningBody.appendTo(warning);
                 App.showInCurtain(warning);

@@ -971,21 +971,17 @@ div.ri-x {
     }
 }
 @media screen and (min-width: 1080px){
-    #checkout-header {
-        font-size: 20px;
+    #col-2 {        
+        max-width: 540px;
+    }
+    #col-1 {
+        flex-grow: 1;
     }
     #sale-groups button, .qs-item {
         width: 25%;
     }
-    #si-placeholder > div,
-    #sale-list input.si-quantity, #sale-list, .d-label, .sale-item-main div  {
-        font-size: 18px;
-    } 
 }
 @media screen and (min-width: 1280px){
-    #checkout-header {
-        font-size: 22px;
-    }
     #sale-groups button, .qs-item {
         width: 20%;
     }
@@ -1019,34 +1015,6 @@ div.ri-x {
     button.db-close, button.pb-close {
         transition: color .2s ease, transform .2s ease;
     }
-}
-
-.food {
-    background-color: #BB3943;
-}
-.drinks {
-    background-color: cadetblue;
-}
-.vegetable{
-    background-color: #52753F;
-}
-.alcohol {
-    background-color: #F49C20;
-}
-.tobacco {
-    background-color: darksalmon;
-}
-.press {
-    background-color: #607AAD;
-}
-.tickets {    
-    background-color: dodgerblue;
-}
-.drugs {
-    background-color: #E84C40;
-}
-.uncategorized {
-    background-color: #67314B;
 }
 
 @media print {

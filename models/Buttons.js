@@ -1,9 +1,9 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-var Retailer = new Schema({
+var buttons = new Schema({
     email: String,
     password: String
 });
 
-module.exports = mongoose.model("retailers", Retailer);
+module.exports = mongoose.model("buttons", buttons);
