@@ -37,6 +37,11 @@ $(document).ready(function () {
         if (p.indexOf("*") >= 0) {
             var mult = App.getMultiplicationNumber(jPriceInput);
             var price = a >= 0 ? p.slice(a + 1, p.length) : p;
+            if (price.length) {
+                if (/^0+$/.test(price)) {
+                    price = "";
+                }
+            }
             jPriceInput.val(mult + " * " + App.correctPrice(price));
             return true;
         }
@@ -66,6 +71,8 @@ $(document).ready(function () {
             $("<button>", {
                 class: "sg",
                 "sg-id": "sg" + i,
+                "sg-tax": data.saleGroups[i].tax,
+                "sg-group": data.saleGroups[i].group,
                 text: data.saleGroups[i].text,
                 css: {"background-color": "#" + data.saleGroups[i].bg}
             }).appendTo(sg);
@@ -119,6 +126,12 @@ $(document).ready(function () {
         var receipt = $("<div>").addClass("receipt");
         $("<div>").addClass("receipt-header").text("Receipt Preview").appendTo(receipt);
         var receiptBody = $("<ul>").addClass("receipt-body");
+        var taxValues = {
+            0:  {tax: null, total: null},
+            10: {tax: null, total: null},
+            15: {tax: null, total: null},
+            21: {tax: null, total: null}
+        };
         jSaleList.find(".sale-item").each(function () {
             var t = $(this);
             var q = t.find(".si-quantity").val();
@@ -130,7 +143,12 @@ $(document).ready(function () {
                     .append($("<div>").addClass("ri-q").text(q))
                     .append($("<div>").addClass("ri-tt").text(thisTotal));
             receiptBody.append(receiptItem);
+
+            var taxRate = t.find(".si-tax").text();
+            taxValues[taxRate].tax += (parseFloat(thisTotal) * parseFloat(taxRate) / 100);
+            taxValues[taxRate].total += parseFloat(thisTotal);
         });
+        console.log(taxValues);
         var total = $("#pay-amount").text().replace(/,/g, ".").replace(/[^\d\.\-]/g, "");
         receiptBody.appendTo(receipt);
 
@@ -142,10 +160,29 @@ $(document).ready(function () {
                 .appendTo(receiptSummary);
         $("<div>").attr("id", "rs-tender")
                 .append($("<div>").addClass("rs-label").text("Tendered:"))
-                .append($("<div>").addClass("rs-value").text(total)).appendTo(receiptSummary);
+                .append($("<div>").addClass("rs-value").text(total))
+                .appendTo(receiptSummary);
         $("<div>").attr("id", "rs-change")
                 .append($("<div>").addClass("rs-label").text("Change:"))
-                .append($("<div>").addClass("rs-value").text(Number(0).formatMoney(2, ".", ""))).appendTo(receiptSummary);
+                .append($("<div>").addClass("rs-value").text(Number(0).formatMoney(2, ".", "")))
+                .appendTo(receiptSummary);
+        $("<div>").attr("id", "taxes-label").text("Taxes summary:").appendTo(receiptSummary);
+        $("<div>").attr("id", "tax-header")
+                .append($("<div>").addClass("th-rate").text("Rate"))
+                .append($("<div>").addClass("th-value").text("Tax"))
+                .append($("<div>").addClass("th-total").text("Total"))
+                .appendTo(receiptSummary);
+        var taxRates = Object.keys(taxValues);
+        for (var i = 0; i < taxRates.length; i++) {
+            if (taxValues[taxRates[i]].tax !== null) {
+                $("<div>").addClass("rs-tax")
+                        .append($("<div>").addClass("rs-tax-rate").text(taxRates[i] + "%"))
+                        .append($("<div>").addClass("rs-tax-tax").text(taxValues[taxRates[i]].tax.toFixed(2)))
+                        .append($("<div>").addClass("rs-tax-total").text(taxValues[taxRates[i]].total.toFixed(2)))
+                        .appendTo(receiptSummary);
+                //console.log(taxes);
+            }
+        }
         receiptSummary.appendTo(receipt);
 
         //creating receipt footer

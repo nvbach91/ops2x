@@ -229,6 +229,7 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
                 App.recalculateTotalCost();
             })
             .appendTo(main);
+    $("<div>").addClass("si-tax").text(tax).appendTo(main);
     $("<div>").addClass("si-price").text(price).appendTo(main);
     $("<div>").addClass("si-total").text(price).appendTo(main);
     $("<button>")
@@ -392,9 +393,9 @@ App.bindSaleGroups = function (sg, jPriceInput, jSaleList, jRegistrySession) {
 
         var id = t.attr("sg-id");
         var name = t.text();
-        var group = t.text().toLowerCase();
-        var tax = t.find(".sg-tax").text();
-        var tags = t.text();
+        var group = t.attr("sg-group");
+        var tax = t.attr("sg-tax");
+        var tags = t.attr("sg-group");
         var desc = t.text();
         App.addItemToCheckout(id, "", name, price, group, tax, tags, desc, mult);
         jRegistrySession.text("1");

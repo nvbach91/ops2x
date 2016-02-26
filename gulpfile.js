@@ -40,10 +40,11 @@ gulp.task('browser-sync', ['nodemon'], function () {
      }
      });*/
     browserSync.init(null, {
-        proxy: "http://localhost:3000",
+        proxy: "http://127.0.0.1:3000",
         files: ["public/**/*.*"],
         browser: "google chrome",
-        port: 7000
+        port: 7000,
+        online: false
     });
 
 });

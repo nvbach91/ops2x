@@ -376,7 +376,7 @@ button#park-sale, button#discard-sale {
     border-bottom: 1px solid #E0E0E0;
     font-size: 12px;
 }
-.si-id, .si-ean {
+.si-id, .si-ean, .si-tax {
     display: none;
 }
 .si-name {
@@ -563,6 +563,7 @@ button.db-close:before, button.pb-close:before, button.wb-close:before {
     line-height: 30px;
 }
 .receipt-body {
+    margin: 0 0 0 5px;
     overflow-y: scroll;
     height: 220px;
     flex-grow: 1;
@@ -586,8 +587,6 @@ div.ri-x {
 }
 .ri-n {
     overflow: hidden;
-    padding: 0 0 0 5px;
-    margin: 0 5px 0 0;
     text-align: left;
     flex-grow: 10;
 }
@@ -597,7 +596,7 @@ div.ri-x {
     padding-right: 0;
 }
 #receipt-summary {
-    padding: 0 0 0 5px;
+    margin: 0 0 0 5px;
     font-size: 12px;
     display: flex;
     flex-direction: column;
@@ -609,6 +608,20 @@ div.ri-x {
 #rs-total {
     font-weight: bold;
     /*font-size: 24px;*/
+}
+div#taxes-label {
+    display: inline-block;
+    text-align: center;
+    font-weight: bold;
+}
+#tax-header > div, .rs-tax > div {
+    flex-grow: 1;
+    text-align: right;
+    width: 40%;
+}
+#tax-header > div.th-rate, .rs-tax > div.rs-tax-rate{
+    text-align: left;
+    width: 20%;
 }
 .receipt-footer {
     line-height: 30px;
@@ -1076,6 +1089,9 @@ div.ri-x {
     }
     #receipt-summary {
         font-size: 12px;
+        padding-top: 5px;
+        margin-top: 5px;
+        border-top: 1px solid #000;
     }
     .receipt-footer {
         text-indent: 20px;
