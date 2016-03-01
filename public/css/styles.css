@@ -1105,3 +1105,11 @@ div#taxes-label {
         content: initial;
     }
 }
+
+button#login {
+    z-index: 1;
+    padding: 20px;
+    position: fixed;
+    bottom: 0;
+    right: 200px;
+}
