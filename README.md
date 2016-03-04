@@ -86,6 +86,8 @@ $ gulp
 username: "guest", password: "tseug"
 ```
 
+* project tasks include watch task with live reload which automatically restarts the server when server files change, and inject client scripts when client files change
+
 * during development you can restart the server with nodemon
 ```
 rs
