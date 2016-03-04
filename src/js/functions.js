@@ -44,7 +44,7 @@ Number.prototype.formatMoney = function (c, d, t) {
     var n = this,
             c = isNaN(c = Math.abs(c)) ? 2 : c,
             d = d === undefined ? "." : d,
-            t = t === undefined ? "," : t,
+            t = t === undefined ? "" : t,
             s = n < 0 ? "-" : "",
             i = parseInt(n = Math.abs(+n || 0).toFixed(c)) + "",
             j = (j = i.length) > 3 ? j % 3 : 0;
@@ -721,8 +721,12 @@ App.renderWebRegister = function () {
                     var t = $(this);
                     if (!t.hasClass("disabled")) {
                         window.print();
+                        $("#discard-sale").click();
                     }
                 });
+        window.onafterprint = function () {
+            $("#curtain").remove();
+        };
         cashInputContainer.appendTo(payment);
         var quickCashLabel = $("<div>").addClass("cash-quick-label").text("Quick cash payment");
         quickCashLabel.appendTo(payment);
@@ -955,3 +959,30 @@ App.renderLogin = function () {
         t.find("#password").val("");
     });
 };
+
+
+(function() {
+
+    var beforePrint = function() {
+        
+    };
+
+    var afterPrint = function() {
+        $("#curtain").remove();
+    };
+
+    if (window.matchMedia) {
+        var mediaQueryList = window.matchMedia('print');
+        mediaQueryList.addListener(function(mql) {
+            if (mql.matches) {
+                beforePrint();
+            } else {
+                afterPrint();
+            }
+        });
+    }
+
+    window.onbeforeprint = beforePrint;
+    window.onafterprint = afterPrint;
+
+}());

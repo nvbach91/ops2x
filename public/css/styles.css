@@ -11,7 +11,7 @@
     border-radius: 5px;
 }
 #kc {
-    /*display: none;*/
+    display: none;
     position: fixed;
     right: 0;
     bottom: 0;
