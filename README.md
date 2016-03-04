@@ -74,10 +74,16 @@ users
 ## Run project ##
 * the following commands will run project tasks to start the server and open your system's default web browser and navigate you to the app
 * if your browser does not start, manually open the app at http://localhost:7000
+
 ```
 $ npm start
 or
 $ gulp
+```
+
+* login for user guest
+```
+username: "guest", password: "tseug"
 ```
 
 * during development you can restart the server with nodemon

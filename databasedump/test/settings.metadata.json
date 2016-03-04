@@ -1,0 +1,1 @@
+{"options":{},"indexes":[{"v":1,"key":{"_id":1},"name":"_id_","ns":"test.settings"},{"v":1,"unique":true,"key":{"tin":1},"name":"tin_1","ns":"test.settings","background":true},{"v":1,"unique":true,"key":{"vat":1},"name":"vat_1","ns":"test.settings","background":true},{"v":1,"key":{"userId":1},"name":"userId_1","ns":"test.settings","background":true}]}
