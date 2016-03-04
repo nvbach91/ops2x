@@ -1,12 +1,11 @@
 
 App.getWindowWidth = function () {
     return window.innerWidth;
-}
-;
+};
+
 App.getAnimationTime = function () {
     return App.getWindowWidth() > 799 ? 100 : 0;
-}
-;
+};
 
 Array.prototype.binaryIndexOf = function (searchElement) {
     'use strict';
@@ -20,10 +19,10 @@ Array.prototype.binaryIndexOf = function (searchElement) {
         currentIndex = (minIndex + maxIndex) / 2 | 0;
         currentElement = this[currentIndex];
 
-        if (currentElement < searchElement) {
+        if (currentElement.ean < searchElement) {
             minIndex = currentIndex + 1;
         }
-        else if (currentElement > searchElement) {
+        else if (currentElement.ean > searchElement) {
             maxIndex = currentIndex - 1;
         }
         else {
@@ -39,6 +38,7 @@ String.prototype.endsWith = function (suffix) {
 };
 
 Number.prototype.formatMoney = function (c, d, t) {
+    //d = App.settings.decimal_delimiter;
     var n = this,
             c = isNaN(c = Math.abs(c)) ? 2 : c,
             d = d === undefined ? "." : d,
@@ -47,16 +47,14 @@ Number.prototype.formatMoney = function (c, d, t) {
             i = parseInt(n = Math.abs(+n || 0).toFixed(c)) + "",
             j = (j = i.length) > 3 ? j % 3 : 0;
     return s + (j ? i.substr(0, j) + t : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) + (c ? d + Math.abs(n - i).toFixed(c).slice(2) : "");
-}
-;
+};
 
 App.beep = function () {
     var b = document.getElementById("beep");
     b.pause();
     b.currentTime = 0;
     b.play();
-}
-;
+};
 
 App.correctPrice = function (pr) {
     var p = pr.replace(/\./g, "");
@@ -75,8 +73,7 @@ App.correctPrice = function (pr) {
         correctValue = "0.0" + p;
     }
     return correctValue;
-}
-;
+};
 
 App.recalculateTotalCost = function () {
     var saleList = $("#sale-list");
@@ -94,18 +91,17 @@ App.recalculateTotalCost = function () {
         var discountPercent = si.find(".d-discount").val() / 100;
         subTotal = subTotal - subTotal * discountPercent;
         subTotal.toFixed(2);
-        si.find(".si-total").text(subTotal.formatMoney(2, ".", ""));
+        si.find(".si-total").text(subTotal.formatMoney());
     });
     saleList.find(".sale-item .si-total").each(function () {
         totalCost += parseFloat($(this).text());
     });
     totalCost.toFixed(2);
-    var totalCostText = totalCost.formatMoney(2, ".", " ");
-    $("#checkout-total").text("Total: " + totalCostText + " Kč");
-    $("#pay-amount").text(totalCostText + " Kč");
+    var totalCostText = totalCost.formatMoney();
+    $("#checkout-total").text("Total: " + totalCostText + " " + App.settings.currency.symbol);
+    $("#pay-amount").text(totalCostText + " " + App.settings.currency.symbol);
     $("#checkout-label").text("CHECKOUT (" + itemsCnt + " item" + (itemsCnt !== 1 ? "s" : "") + ")");
-}
-;
+};
 
 App.checkPriceInput = function (e, kc, p) {
     e.stopPropagation();
@@ -170,16 +166,17 @@ App.setUpMobileNumericInput = function (jpi) {
 };
 
 App.showInCurtain = function (s) {
-    var curtain = $("<div>").attr("id", "curtain").click(function () {
-        $(this).fadeOut(App.getAnimationTime(), function () {
-            $(this).remove();
+    if (!$("#curtain").size()) {
+        var curtain = $("<div>").attr("id", "curtain").click(function () {
+            $(this).fadeOut(App.getAnimationTime(), function () {
+                $(this).remove();
+            });
         });
-    });
-    curtain.append(s).hide();
-    $("#app").append(curtain);
-    curtain.fadeIn(App.getAnimationTime());
-}
-;
+        curtain.append(s).hide();
+        $("#app").append(curtain);
+        curtain.fadeIn(App.getAnimationTime());
+    }
+};
 
 App.getMultiplicationNumber = function (jpi) {
     var m = jpi.val().replace(/[\s\.]+/g, "");
@@ -187,8 +184,7 @@ App.getMultiplicationNumber = function (jpi) {
         return 1;
     }
     return parseInt(m.slice(0, m.indexOf("*")));
-}
-;
+};
 
 App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, mult) {
     var jSaleList = $("#sale-list");
@@ -326,7 +322,7 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
                 var lbBody = $("<div>").addClass("db-body");
                 var lbInfo = $("<div>").addClass("db-info");
                 $("<div>").addClass("db-name").text("Name: " + name).appendTo(lbInfo);
-                $("<div>").addClass("db-price").text("Price: " + price + " Kč").appendTo(lbInfo);
+                $("<div>").addClass("db-price").text("Price: " + price + " " + App.settings.currency.symbol).appendTo(lbInfo);
                 $("<div>").addClass("db-group").text("Group: " + group).appendTo(lbInfo);
                 $("<div>").addClass("db-tax").text("Tax: " + tax).appendTo(lbInfo);
                 $("<div>").addClass("db-tags").text("Tags: " + tags).appendTo(lbInfo);
@@ -354,15 +350,15 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
 
     App.recalculateTotalCost();
     App.beep();
-}
-;
+};
+
 App.incrementLastItem = function (lastItem) {
     var lastQuantity = lastItem.find(".si-quantity");
     lastQuantity.val(parseInt(lastQuantity.val()) + 1);
     App.recalculateTotalCost();
     App.beep();
-}
-;
+};
+
 App.bindSaleGroups = function (sg, jPriceInput, jSaleList, jRegistrySession) {
     // Clicking on sale-group buttons adds an item to the sale list
     sg.find("button").click(function () {
@@ -400,8 +396,8 @@ App.bindSaleGroups = function (sg, jPriceInput, jSaleList, jRegistrySession) {
         App.addItemToCheckout(id, "", name, price, group, tax, tags, desc, mult);
         jRegistrySession.text("1");
     });
-}
-;
+};
+
 App.bindQuickSales = function (qs, jPriceInput, jRegistrySession) {
     // bind quick sale buttons
     qs.find(".qs-item button").click(function () {
@@ -420,47 +416,85 @@ App.bindQuickSales = function (qs, jPriceInput, jRegistrySession) {
 
         jRegistrySession.text("1");
     });
-}
-;
-App.generateWebRegisterDOM = function () {
-    var mainDOM = [
-        '<div id="col-1">',
-            '<div id="live-search">',
-                '<input id="search" placeholder"Search" autocomplete="off">',
-                '<ul id="dropdown"></ul>',
-            '</div>',
-            '<input id="price-input" placeholder="0.00", maxlength="9">',
-            '<div id="sale-groups"></div>',
-            '<div id="quick-sales"></div>',
-        '</div>',
-        '<div id="col-2">',
-            '<div id="checkout-header">',
-                '<div id="checkout-label">CHECKOUT (0 items)</div>',
-                '<div id="checkout-total">Total: 0 Kč</div>',
-            '</div>',
-            '<div id="checkout-btns">',
-                '<button id="park-sale">Park Sale</button>',
-                '<button id="discard-sale">Discard Sale</button>',
-            '</div>',
-            '<ul id="sale-list">',
-                '<li id="si-placeholder">',
-                    '<div>Registered items will be dsplayed here</div>',
-                '</li>',
-            '</ul>',
-            '<button id="pay">',
-                '<span>Pay</span>',
-                '<span id="pay-amount">0 Kč</span>',
-            '</button>',
-        '</div>'        
-    ];
-
-    var main = $("<div>").attr("id", "main");
-    main.html(mainDOM.join(''));
-    main.appendTo($("#app"));
 };
 
-App.initializeWebRegister = function () {
-    App.generateWebRegisterDOM();
+App.makeWarning = function (msg) {
+    var warning = $("<div>").attr("id", "warning-box")
+            .click(function (e) {
+                e.stopPropagation();
+            });
+    $("<div>").addClass("wb-header")
+            .append($("<div>").addClass("wb-title").text("Warning"))
+            .append($("<button>").addClass("wb-close").click(function () {
+                $(this).parents("#curtain").fadeOut(App.getAnimationTime(), function () {
+                    $(this).remove();
+                });
+            })).appendTo(warning);
+    var warningBody = $("<div>").addClass("wb-body");
+    warningBody.text(msg);
+    warningBody.appendTo(warning);
+    return warning;
+};
+
+App.createWebRegisterDOM = function () {
+    // nav, menu-left, registry-session
+    var appDOM = [
+        '<nav>',
+        '<div id="logo"><div></div></div>',
+        '<div id="brand">EnterpriseApps</div>',
+        '<div id="menu-top">',
+        '<div id="profile">Profile</div>',
+        '<div id="sign-out">Sign out</div>',
+        '</div>',
+        '</nav>',
+        '<div id="menu-left">',
+        '<div id="menu-header">',
+        '<div></div>',
+        '</div>',
+        '<div id="menu-body">',
+        '<button class="menu-item"></button>',
+        '<button class="menu-item"></button>',
+        '<button class="menu-item"></button>',
+        '</div>',
+        '</div>',
+        '<div id="registry-session">1</div>',
+        '<div id="main">',
+        '<div id="col-1">',
+        '<div id="live-search">',
+        '<input id="search" placeholder="Search by EAN PLU" autocomplete="off">',
+        '<ul id="dropdown"></ul>',
+        '</div>',
+        '<input id="price-input" placeholder="0.00", maxlength="9">',
+        '<div id="sale-groups"></div>',
+        '<div id="quick-sales"></div>',
+        '</div>',
+        '<div id="col-2">',
+        '<div id="checkout-header">',
+        '<div id="checkout-label">CHECKOUT (0 items)</div>',
+        '<div id="checkout-total">Total: 0 ' + App.settings.currency.symbol + '</div>',
+        '</div>',
+        '<div id="checkout-btns">',
+        '<button id="park-sale">Park Sale</button>',
+        '<button id="discard-sale">Discard Sale</button>',
+        '</div>',
+        '<ul id="sale-list">',
+        '<li id="si-placeholder">',
+        '<div>Registered items will be dsplayed here</div>',
+        '</li>',
+        '</ul>',
+        '<button id="pay">',
+        '<span>Pay</span>',
+        '<span id="pay-amount">0 ' + App.settings.currency.symbol + '</span>',
+        '</button>',
+        '</div>',
+        '</div>',
+        '<div id="kc"></div>'
+    ];
+    $("#app").html(appDOM.join(""));
+};
+
+App.renderWebRegister = function () {
+    App.createWebRegisterDOM();
     var jKc = $("#kc");
     var jSaleList = $("#sale-list");
 
@@ -522,36 +556,35 @@ App.initializeWebRegister = function () {
     });
 
     // generate sale groups and quick sale
-    $.getJSON("/api/buttons", function (data) {
-        var sg = $("#sale-groups");
-        for (var i = 0; i < data.saleGroups.length; i++) {
-            $("<button>", {
-                class: "sg",
-                "sg-id": "sg" + i,
-                "sg-tax": data.saleGroups[i].tax,
-                "sg-group": data.saleGroups[i].group,
-                text: data.saleGroups[i].text,
-                css: {"background-color": "#" + data.saleGroups[i].bg}
-            }).appendTo(sg);
-        }
-        App.bindSaleGroups(sg, jPriceInput, jSaleList, jRegistrySession);
+    var btns = App.settings.buttons;
+    var sg = $("#sale-groups");
+    for (var i = 0; i < btns.saleGroups.length; i++) {
+        $("<button>", {
+            class: "sg",
+            "sg-id": "sg" + i,
+            "sg-tax": btns.saleGroups[i].tax,
+            "sg-group": btns.saleGroups[i].group,
+            text: btns.saleGroups[i].text,
+            css: {"background-color": "#" + btns.saleGroups[i].bg}
+        }).appendTo(sg);
+    }
+    App.bindSaleGroups(sg, jPriceInput, jSaleList, jRegistrySession);
 
-        var qs = $("#quick-sales");
-        for (var i = 0; i < data.quickSales.length; i++) {
-            var t = data.quickSales[i];
-            $("<div>")
-                    .addClass("qs-item")
-                    .append($("<button>").text(t.text))
-                    .append($("<div>").addClass("qs-id").text("qs" + i))
-                    .append($("<div>").addClass("qs-price").text(t.price))
-                    .append($("<div>").addClass("qs-group").text(t.group))
-                    .append($("<div>").addClass("qs-tax").text(t.tax))
-                    .append($("<div>").addClass("qs-tags").text(t.tags))
-                    .append($("<div>").addClass("qs-desc").text(t.desc))
-                    .appendTo(qs);
-        }
-        App.bindQuickSales(qs, jPriceInput, jRegistrySession);
-    });
+    var qs = $("#quick-sales");
+    for (var i = 0; i < btns.quickSales.length; i++) {
+        var t = btns.quickSales[i];
+        $("<div>")
+                .addClass("qs-item")
+                .append($("<button>").text(t.text))
+                .append($("<div>").addClass("qs-id").text("qs" + i))
+                .append($("<div>").addClass("qs-price").text(t.price))
+                .append($("<div>").addClass("qs-group").text(t.group))
+                .append($("<div>").addClass("qs-tax").text(t.tax))
+                .append($("<div>").addClass("qs-tags").text(t.tags))
+                .append($("<div>").addClass("qs-desc").text(t.desc))
+                .appendTo(qs);
+    }
+    App.bindQuickSales(qs, jPriceInput, jRegistrySession);
 
     // bind control panel buttons
     $("#logo > div").click(function () {
@@ -620,7 +653,7 @@ App.initializeWebRegister = function () {
                 .appendTo(receiptSummary);
         $("<div>").attr("id", "rs-change")
                 .append($("<div>").addClass("rs-label").text("Change:"))
-                .append($("<div>").addClass("rs-value").text(Number(0).formatMoney(2, ".", "")))
+                .append($("<div>").addClass("rs-value").text(Number(0).formatMoney()))
                 .appendTo(receiptSummary);
         $("<div>").attr("id", "taxes-label").text("Taxes summary:").appendTo(receiptSummary);
         $("<div>").attr("id", "tax-header")
@@ -646,7 +679,7 @@ App.initializeWebRegister = function () {
         //creating payment section
         var payment = $("<div>").attr("id", "payment");
         $("<div>").addClass("cash-pay-label").text("Amount to pay").appendTo(payment);
-        $("<div>").attr("id", "cash-pay-topay").text(total + " Kč").appendTo(payment);
+        $("<div>").attr("id", "cash-pay-topay").text(total + " " + App.settings.currency.symbol).appendTo(payment);
         $("<div>").addClass("cash-pay-label").text("Amount tendered").appendTo(payment);
         var cashInputContainer = $("<div>").attr("id", "cash-input-container");
         var cashInput = $("<input>").attr("id", "cash-input")
@@ -669,8 +702,8 @@ App.initializeWebRegister = function () {
                     t.removeClass("invalid");
                     t.parent().find("button.cash-confirm").removeClass("disabled");
                     t.val(correctValue);
-                    var newChange = (parseFloat(t.val()) - parseFloat(total)).formatMoney(2, ".", "");
-                    t.parents("#payment").find("#cash-change").text(newChange + " Kč");
+                    var newChange = (parseFloat(t.val()) - parseFloat(total)).formatMoney();
+                    t.parents("#payment").find("#cash-change").text(newChange + " " + App.settings.currency.symbol);
                     t.parents("#payment-box").find("#rs-tender .rs-value").text(t.val());
                     t.parents("#payment-box").find("#rs-change .rs-value").text(newChange);
                 })
@@ -699,14 +732,14 @@ App.initializeWebRegister = function () {
                         var cash = t.text();
                         $("#cash-input").val(cash + "00").blur();
                         t.parents("#payment").find("button.cash-confirm").removeClass("disabled");
-                        $("#cash-change").text((cash - parseFloat(total)).formatMoney(2, ".", "") + " Kč");
+                        $("#cash-change").text((cash - parseFloat(total)).formatMoney() + " " + App.settings.currency.symbol);
                     })
                     .appendTo(quickCash);
         }
         quickCash.appendTo(payment);
 
         $("<div>").addClass("cash-pay-label").text("Change").appendTo(payment);
-        $("<div>").attr("id", "cash-change").text(Number(0).formatMoney(2, ".", "") + " Kč").appendTo(payment);
+        $("<div>").attr("id", "cash-change").text(Number(0).formatMoney() + " " + App.settings.currency.symbol).appendTo(payment);
 
         payment.appendTo(paymentBody);
         $("<div>").addClass("receipt-container").append(receipt).appendTo(paymentBody);
@@ -717,23 +750,12 @@ App.initializeWebRegister = function () {
         cashInput.focus();
     });
 
-    //populating articles for scanning
-    var catalog = [];
-    catalog.push(new App.Item(
-            Math.floor((Math.random() * 10) + 1),
-            "40152233",
-            "Wax",
-            "45.00",
-            "description"
-            ));
-    catalog.push(new App.Item(
-            Math.floor((Math.random() * 10) + 1),
-            "4043619653553",
-            "Audio Cable",
-            "105.00",
-            "description"
-            ));
-    catalog.sort(function (a, b) {
+    //populating articles for scanning    
+    var articles = App.catalog.articles;
+    for (var i = 0; i < articles.length; i++) {
+        articles[i].id = i;
+    }
+    articles.sort(function (a, b) {
         return a.ean < b.ean ? -1 : 1;
     });
     var jSearchBox = $("#search");
@@ -741,9 +763,9 @@ App.initializeWebRegister = function () {
         var t = $(this);
         if (e.keyCode === 13) {
             var filter = t.val();
-            var i = catalog.binaryIndexOf(filter);
+            var i = articles.binaryIndexOf(filter);
             if (i >= 0) {
-                var item = catalog[i];
+                var item = articles[i];
                 var mult = App.getMultiplicationNumber(jPriceInput);
                 App.addItemToCheckout(
                         item.id,
@@ -762,28 +784,19 @@ App.initializeWebRegister = function () {
                 t.removeClass("not-found");
             } else {
                 t.addClass("not-found");
-                var warning = $("<div>").attr("id", "warning-box")
-                        .click(function (e) {
-                            e.stopPropagation();
-                        });
-                $("<div>").addClass("wb-header")
-                        .append($("<div>").addClass("wb-title").text("Warning"))
-                        .append($("<button>").addClass("wb-close").click(function () {
-                            $(this).parents("#curtain").fadeOut(App.getAnimationTime(), function () {
-                                $(this).remove();
-                            });
-                        })).appendTo(warning);
-                var warningBody = $("<div>").addClass("wb-body");
-                warningBody.text("This EAN " + filter + " is not defined");
-                warningBody.appendTo(warning);
-                App.showInCurtain(warning);
+                t.attr("placeholder", "This EAN " + filter + " is not defined");
+                //App.showInCurtain(App.makeWarning("This EAN " + filter + " is not defined"));
             }
             t.val("");
         }
+    }).keydown(function (e) {
+        e.stopPropagation();
     }).click(function () {
         $(this).removeClass("not-found");
+        $(this).attr("placeholder", "Search by EAN PLU");
     }).focus(function () {
         $(this).removeClass("not-found");
+        $(this).attr("placeholder", "Search by EAN PLU");
     });
 
     $(document).scannerDetection(function (s) {
@@ -792,7 +805,7 @@ App.initializeWebRegister = function () {
         var e = $.Event('keyup');
         e.keyCode = 13;
         jSearchBox.trigger(e);
-        jPriceInput.blur();
+        //jPriceInput.blur();
     });
 
     // focus price input after hitting enter if price input is not yet focused
@@ -821,6 +834,17 @@ App.initializeWebRegister = function () {
              }*/
         }
     });
+    $("#sign-out").click(function () {
+        App.showInCurtain(App.makeLoading());
+        $.ajax({
+            type: "GET",
+            url: "/logout"
+        }).done(function () {
+            App.renderLogin();
+        }).fail(function () {
+            App.renderLogin();
+        });
+    });
     /*
      dropDown.html(createFoundItem(item.name, item.price));
      dropDown.addClass("visible");
@@ -831,4 +855,100 @@ App.initializeWebRegister = function () {
      dropDown.html("");
      dropDown.removeClass("visible");
      });*/
+};
+
+App.initWebRegister = function () {
+    $.when(
+        $.getJSON("/api/catalogs", function (catalog) {
+            App.catalog = catalog;
+        }),
+        $.getJSON("/api/settings", function (settings) {
+            App.settings = settings;
+        })
+    ).then(function () {
+        App.renderWebRegister();
+    });
+    /*$.ajax({
+     type: "GET",
+     url: "/api/settings",
+     dataType: "json"
+     }).done(function (settings) {
+     App.settings = settings;
+     App.renderWebRegister();
+     });*/
+};
+
+App.makeLoading = function () {
+    var loadingDOM = [
+        '<div id="loading">',
+        '<div class="spinner">',
+        '<div class="mask">',
+        '<div class="maskedCircle"></div>',
+        '</div>',
+        '</div>',
+        '</div>'
+    ];
+    return $(loadingDOM.join(""));
+};
+
+App.isValidEmail = function (email) {
+    if (email === "guest") {
+        return true;
+    }
+    var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(email);
+};
+
+App.renderSignUp = function () {
+
+};
+
+App.renderLogin = function () {
+    var loginDOM = [
+        '<div class="center-box">',
+        '<div id="sign-in-welcome">Welcome to OPS</div>',
+        '<form id="sign-in" action="" method="POST">',
+        '<div id="sign-in-label">OPEN YOUR STORE</div>',
+        '<input id="username" type="text" placeholder="EMAIL">',
+        '<input id="password" type="password" placeholder="PASSWORD">',
+        '<input id="submit" type="submit" value="SIGN IN">',
+        '</form>',
+        '</div>'
+    ];
+    $("#app").html(loginDOM.join(""));
+    $("form#sign-in").submit(function (e) {
+        e.preventDefault();
+        var t = $(this);
+        var username = t.find("#username").val();
+        var password = t.find("#password").val();
+        if (!App.isValidEmail(username) || !password.length) {
+            App.showInCurtain(App.makeWarning("Please enter your email and password to sign in"));
+        } else {
+            App.showInCurtain(App.makeLoading());
+            $.ajax({
+                type: "POST",
+                url: "/auth",
+                dataType: "json",
+                data: {
+                    username: username || " ",
+                    password: password || " "
+                }
+            }).done(function (data) {
+                if (data.isAuthenticated) {
+                    App.initWebRegister();
+                } else {
+                    alert("Wrong credentials");
+                }
+            }).fail(function (data) {
+                $("#curtain").remove();
+                var msg = "The username and/or password is invalid";
+                if (data.status === 0) {
+                    msg = "Network error. Please check your internet connection";
+                }
+                App.showInCurtain(App.makeWarning(msg));
+            });
+        }
+
+        t.find("#password").val("");
+    });
 };

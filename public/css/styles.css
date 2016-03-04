@@ -10,7 +10,6 @@
     background-color: rgba(0,0,0,0.4);
     border-radius: 5px;
 }
-
 #kc {
     /*display: none;*/
     position: fixed;
@@ -36,6 +35,67 @@ html, body, #app, #main, #curtain {
     height: 100%;
     width: 100%;
     min-height: 600px;
+}
+.center-box {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+#sign-in-welcome {
+    width: 100%;
+    max-width: 640px;
+    background-color: #334C60;
+    color: #fff;
+    padding: 15px 20px;
+    border-radius: 3px 3px 0 0;
+    background-image: url('../img/logo.png');
+    background-position: 98%;
+    background-repeat: no-repeat;
+    background-size: 50px;
+}
+form#sign-in {
+    background-color: #fff;
+    border-radius: 0 0 3px 3px;
+    padding: 20px;
+    width: 100%;
+    max-width: 640px;
+    display: flex;
+    flex-direction: column;
+}
+form#sign-in input {
+    border: 1px solid #CACACA;
+    font-size: 14px;
+    padding: 20px;
+    margin: 5px 0;
+    cursor: text;
+    background-position: 20px;
+    background-repeat: no-repeat;
+    background-size: 20px;
+    text-indent: 40px;
+}
+form#sign-in #username {
+    background-image: url('../img/icons/user.svg');
+}
+form#sign-in #password {
+    background-image: url('../img/icons/lock.svg');
+}
+form#sign-in #submit {
+    text-indent: 0;
+    cursor: pointer;
+    color: #fff;
+    background-color: #01AA93;
+    background-image: none;
+}
+form#sign-in #submit:hover {    
+    background-color: #59AAD3;
+}
+form#sign-in #sign-in-label {    
+    font-size: 18px;
+    line-height: 40px;
+    width: 100%;
 }
 #registry-session {
     display: none;
@@ -78,9 +138,20 @@ nav {
     text-align: center;
     cursor: pointer;
     border-bottom: 3px solid transparent;
+    background-size: 15px;
+    background-position: 5px;
+    background-repeat: no-repeat;
 }
 #menu-top > div:hover {
     border-bottom: 3px solid #B53737;
+}
+#sign-out {
+    text-indent: 15px;
+    background-image: url('../img/icons/signout.svg');
+}
+#profile {
+    text-indent: 15px;
+    background-image: url('../img/icons/userwhite.svg');    
 }
 #menu-left {
     display: flex;
@@ -141,7 +212,7 @@ input {
     flex-grow: 0;
     display: flex;
     flex-direction: column;
-    display: none;
+    /*display: none;*/
 }
 #search {
     font-size: 16px;
@@ -149,8 +220,8 @@ input {
     width: 100%;
 }
 #search.not-found {
-    border: 1px solid red;
-    box-shadow: 0 0 3px red
+    /*border: 1px solid red;*/
+    box-shadow: 0 0 1px 1px red
 }
 #dropdown {
     position: absolute;
@@ -179,7 +250,7 @@ input {
     flex-grow: 1;
 }
 #dropdown .dd-price {
-    
+
 }
 #price-input {
     text-align: right;
@@ -945,6 +1016,9 @@ div#taxes-label {
     }*/
 }
 @media screen and (min-width: 840px){
+    form#sign-in {
+        padding: 40px;
+    }
     .cash-button {
         font-size: 20px;
     }
@@ -1013,7 +1087,7 @@ div#taxes-label {
     #menu-header > div {
         transition: transform .2s ease;
     }
-    button {
+    button, form#sign-in #submit {
         transition: background-color .2s ease;
     }
     button#park-sale, button#discard-sale {
@@ -1032,7 +1106,7 @@ div#taxes-label {
 
 @media print {
     html, body {
-        font-family: "Open Sans", monospace;
+        font-family: "Open Sans", sans-serif;
     }
     nav, #menu-left, #main, .pb-header, #payment {
         display: none;
@@ -1106,10 +1180,31 @@ div#taxes-label {
     }
 }
 
-button#login {
-    z-index: 1;
-    padding: 20px;
-    position: fixed;
-    bottom: 0;
-    right: 200px;
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+#loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin: -14px 0 0 -14px;
+}
+#loading .maskedCircle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+#loading .mask {
+    width: 40px;
+    height: 40px;
+    overflow: hidden;
+    border-radius: 50%;
+    border: 1px solid transparent;
+}
+#loading .spinner {
+    position: absolute;
+    animation: spin 1s infinite linear;
 }

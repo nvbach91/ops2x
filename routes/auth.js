@@ -1,24 +1,48 @@
-var express = require('express');
-var router = express.Router();
-var mongoose = require('mongoose');
-var Users = require('../models/Users');
+var router = require('express').Router();
 var passport = require('passport');
+var passportLocal = require('passport-local');
 
-router.route('/auth')
-        .post(/*passport.authenticate('local'), */function (req, res) {
-            res.json({isAuthenticated: true});
-        })
-        .get(function (req, res) {
-            res.json({isAuthenticated: req.isAuthenticated()});
-            /*Users.findOne({email: req},function (err, user) {
-                if (err) {
-                    res.send(err);
+var Users = require('../models/Users');
+
+function isValidUsername(username) {
+    if (username === "guest") {
+        return true;
+    }
+    var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(username);
+}
+
+passport.use(new passportLocal.Strategy(function (username, password, done) {
+    if (!isValidUsername(username)) {
+        done(null, null);
+    } else {
+        Users.findOne({email: username}, function (err, user) {
+            if (user) {
+                if (username === user.email && password === user.password) {
+                    done(null, {id: user._id, username: username});
+                } else {
+                    done(null, null);
                 }
-                if(user)
-                res.json(user);
-            });*/
-            //console.log(req);
-            //res.send(1);
+            } else {
+                done(null, null);
+            }
         });
+    }
+}));
+
+passport.serializeUser(function (user, done) {
+    done(null, {id: user.id, username: user.username});
+});
+
+passport.deserializeUser(function (user, done) {
+    //done(null, {id: user.id, username: user.username});
+    Users.findById(user.id, function (err, user) {
+        done(err, user);
+    });
+});
+
+router.post('/auth', passport.authenticate('local'), function (req, res) {
+    res.json({isAuthenticated: req.isAuthenticated()});
+});
 
 module.exports = router;
