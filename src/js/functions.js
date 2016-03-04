@@ -1,4 +1,6 @@
 
+/* global App */
+
 App.getWindowWidth = function () {
     return window.innerWidth;
 };
@@ -213,6 +215,7 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
             .attr({maxlength: 3})
             .val(mult ? mult : 1)
             .keydown(function (e) {
+                e.stopPropagation();
                 return App.checkNumericInput(e, this);
             })
             .focus(function () {

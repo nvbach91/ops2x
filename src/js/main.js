@@ -3,6 +3,8 @@
  * 
  * 
  */
+/* global App */
+
 $(document).ready(function () {
     $.ajax({
         type: "POST",

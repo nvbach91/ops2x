@@ -1,7 +1,7 @@
 var router = require('express').Router();
 var passport = require('passport');
 var passportLocal = require('passport-local');
-
+var crypto = require('crypto');
 var Users = require('../models/Users');
 
 function isValidUsername(username) {
@@ -10,7 +10,11 @@ function isValidUsername(username) {
     }
     var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(username);
-}
+};
+
+function hash(password) {
+    return crypto.createHash('sha256').update(password).digest('hex');
+};
 
 passport.use(new passportLocal.Strategy(function (username, password, done) {
     if (!isValidUsername(username)) {
@@ -18,7 +22,7 @@ passport.use(new passportLocal.Strategy(function (username, password, done) {
     } else {
         Users.findOne({email: username}, function (err, user) {
             if (user) {
-                if (username === user.email && password === user.password) {
+                if (username === user.email && hash(password) === user.password) {
                     done(null, {id: user._id, username: username});
                 } else {
                     done(null, null);
