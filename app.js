@@ -12,6 +12,8 @@ var passport = require('passport');
 
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://127.0.0.1/test');
+//comment the previous line and uncomment the next line to enable remote MongoDB instance
+//mongoose.connect('mongodb://81.2.236.231:37017/test', {user: 'guest', pass: 'tseug'});
 
 var app = express();
 
