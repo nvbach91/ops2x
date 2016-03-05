@@ -3,9 +3,9 @@
  * 
  * 
  */
-/* global App */
 
 $(document).ready(function () {
+    App.appContainer = $("#app");
     $.ajax({
         type: "POST",
         url: "/isAuthenticated"

@@ -11,8 +11,8 @@ var expressSession = require('express-session');
 var passport = require('passport');
 
 var mongoose = require('mongoose');
+// use one of the following mongodb connections, either a local instance or a remote instance
 mongoose.connect('mongodb://127.0.0.1/test');
-//comment the previous line and uncomment the next line to enable remote MongoDB instance
 //mongoose.connect('mongodb://81.2.236.231:37017/test', {user: 'guest', pass: 'tseug'});
 
 var app = express();
@@ -49,7 +49,7 @@ var isAuthenticated = require('./routes/isAuthenticated');
 var auth = require('./routes/auth');
 var logout = require('./routes/logout');
 var settings = require('./routes/settings');
-var catalogs = require('./routes/catalogs');
+var catalog = require('./routes/catalog');
 
 app.use('/', index);
 app.use('/', isAuthenticated);
@@ -57,7 +57,7 @@ app.use('/', auth);
 app.use('/', logout);
 app.use('/api', ensureAuthenticated);
 app.use('/api', settings);
-app.use('/api', catalogs);
+app.use('/api', catalog);
 
 
 
@@ -77,10 +77,10 @@ app.use('/api', catalogs);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
-    res.redirect('/');
+    res.sendStatus(404);
     /*var err = new Error('Not Found');
-    err.status = 404;
-    next(err);*/
+     err.status = 404;
+     next(err);*/
 });
 
 // error handlers
@@ -88,25 +88,25 @@ app.use(function (req, res, next) {
 // development error handler
 // will print stacktrace
 /*if (app.get('env') === 'development') {
-    app.use(function (err, req, res, next) {
-        res.status(err.status || 500);
-        res.render('error', {
-            message: err.message,
-            error: err
-        });
-    });
-}
-*/
+ app.use(function (err, req, res, next) {
+ res.status(err.status || 500);
+ res.render('error', {
+ message: err.message,
+ error: err
+ });
+ });
+ }
+ */
 // production error handler
 // no stacktraces leaked to user
 /*
-app.use(function (err, req, res, next) {
-    res.status(err.status || 500);
-    res.render('error', {
-        message: err.message,
-        error: {}
-    });
-});*/
+ app.use(function (err, req, res, next) {
+ res.status(err.status || 500);
+ res.render('error', {
+ message: err.message,
+ error: {}
+ });
+ });*/
 
 
 module.exports = app;

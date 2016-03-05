@@ -9,7 +9,7 @@ App.getAnimationTime = function () {
     return App.getWindowWidth() > 799 ? 100 : 0;
 };
 
-Array.prototype.binaryIndexOf = function (searchElement) {
+Array.prototype.binaryIndexOf = function (searchEAN) {
     'use strict';
 
     var minIndex = 0;
@@ -21,10 +21,10 @@ Array.prototype.binaryIndexOf = function (searchElement) {
         currentIndex = (minIndex + maxIndex) / 2 | 0;
         currentElement = this[currentIndex];
 
-        if (currentElement.ean < searchElement) {
+        if (currentElement.ean < searchEAN) {
             minIndex = currentIndex + 1;
         }
-        else if (currentElement.ean > searchElement) {
+        else if (currentElement.ean > searchEAN) {
             maxIndex = currentIndex - 1;
         }
         else {
@@ -52,10 +52,9 @@ Number.prototype.formatMoney = function (c, d, t) {
 };
 
 App.beep = function () {
-    var b = document.getElementById("beep");
-    b.pause();
-    b.currentTime = 0;
-    b.play();
+    App.beeper.pause();
+    App.beeper.currentTime = 0;
+    App.beeper.play();
 };
 
 App.correctPrice = function (pr) {
@@ -78,13 +77,12 @@ App.correctPrice = function (pr) {
 };
 
 App.recalculateTotalCost = function () {
-    var saleList = $("#sale-list");
-    if (saleList.children().size() === 1) {
-        $("#si-placeholder").removeClass("hidden");
+    if (App.jSaleList.children().size() === 1) {
+        App.jSiPlaceholder.removeClass("hidden");
     }
     var totalCost = 0;
     var itemsCnt = 0;
-    saleList.find(".sale-item").each(function () {
+    App.jSaleList.find(".sale-item").each(function () {
         var si = $(this);
         var q = parseInt(si.find(".si-quantity").val());
         itemsCnt += q;
@@ -95,23 +93,22 @@ App.recalculateTotalCost = function () {
         subTotal.toFixed(2);
         si.find(".si-total").text(subTotal.formatMoney());
     });
-    saleList.find(".sale-item .si-total").each(function () {
+    App.jSaleList.find(".sale-item .si-total").each(function () {
         totalCost += parseFloat($(this).text());
     });
     totalCost.toFixed(2);
     var totalCostText = totalCost.formatMoney();
-    $("#checkout-total").text("Total: " + totalCostText + " " + App.settings.currency.symbol);
-    $("#pay-amount").text(totalCostText + " " + App.settings.currency.symbol);
-    $("#checkout-label").text("CHECKOUT (" + itemsCnt + " item" + (itemsCnt !== 1 ? "s" : "") + ")");
+    App.jCheckoutTotal.text("Total: " + totalCostText + " " + App.settings.currency.symbol);
+    App.jPayAmount.text(totalCostText);
+    App.jCheckoutLabel.text("CHECKOUT (" + itemsCnt + " item" + (itemsCnt !== 1 ? "s" : "") + ")");
 };
 
-App.checkPriceInput = function (e, kc, p) {
+App.checkPriceInput = function (e) {
     e.stopPropagation();
-    kc.text("keyCode: " + e.keyCode);
-    //var p = $("#price-input");
+    App.jKc.text("keyCode: " + e.keyCode);
     if (e.keyCode === 13) { // allow enter 
-        if (p.val().length) {
-            p.blur();
+        if (App.jPriceInput.val().length) {
+            App.jPriceInput.blur();
         }
         return true;
     }
@@ -119,7 +116,7 @@ App.checkPriceInput = function (e, kc, p) {
         return true;
     }
     if (e.keyCode === 109 || e.keyCode === 189 || e.keyCode === 173) { // check for multiple dashes
-        if (p.val().length > 0) {
+        if (App.jPriceInput.val().length > 0) {
             return false;
         }
         return true;
@@ -132,10 +129,10 @@ App.checkPriceInput = function (e, kc, p) {
     // allow asterisk for scanner multiplication
     // do not allow more than 99*
     if (e.keyCode === 106) {
-        if (p.val().length === 0 || p.val().length > 2) {
+        if (App.jPriceInput.val().length === 0 || App.jPriceInput.val().length > 2) {
             return false;
         }
-        if (p.val().indexOf("*") < 0) {
+        if (App.jPriceInput.val().indexOf("*") < 0) {
             //p.attr("maxlength", 9);
             return true;
         }
@@ -161,27 +158,28 @@ App.checkNumericInput = function (e, t) {
     }
 };
 
-App.setUpMobileNumericInput = function (jpi) {
+App.setUpMobileNumericInput = function () {
     if ($.browser.mobile) {
-        jpi.attr("type", "number");
+        App.jPriceInput.attr("type", "number");
     }
 };
 
 App.showInCurtain = function (s) {
     if (!$("#curtain").size()) {
-        var curtain = $("<div>").attr("id", "curtain").click(function () {
+        App.curtain = $("<div>").attr("id", "curtain");
+        App.curtain.click(function () {
             $(this).fadeOut(App.getAnimationTime(), function () {
                 $(this).remove();
             });
         });
-        curtain.append(s).hide();
-        $("#app").append(curtain);
-        curtain.fadeIn(App.getAnimationTime());
+        App.curtain.append(s).hide();
+        App.appContainer.append(App.curtain);
+        App.curtain.fadeIn(App.getAnimationTime());
     }
 };
 
-App.getMultiplicationNumber = function (jpi) {
-    var m = jpi.val().replace(/[\s\.]+/g, "");
+App.getMultiplicationNumber = function () {
+    var m = App.jPriceInput.val().replace(/[\s\.]+/g, "");
     if (!m.match(/^\-?[1-9](\d+)?\*(\d+)?$/g)) {
         return 1;
     }
@@ -189,20 +187,18 @@ App.getMultiplicationNumber = function (jpi) {
 };
 
 App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, mult) {
-    var jSaleList = $("#sale-list");
-    var lastItem = jSaleList.find(".sale-item.last");
+    var lastItem = App.jSaleList.find(".sale-item.last");
     if (id.toString() === lastItem.find(".si-id").text()) {
-        if ($("#registry-session").text() === "1") {
+        if (App.jRegistrySession.text() === "1") {
             App.incrementLastItem(lastItem);
             return true;
         }
     }
-    var jSaleListPlaceHolder = jSaleList.find("#si-placeholder");
-    if (jSaleListPlaceHolder.size()) {
-        jSaleListPlaceHolder.addClass("hidden");
+    if (App.jSiPlaceholder.size()) {
+        App.jSiPlaceholder.addClass("hidden");
     }
-    if (jSaleList.children().size() > 0) {
-        jSaleList.children().eq(jSaleList.children().size() - 1).removeClass("last");
+    if (App.jSaleList.children().size() > 0) {
+        App.jSaleList.children().eq(App.jSaleList.children().size() - 1).removeClass("last");
     }
     // creating sale item and bind events
     var item = $("<li>").addClass("sale-item last");
@@ -275,7 +271,7 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
                     t.val(correctValue);
                     t.parents().eq(2).find(".si-price").text(correctValue);
                     /**************ATTENTION****************/
-                    if (jSaleList.find(".d-discount").val() <= 100) {
+                    if (App.jSaleList.find(".d-discount").val() <= 100) {
                         App.recalculateTotalCost();
                     }
                 }
@@ -345,10 +341,10 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
 
     details.hide();
     details.appendTo(item);
-    item.appendTo(jSaleList);
+    item.appendTo(App.jSaleList);
 
-    jSaleList.animate({
-        scrollTop: jSaleList[0].scrollHeight
+    App.jSaleList.animate({
+        scrollTop: App.jSaleList[0].scrollHeight
     }, App.getAnimationTime());
 
     App.recalculateTotalCost();
@@ -362,33 +358,33 @@ App.incrementLastItem = function (lastItem) {
     App.beep();
 };
 
-App.bindSaleGroups = function (sg, jPriceInput, jSaleList, jRegistrySession) {
+App.bindSaleGroups = function (sg) {
     // Clicking on sale-group buttons adds an item to the sale list
     sg.find("button").click(function () {
         var t = $(this);
         // do not register an item of different group while price input is the same
         // user must type the same price for another sale group
         // reset the price input and play error sound
-        var lastItem = jSaleList.find(".sale-item.last");
+        var lastItem = App.jSaleList.find(".sale-item.last");
         if (lastItem.size() && t.attr("sg-id") !== lastItem.find(".si-id").text()
-                && jRegistrySession.text() === "1") {
-            jPriceInput.val("");
+                && App.jRegistrySession.text() === "1") {
+            App.jPriceInput.val("");
             return false;
         }
-        var v = jPriceInput.val();
+        var v = App.jPriceInput.val();
 
         // extract price and multiplication number
         v = v.replace(/[\s\.]+/g, "");
         var a = v.indexOf("*");
         var price = a >= 0 ? v.slice(a + 1, v.length) : v;
         if (price.length === 0 || parseInt(price) === 0) {
-            jPriceInput.val("");
+            App.jPriceInput.val("");
             return false;
         }
-        var mult = App.getMultiplicationNumber(jPriceInput);
+        var mult = App.getMultiplicationNumber();
 
         price = App.correctPrice(price);
-        jPriceInput.val(price);
+        App.jPriceInput.val(price);
 
         var id = t.attr("sg-id");
         var name = t.text();
@@ -397,17 +393,17 @@ App.bindSaleGroups = function (sg, jPriceInput, jSaleList, jRegistrySession) {
         var tags = t.attr("sg-group");
         var desc = t.text();
         App.addItemToCheckout(id, "", name, price, group, tax, tags, desc, mult);
-        jRegistrySession.text("1");
+        App.jRegistrySession.text("1");
     });
 };
 
-App.bindQuickSales = function (qs, jPriceInput, jRegistrySession) {
+App.bindQuickSales = function (qs) {
     // bind quick sale buttons
     qs.find(".qs-item button").click(function () {
         var t = $(this);
         var price = t.parent().find(".qs-price").text();
-        var mult = App.getMultiplicationNumber(jPriceInput);
-        jPriceInput.val(price);
+        var mult = App.getMultiplicationNumber();
+        App.jPriceInput.val(price);
         var name = t.text();
         var id = t.parent().find(".qs-id").text();
         var tax = t.parent().find(".qs-tax").text();
@@ -417,7 +413,7 @@ App.bindQuickSales = function (qs, jPriceInput, jRegistrySession) {
 
         App.addItemToCheckout(id, "", name, price, group, tax, tags, desc, mult);
 
-        jRegistrySession.text("1");
+        App.jRegistrySession.text("1");
     });
 };
 
@@ -429,8 +425,8 @@ App.makeWarning = function (msg) {
     $("<div>").addClass("wb-header")
             .append($("<div>").addClass("wb-title").text("Warning"))
             .append($("<button>").addClass("wb-close").click(function () {
-                $(this).parents("#curtain").fadeOut(App.getAnimationTime(), function () {
-                    $(this).remove();
+                App.curtain.fadeOut(App.getAnimationTime(), function () {
+                    App.curtain.remove();
                 });
             })).appendTo(warning);
     var warningBody = $("<div>").addClass("wb-body");
@@ -441,102 +437,109 @@ App.makeWarning = function (msg) {
 
 App.createWebRegisterDOM = function () {
     // nav, menu-left, registry-session
-    var appDOM = [
-        '<nav>',
-        '<div id="logo"><div></div></div>',
-        '<div id="brand">EnterpriseApps</div>',
-        '<div id="menu-top">',
-        '<div id="profile">Profile</div>',
-        '<div id="sign-out">Sign out</div>',
-        '</div>',
-        '</nav>',
-        '<div id="menu-left">',
-        '<div id="menu-header">',
-        '<div></div>',
-        '</div>',
-        '<div id="menu-body">',
-        '<button class="menu-item"></button>',
-        '<button class="menu-item"></button>',
-        '<button class="menu-item"></button>',
-        '</div>',
-        '</div>',
-        '<div id="registry-session">1</div>',
-        '<div id="main">',
-        '<div id="col-1">',
-        '<div id="live-search">',
-        '<input id="search" placeholder="Search by EAN PLU" autocomplete="off">',
-        '<ul id="dropdown"></ul>',
-        '</div>',
-        '<input id="price-input" placeholder="0.00", maxlength="9">',
-        '<div id="sale-groups"></div>',
-        '<div id="quick-sales"></div>',
-        '</div>',
-        '<div id="col-2">',
-        '<div id="checkout-header">',
-        '<div id="checkout-label">CHECKOUT (0 items)</div>',
-        '<div id="checkout-total">Total: 0 ' + App.settings.currency.symbol + '</div>',
-        '</div>',
-        '<div id="checkout-btns">',
-        '<button id="park-sale">Park Sale</button>',
-        '<button id="discard-sale">Discard Sale</button>',
-        '</div>',
-        '<ul id="sale-list">',
-        '<li id="si-placeholder">',
-        '<div>Registered items will be dsplayed here</div>',
-        '</li>',
-        '</ul>',
-        '<button id="pay">',
-        '<span>Pay</span>',
-        '<span id="pay-amount">0 ' + App.settings.currency.symbol + '</span>',
-        '</button>',
-        '</div>',
-        '</div>',
-        '<div id="kc"></div>'
-    ];
-    $("#app").html(appDOM.join(""));
+    var appDOM =
+        '<nav>\
+            <div id="logo"><div></div></div>\
+            <div id="brand">EnterpriseApps</div>\
+            <div id="menu-top">\
+                <div id="profile">Profile</div>\
+                <div id="sign-out">Sign out</div>\
+            </div>\
+         </nav>\
+         <div id="menu-left">\
+            <div id="menu-header">\
+                <div></div>\
+            </div>\
+            <div id="menu-body">\
+                <button class="menu-item"></button>\
+                <button class="menu-item"></button>\
+                <button class="menu-item"></button>\
+            </div>\
+         </div>\
+         <div id="registry-session">1</div>\
+         <div id="main">\
+            <div id="col-1">\
+                <div id="live-search">\
+                    <input id="search" placeholder="Search by EAN PLU" autocomplete="off">\
+                    <ul id="dropdown"></ul>\
+                </div>\
+                <input id="price-input" placeholder="0.00", maxlength="9">\
+                <div id="sale-groups"></div>\
+                <div id="quick-sales"></div>\
+            </div>\
+            <div id="col-2">\
+               <div id="checkout-header">\
+                   <div id="checkout-label">CHECKOUT (0 items)</div>\
+                   <div id="checkout-total">Total: 0 ' + App.settings.currency.symbol + '</div>\
+               </div>\
+               <div id="checkout-btns">\
+                   <button id="park-sale">Park Sale</button>\
+                   <button id="discard-sale">Discard Sale</button>\
+               </div>\
+               <ul id="sale-list">\
+                   <li id="si-placeholder">\
+                       <div>Registered items will be dsplayed here</div>\
+                   </li>\
+               </ul>\
+               <button id="pay">\
+                   <span id="pay-label">Pay</span>\
+                   <span id="pay-amount">0</span>\
+                   <span id="pay-currency">' + App.settings.currency.symbol + '</span>\
+               </button>\
+            </div>\
+         </div>\
+         <div id="kc"></div>'
+            ;
+    App.appContainer.html(appDOM);
 };
 
+// render web register view
 App.renderWebRegister = function () {
     App.createWebRegisterDOM();
-    var jKc = $("#kc");
-    var jSaleList = $("#sale-list");
+    App.jSiPlaceholder = $("#si-placeholder");
+    App.beeper = document.getElementById("beep");
+    App.jKc = $("#kc");
+    App.jSaleList = $("#sale-list");
+    App.jPriceInput = $("#price-input");
+    App.jPayAmount = $("#pay-amount");
+    App.jCheckoutTotal = $("#checkout-total");
+    App.jCheckoutLabel = $("#checkout-label");
+
+    // call numpad on mobile devices
+    App.setUpMobileNumericInput();
+
+    // registry session means a session when user types in prices
+    // used to handle multiple articles in sale list
+    App.jRegistrySession = $("#registry-session");
 
     // reset checkout
-    $("#discard-sale").click(function () {
-        jSaleList.find(".sale-item").slideUp(App.getAnimationTime(), function () {
+    var jDiscardSale = $("#discard-sale");
+    jDiscardSale.click(function () {
+        App.jSaleList.find(".sale-item").slideUp(App.getAnimationTime(), function () {
             $(this).remove();
             App.recalculateTotalCost();
         });
     });
 
-    var jPriceInput = $("#price-input");
-
-    // call numpad on mobile devices
-    App.setUpMobileNumericInput(jPriceInput);
-
-    // registry session means a session when user types in prices
-    // used to handle multiple articles in sale list
-    var jRegistrySession = $("#registry-session");
-
     // Price input accepts only numeric values, also only reacts to enter and backspace
-    jPriceInput.keydown(function (e) {
-        return App.checkPriceInput(e, jKc, jPriceInput);
+    App.jPriceInput.keydown(function (e) {
+        return App.checkPriceInput(e);
     }).blur(function () {
-        var p = jPriceInput.val();
+        var p = App.jPriceInput.val();
         if (!/^\-?\d+\*?(\d+)?$/g.test(p) || p === "-") {
-            jPriceInput.val("");
+            App.jPriceInput.val("");
             return false;
         }
         var a = p.indexOf("*");
         if (p.indexOf("*") >= 0) {
-            var mult = App.getMultiplicationNumber(jPriceInput);
+            var mult = App.getMultiplicationNumber();
             var price = a >= 0 ? p.slice(a + 1, p.length) : p;
             if (price.length) {
                 if (/^0+$/.test(price)) {
                     price = "";
                 }
             }
-            jPriceInput.val(mult + " * " + App.correctPrice(price));
+            App.jPriceInput.val(mult + " * " + App.correctPrice(price));
             return true;
         }
         var sign = "";
@@ -546,16 +549,16 @@ App.renderWebRegister = function () {
         }
         var correctValue = App.correctPrice(p);
         if (!correctValue) {
-            jPriceInput.val("");
+            App.jPriceInput.val("");
             return false;
         }
-        jPriceInput.val(sign + correctValue);
+        App.jPriceInput.val(sign + correctValue);
     }).click(function () {
-        jPriceInput.val("");
-        jRegistrySession.text("0");
+        App.jPriceInput.val("");
+        App.jRegistrySession.text("0");
     }).focus(function () {
-        jPriceInput.val("");
-        jRegistrySession.text("0");
+        App.jPriceInput.val("");
+        App.jRegistrySession.text("0");
     });
 
     // generate sale groups and quick sale
@@ -571,7 +574,7 @@ App.renderWebRegister = function () {
             css: {"background-color": "#" + btns.saleGroups[i].bg}
         }).appendTo(sg);
     }
-    App.bindSaleGroups(sg, jPriceInput, jSaleList, jRegistrySession);
+    App.bindSaleGroups(sg);
 
     var qs = $("#quick-sales");
     for (var i = 0; i < btns.quickSales.length; i++) {
@@ -587,19 +590,20 @@ App.renderWebRegister = function () {
                 .append($("<div>").addClass("qs-desc").text(t.desc))
                 .appendTo(qs);
     }
-    App.bindQuickSales(qs, jPriceInput, jRegistrySession);
+    App.bindQuickSales(qs);
 
+    var jMenuLeft = $("#menu-left");
     // bind control panel buttons
     $("#logo > div").click(function () {
-        $("#menu-left").addClass("visible");
+        jMenuLeft.addClass("visible");
     });
     $("#menu-header > div, #main").click(function () {
-        $("#menu-left").removeClass("visible");
+        jMenuLeft.removeClass("visible");
     });
 
     // bind pay button to proceed to payment, generate payment box
     $("#pay").click(function () {
-        if (jSaleList.find(".sale-item").size() < 1) {
+        if (App.jSaleList.find(".sale-item").size() < 1) {
             return false;
         }
 
@@ -611,8 +615,8 @@ App.renderWebRegister = function () {
         $("<div>").addClass("pb-header")
                 .append($("<div>").addClass("pb-title").text("Payment"))
                 .append($("<button>").addClass("pb-close").click(function () {
-                    $(this).parents("#curtain").fadeOut(App.getAnimationTime(), function () {
-                        $(this).remove();
+                    App.curtain.fadeOut(App.getAnimationTime(), function () {
+                        App.curtain.remove();
                     });
                 })).appendTo(paymentBox);
         var paymentBody = $("<div>").addClass("pb-body");
@@ -625,7 +629,7 @@ App.renderWebRegister = function () {
             15: {tax: null, total: null},
             21: {tax: null, total: null}
         };
-        jSaleList.find(".sale-item").each(function () {
+        App.jSaleList.find(".sale-item").each(function () {
             var t = $(this);
             var q = t.find(".si-quantity").val();
             var n = t.find(".si-name").text();
@@ -641,7 +645,8 @@ App.renderWebRegister = function () {
             taxValues[taxRate].tax += (parseFloat(thisTotal) * parseFloat(taxRate) / 100);
             taxValues[taxRate].total += parseFloat(thisTotal);
         });
-        var total = $("#pay-amount").text().replace(/,/g, ".").replace(/[^\d\.\-]/g, "");
+        
+        var total = App.jPayAmount.text().replace(/,/g, ".").replace(/[^\d\.\-]/g, "");
         receiptBody.appendTo(receipt);
 
         //creating receipt summary
@@ -715,38 +720,37 @@ App.renderWebRegister = function () {
                 });
         cashInput.appendTo(cashInputContainer);
         $("<button>")
-                .addClass("cash-confirm").text("OK")
+                .addClass("cash-confirm").text("Confirm Payment")
                 .appendTo(cashInputContainer)
                 .click(function () {
                     var t = $(this);
                     if (!t.hasClass("disabled")) {
                         window.print();
-                        $("#discard-sale").click();
+                        jDiscardSale.click();
+                        App.jPriceInput.focus();
                     }
                 });
-        window.onafterprint = function () {
-            $("#curtain").remove();
-        };
         cashInputContainer.appendTo(payment);
         var quickCashLabel = $("<div>").addClass("cash-quick-label").text("Quick cash payment");
         quickCashLabel.appendTo(payment);
         var quickCash = $("<div>").addClass("cash-quick");
+        var cashChange = $("<div>").attr("id", "cash-change");
         var qcs = [100, 200, 500, 1000, 2000, 5000];
         for (var i = 0; i < qcs.length; i++) {
             $("<button>").addClass("cash-button").text(qcs[i])
                     .click(function () {
                         var t = $(this);
                         var cash = t.text();
-                        $("#cash-input").val(cash + "00").blur();
+                        cashInput.val(cash + "00").blur();
                         t.parents("#payment").find("button.cash-confirm").removeClass("disabled");
-                        $("#cash-change").text((cash - parseFloat(total)).formatMoney() + " " + App.settings.currency.symbol);
+                        cashChange.text((cash - parseFloat(total)).formatMoney() + " " + App.settings.currency.symbol);
                     })
                     .appendTo(quickCash);
         }
         quickCash.appendTo(payment);
 
         $("<div>").addClass("cash-pay-label").text("Change").appendTo(payment);
-        $("<div>").attr("id", "cash-change").text(Number(0).formatMoney() + " " + App.settings.currency.symbol).appendTo(payment);
+        cashChange.text(Number(0).formatMoney() + " " + App.settings.currency.symbol).appendTo(payment);
 
         payment.appendTo(paymentBody);
         $("<div>").addClass("receipt-container").append(receipt).appendTo(paymentBody);
@@ -773,7 +777,7 @@ App.renderWebRegister = function () {
             var i = articles.binaryIndexOf(filter);
             if (i >= 0) {
                 var item = articles[i];
-                var mult = App.getMultiplicationNumber(jPriceInput);
+                var mult = App.getMultiplicationNumber();
                 App.addItemToCheckout(
                         item.id,
                         item.ean,
@@ -786,8 +790,8 @@ App.renderWebRegister = function () {
                         // multiplication number
                         mult
                         );
-                jRegistrySession.text("0");
-                jPriceInput.val(item.price);
+                App.jRegistrySession.text("0");
+                App.jPriceInput.val(item.price);
                 t.removeClass("not-found");
             } else {
                 t.addClass("not-found");
@@ -807,7 +811,7 @@ App.renderWebRegister = function () {
     });
 
     $(document).scannerDetection(function (s) {
-        $("#curtain").remove();
+        App.curtain.remove();
         jSearchBox.val(s);
         var e = $.Event('keyup');
         e.keyCode = 13;
@@ -818,27 +822,20 @@ App.renderWebRegister = function () {
     // focus price input after hitting enter if price input is not yet focused
     $(document).keydown(function (e) {
         if (e.keyCode === 27) {
-            $("#curtain").remove();
+            App.curtain.remove();
         }
         if (e.keyCode === 13) {
             if (!$("#curtain").size()) {
-                if (!jPriceInput.is(":focus")) {
-                    jPriceInput.focus();
+                if (!App.jPriceInput.is(":focus")) {
+                    App.jPriceInput.focus();
                     return true;
                 }
             } else {
-                var ci = $("#curtain #cash-input");
+                var ci = App.curtain.find("#cash-input");
                 if (ci.size()) {
                     ci.focus();
                 }
             }
-            /*if(!jPriceInput.val().length){
-             
-             }
-             if(!jPriceInput.is(":focus")){
-             jPriceInput.focus();
-             return true;
-             }*/
         }
     });
     $("#sign-out").click(function () {
@@ -864,15 +861,16 @@ App.renderWebRegister = function () {
      });*/
 };
 
+// get data for web register
 App.initWebRegister = function () {
     $.when(
-        $.getJSON("/api/catalogs", function (catalog) {
-            App.catalog = catalog;
-        }),
-        $.getJSON("/api/settings", function (settings) {
-            App.settings = settings;
-        })
-    ).then(function () {
+            $.getJSON("/api/catalog", function (catalog) {
+                App.catalog = catalog;
+            }),
+            $.getJSON("/api/settings", function (settings) {
+                App.settings = settings;
+            })
+            ).then(function () {
         App.renderWebRegister();
     });
     /*$.ajax({
@@ -885,19 +883,12 @@ App.initWebRegister = function () {
      });*/
 };
 
+// show loading spin when making requests
 App.makeLoading = function () {
-    var loadingDOM = [
-        '<div id="loading">',
-        '<div class="spinner">',
-        '<div class="mask">',
-        '<div class="maskedCircle"></div>',
-        '</div>',
-        '</div>',
-        '</div>'
-    ];
-    return $(loadingDOM.join(""));
+    return $('<div id="loading"></div>');
 };
 
+// check for valid email syntax, allows guest as valid
 App.isValidEmail = function (email) {
     if (email === "guest") {
         return true;
@@ -906,23 +897,25 @@ App.isValidEmail = function (email) {
     return re.test(email);
 };
 
+// render signup view
 App.renderSignUp = function () {
 
 };
 
+// render login view
 App.renderLogin = function () {
-    var loginDOM = [
-        '<div class="center-box">',
-        '<div id="sign-in-welcome">Welcome to OPS</div>',
-        '<form id="sign-in" action="" method="POST">',
-        '<div id="sign-in-label">OPEN YOUR STORE</div>',
-        '<input id="username" type="text" placeholder="EMAIL">',
-        '<input id="password" type="password" placeholder="PASSWORD">',
-        '<input id="submit" type="submit" value="SIGN IN">',
-        '</form>',
-        '</div>'
-    ];
-    $("#app").html(loginDOM.join(""));
+    var loginDOM =
+            '<div class="center-box">\
+                <div id="sign-in-welcome">Welcome to OPS</div>\
+                <form id="sign-in" action="" method="POST">\
+                    <div id="sign-in-label">OPEN YOUR STORE</div>\
+                    <input id="username" type="text" placeholder="EMAIL">\
+                    <input id="password" type="password" placeholder="PASSWORD">\
+                    <input id="submit" type="submit" value="SIGN IN">\
+                </form>\
+             </div>'
+            ;
+    App.appContainer.html(loginDOM);
     $("form#sign-in").submit(function (e) {
         e.preventDefault();
         var t = $(this);
@@ -947,7 +940,7 @@ App.renderLogin = function () {
                     alert("Wrong credentials");
                 }
             }).fail(function (data) {
-                $("#curtain").remove();
+                App.curtain.remove();
                 var msg = "The username and/or password is invalid";
                 if (data.status === 0) {
                     msg = "Network error. Please check your internet connection";
@@ -960,20 +953,20 @@ App.renderLogin = function () {
     });
 };
 
+// after print remove the payment box
+(function () {
 
-(function() {
+    var beforePrint = function () {
 
-    var beforePrint = function() {
-        
     };
 
-    var afterPrint = function() {
-        $("#curtain").remove();
+    var afterPrint = function () {
+        App.curtain.remove();
     };
 
     if (window.matchMedia) {
         var mediaQueryList = window.matchMedia('print');
-        mediaQueryList.addListener(function(mql) {
+        mediaQueryList.addListener(function (mql) {
             if (mql.matches) {
                 beforePrint();
             } else {

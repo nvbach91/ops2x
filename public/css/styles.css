@@ -2,7 +2,10 @@
  *   Created on : Jan 28, 2016, 12:24:53 PM
  *   Author     : Nguyen Viet Bach
  */
-
+@font-face {
+    font-family: "Open Sans";
+    src: url('../font/OpenSans.ttf');
+}
 ::-webkit-scrollbar {
     width: 8px;
 }
@@ -11,7 +14,7 @@
     border-radius: 5px;
 }
 #kc {
-    display: none;
+    /*display: none;*/
     position: fixed;
     right: 0;
     bottom: 0;
@@ -494,6 +497,8 @@ button.si-remove:hover {
     background-color: #FFF;
 }
 #pay {
+    display: flex;
+    justify-content: space-between;
     margin-bottom: 5px;
     width: 100%;
     padding: 0 20px;
@@ -501,9 +506,12 @@ button.si-remove:hover {
     font-size: 24px;
     text-align: left;
 }
+#pay-label {
+    flex-grow: 1;
+}
 #pay-amount {
     font-weight: bold;
-    float: right;
+    margin-right: 5px
 }
 .shadow {    
     -webkit-box-shadow: 0px 0px 3px 0px rgba(0,0,0,0.5);
@@ -1184,27 +1192,16 @@ div#taxes-label {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
-
 #loading {
     position: absolute;
     top: 50%;
-    left: 50%;
-    margin: -14px 0 0 -14px;
-}
-#loading .maskedCircle {
+    left: 50%;    
+    height: 40px;    
     width: 40px;
-    height: 40px;
+    border-top: 4px solid white;
+    border-right: 4px solid white;
+    border-bottom: 4px solid white;
+    border-left: 4px solid transparent;
     border-radius: 50%;
-    border: 2px solid white;
-}
-#loading .mask {
-    width: 40px;
-    height: 40px;
-    overflow: hidden;
-    border-radius: 50%;
-    border: 1px solid transparent;
-}
-#loading .spinner {
-    position: absolute;
     animation: spin 1s infinite linear;
 }

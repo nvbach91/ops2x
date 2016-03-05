@@ -2,7 +2,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var Catalogs = new Schema({
-    userId: {type: Schema.ObjectId, index: true},
+    userId: {type: Schema.ObjectId, index: {unique: true}},
     articles: [
         {
             ean: String,
