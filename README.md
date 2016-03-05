@@ -1,3 +1,6 @@
+# Latest updates #
+* A remote MongoDB server is avaiable for testing. See Project Setup for details
+
 # README #
 
 This readme will guide you through the project setup for development
@@ -18,12 +21,15 @@ $ node -v
 $ npm -v
 ```
 
-* MongoDB
+* MongoDB (optional)
 * install from https://www.mongodb.org/downloads
 * check your installation with 
 ```
 $ mongod --version
 ```
+\* you might want to add MongoDB's bin to you system's PATH
+
+* Instead of installing a local MongoDB you can connect to a remote server. By default, the project assumes you choose to use a local MongoDB instance. Check line ``14`` in ``~/ops2x/app.js`` in case you don't want to install MongoDB and use the remote one instead.
 
 * navigate to project folder to continue
 ```
@@ -41,7 +47,7 @@ $ npm install -g gulp nodemon
 $ npm install
 ```
 
-### Database ###
+### Database (optional) ###
 * configure default database path and run database service
 ```
 $ mkdir C:/data/db/
