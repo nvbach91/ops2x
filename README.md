@@ -5,7 +5,7 @@ This readme will guide you through the project setup for development
 # Project OPS #
 ## Online Point-of-Sale System ##
 * Powered by [jQuery](https://jquery.com/), [NodeJS](https://nodejs.org/) and [MongoDB](https://www.mongodb.org/)
-* Built on [gulp.js](http://gulpjs.com/), [BrowserSync](https://www.browsersync.io/), [Express](http://expressjs.com/) and more
+* Built on [nodemon](http://nodemon.io/), [gulp.js](http://gulpjs.com/), [BrowserSync](https://www.browsersync.io/), [Express](http://expressjs.com/) and more
 * Check [package.json](https://bitbucket.org/nvbach91/ops2x/src/6a54a7c8b8de1458bc52d4b43d6ec9a1ec3e4991/package.json?fileviewer=file-view-default) file for details
 
 ## Project Setup ##
@@ -31,7 +31,12 @@ $ cd ~/ops2x
 ```
 
 ### Build system ###
-* install node module packages
+* install global packages to NodeJS
+```
+$ npm install -g gulp nodemon
+
+```
+* install local node module packages for our project
 ```
 $ npm install
 ```
@@ -92,6 +97,8 @@ username: "guest", password: "tseug"
 ```
 rs
 ```
+
+* BrowserSync is awesome! Open multiple browsers, i.e. on you phone, table and desktop and navigate to the app and watch BrowserSync show off!
 
 ## Todos ##
 * implement settings module
