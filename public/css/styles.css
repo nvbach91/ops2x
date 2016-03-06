@@ -153,7 +153,7 @@ nav {
     background-image: url('../img/icons/signout.svg');
 }
 #profile {
-    text-indent: 15px;
+    text-indent: 20px;
     background-image: url('../img/icons/userwhite.svg');    
 }
 #menu-left {
@@ -215,7 +215,7 @@ input {
     flex-grow: 0;
     display: flex;
     flex-direction: column;
-    /*display: none;*/
+    display: none;
 }
 #search {
     font-size: 16px;
@@ -299,7 +299,7 @@ button {
     color: #FFF;
     padding: 0;
     border-radius: 3px;
-    background-color: #44B773;
+    background-color: #6585CE;
 }
 .sg, .qs-item button {
     font-size: 14px;
@@ -392,11 +392,15 @@ button#park-sale, button#discard-sale {
     flex-direction: row;
     flex-wrap: wrap;
 }
-.sale-item-main div {
+.sale-item-main div, input.si-name  {
     overflow: hidden;
     width: 50px;
     margin: auto;
     font-size: 11px;
+    background-color: transparent;
+}
+input.si-name {
+    padding: 9px 0;
 }
 .sale-item-extend {
     display: flex;
@@ -496,15 +500,48 @@ button.si-remove:hover {
     border-top: 1px solid #E0E0E0;
     background-color: #FFF;
 }
+#keyboard {
+    display: none;
+    flex-wrap: wrap;
+}
+#keyboard > button {
+    border: 1px solid #E8E8E8;
+    font-size: 30px;
+    height: 75px;
+    color: #353535;
+    background-color: #fff;
+    width: 25%;
+}
+#btnb:before {
+    content: "\232b";
+}
+#btnm:before {
+    content: "\00d7";
+}
+#paycalc {
+    border: 1px solid #E8E8E8;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 5px;
+}
+#pay, #subtotal {
+    height: 75px;
+    font-size: 22px;
+    border-radius: 0;
+}
+#subtotal {
+    text-align: center;
+    width: 25%;
+    background-color: #334C60;
+}
 #pay {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 5px;
-    width: 100%;
-    padding: 0 20px;
-    height: 50px;
-    font-size: 24px;
     text-align: left;
+    padding: 0 20px;
+    width: 75%;
+    background-color: #E4644B;    
 }
 #pay-label {
     flex-grow: 1;
@@ -737,6 +774,7 @@ div#taxes-label {
     line-height: 40px;
 }
 #cash-pay-topay {    
+    cursor: pointer;
     font-size: 30px;
     line-height: 30px;
 }
@@ -872,7 +910,7 @@ div#taxes-label {
     #checkout-header {
         font-size: 16px;
     }
-    #sale-list input.si-quantity, #sale-list, .sale-item-main div {
+    #sale-list input.si-quantity, #sale-list, .sale-item-main div, input.si-name {
         font-size: 14px;
     }
 }
@@ -899,6 +937,9 @@ div#taxes-label {
 }
 
 @media screen and (min-width: 640px){
+    #keyboard {
+        display: flex;
+    }
     #curtain {
         padding-bottom: 45px;
     }
@@ -972,7 +1013,7 @@ div#taxes-label {
     .qs-item button {
         border: 3px solid #fff;
     }
-    #checkout-header, .sale-item-main div {
+    #checkout-header, .sale-item-main div, input.si-name {
         font-size: 12px;
     }
     button#park-sale, button#discard-sale {
@@ -1024,6 +1065,12 @@ div#taxes-label {
     }*/
 }
 @media screen and (min-width: 840px){
+    #col-2 {        
+        max-width: 420px;
+    }
+    #col-1 {
+        flex-grow: 1;
+    }
     form#sign-in {
         padding: 40px;
     }
@@ -1035,48 +1082,30 @@ div#taxes-label {
     }
     #checkout-header {
         font-size: 15px;
-    }
+    }/*
     #si-placeholder > div, .d-price, .d-discount,
-    #sale-list input.si-quantity, #sale-list, .d-label, .sale-item-main div  {
+    #sale-list input.si-quantity, #sale-list, .d-label, .sale-item-main div, input.si-name  {
         font-size: 14px;
-    } 
+    } */
     .si-name {
         padding-left: 10px;
+    }    
+    #sale-groups button, .qs-item {
+        width: 25%;
     }
 }
 @media screen and (min-width: 960px){
     #details-box {
         width: 80%;
     }
-    #checkout-header {
-        font-size: 18px;
-    }
     .sg, .qs-item button {
         font-size: 16px;
     }
-    button#park-sale, button#discard-sale {
-        font-size: 16px;
-    }
-    #si-placeholder > div, .d-price, .d-discount,
-    #sale-list input.si-quantity, #sale-list, .d-label, .sale-item-main div  {
-        font-size: 16px;
-    } 
     .si-name {
         padding-left: 10px;
     }
 }
 @media screen and (min-width: 1080px){
-    #col-2 {        
-        max-width: 540px;
-    }
-    #col-1 {
-        flex-grow: 1;
-    }
-    #sale-groups button, .qs-item {
-        width: 25%;
-    }
-}
-@media screen and (min-width: 1280px){
     #sale-groups button, .qs-item {
         width: 20%;
     }
