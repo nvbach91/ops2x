@@ -4,7 +4,8 @@
   "description": "Online Point of Sale System",
   "main": "app.js",
   "scripts": {
-    "start": "gulp"
+    "start": "gulp",
+    "https": "gulp --https"
   },
   "author": "Nguyen Viet Bach <nvbach91@outlook.com>",
   "contributors": [],
@@ -32,6 +33,7 @@
     "passport": "^0.3.2",
     "passport-http": "^0.3.0",
     "passport-local": "^1.0.0",
-    "serve-favicon": "~2.3.0"
+    "serve-favicon": "~2.3.0",
+    "yargs": "^4.2.0"
   }
 }

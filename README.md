@@ -1,4 +1,5 @@
 # Latest updates #
+* https server is available with self signed key for testing, see Run Project for details
 * A remote MongoDB server is avaiable for testing. See Project Setup for details
 
 # README #
@@ -84,12 +85,20 @@ users
 
 ## Run project ##
 * the following commands will run project tasks to start the server and open your system's default web browser and navigate you to the app
-* if your browser does not start, manually open the app at http://localhost:7000
+* if your browser does not start, manually open the app at localhost:7000
 
 ```
+# run tasks with http server
 $ npm start
 or
 $ gulp
+```
+
+```
+# run tasks with https server
+$ npm run https
+or
+$ gulp --https
 ```
 
 * login for user guest
@@ -108,9 +117,9 @@ rs
 
 ## Todos ##
 * implement settings module
-* add virtual keyboard
+* ~~add virtual keyboard~~
 * resite pay button
 * add quickSale categories
-* add manual product name input
+* ~~add manual product name input~~
 * EAN PLU in price input?
 * implement sale history

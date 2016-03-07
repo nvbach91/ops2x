@@ -7,11 +7,10 @@
     src: url('../font/OpenSans.ttf');
 }
 ::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
 }
 ::-webkit-scrollbar-thumb {
     background-color: rgba(0,0,0,0.4);
-    border-radius: 5px;
 }
 #kc {
     /*display: none;*/
@@ -24,7 +23,7 @@
     box-sizing: border-box;
 }
 body {
-    background-color: #ECECEC;
+    background-color: #E8E8E8;
 }
 html, body, ul, input {
     font-family: "Open Sans", sans-serif;
@@ -174,7 +173,7 @@ nav {
 #main {
     margin: 0 auto;
     min-width: 320px;
-    max-width: 1280px;
+    /*max-width: 1280px;*/
     padding-top: 45px;
     display: flex;
     flex-direction: column;
@@ -292,6 +291,10 @@ input {
     text-align: center;
     font-size: 12px;
 }
+#checkout-header, #checkout-btns, #sale-list {    
+    border-left: 1px solid #E8E8E8;
+    border-right: 1px solid #E8E8E8;
+}
 button {
     overflow: hidden;
     cursor: pointer;
@@ -299,7 +302,7 @@ button {
     color: #FFF;
     padding: 0;
     border-radius: 3px;
-    background-color: #6585CE;
+    background-color: #3D4F75;
 }
 .sg, .qs-item button {
     font-size: 14px;
@@ -354,7 +357,7 @@ button#park-sale, button#discard-sale {
     display: inline-block;
 }
 .sg:hover, .qs-item button:hover {
-    background-color:hsl(255,100%,75%); 
+    background-color: #E34234; 
 }
 #sale-groups button {
     border: 1px solid #fff;
@@ -503,31 +506,33 @@ button.si-remove:hover {
 #keyboard {
     display: none;
     flex-wrap: wrap;
+    height: 300px;
 }
 #keyboard > button {
     border: 1px solid #E8E8E8;
     font-size: 30px;
-    height: 75px;
     color: #353535;
     background-color: #fff;
     width: 25%;
+    border-radius: 3px;
+}
+#keyboard > button:hover {
+    background-color: #E8E8E8;
 }
 #btnb:before {
     content: "\232b";
-}
+}/*
 #btnm:before {
     content: "\00d7";
-}
+}*/
 #paycalc {
     border: 1px solid #E8E8E8;
     width: 100%;
     display: flex;
-    flex-direction: row;
-    margin-bottom: 5px;
 }
 #pay, #subtotal {
     height: 75px;
-    font-size: 22px;
+    font-size: 24px;
     border-radius: 0;
 }
 #subtotal {
@@ -764,11 +769,6 @@ div#taxes-label {
     flex-direction: column;
 }
 #payment > div {}
-#cash-input-container {
-    display: flex;
-    justify-content: center;
-    padding: 0px 7px;
-}
 .cash-pay-label {
     font-size: 16px;
     line-height: 40px;
@@ -779,10 +779,10 @@ div#taxes-label {
     line-height: 30px;
 }
 #cash-input {
-    width: 80%;
+    width: 100%;
     font-size: 40px;
     padding: 5px;
-    text-align: right;
+    text-align: center;
     border-radius: 3px;
     box-shadow: 0 0 1px 0 rgba(0,0,0,0.5);
     margin-right: 5px;
@@ -790,10 +790,10 @@ div#taxes-label {
 #cash-input.invalid {
     box-shadow: 0 0 5px 1px red;
 }
-.cash-confirm {
-    flex-grow: 1;
-    width: 100px;
-    padding: 10px;
+.cash-confirm { 
+    margin: 0 auto;
+    width: 80%;
+    padding: 30px 0;
     font-size: 20px;
 }
 .cash-confirm.disabled {
@@ -810,13 +810,13 @@ div#taxes-label {
 }
 .cash-button {
     height: 40px;
-    width: 80px;
+    width: 33.33333%;
     margin: 0;
     font-size: 16px;
     border: 2px solid #F8F8F8;
 }
 #cash-change {
-    line-height: 40px;
+    line-height: 100px;
     font-size: 24px;
 }
 #warning-box {
@@ -936,7 +936,7 @@ div#taxes-label {
     }
 }
 
-@media screen and (min-width: 640px){
+@media screen and (min-width: 720px){
     #keyboard {
         display: flex;
     }
@@ -951,7 +951,6 @@ div#taxes-label {
         order: 2;
     }
     #cash-input {
-        text-align: right;
         padding: 10px;
         font-size: 50px;
     }
@@ -1026,8 +1025,8 @@ div#taxes-label {
     .sale-item-main {
         padding: 2px;
     }
-}
-@media screen and (min-width: 720px){
+/*}
+@media screen and (min-width: 720px){*/
     #details-box {
         height: 300px;
     }
@@ -1098,16 +1097,33 @@ div#taxes-label {
     #details-box {
         width: 80%;
     }
-    .sg, .qs-item button {
-        font-size: 16px;
-    }
     .si-name {
         padding-left: 10px;
     }
 }
-@media screen and (min-width: 1080px){
+@media screen and (min-width: 1024px){
     #sale-groups button, .qs-item {
         width: 20%;
+    }
+}
+@media screen and (min-width: 1280px){
+    #sale-groups button, .qs-item {
+        width: 16.66666%;
+    }
+}
+@media screen and (min-width: 1366px){
+    #sale-groups button, .qs-item {
+        width: 14.2857142857%;
+    }
+}
+@media screen and (min-width: 1440px){
+    #sale-groups button, .qs-item {
+        width: 12.5%;
+    }
+}
+@media screen and (min-width: 1600px){
+    #sale-groups button, .qs-item {
+        width: 10%;
     }
 }
 

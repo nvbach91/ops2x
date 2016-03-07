@@ -6,6 +6,7 @@ var plumber = require('gulp-plumber');
 var rename = require('gulp-rename');
 var concat = require('gulp-concat');
 var nodemon = require('gulp-nodemon');
+var argv = require('yargs').argv;
 
 gulp.task('scripts', function () {
     gulp.src([
@@ -40,7 +41,7 @@ gulp.task('browser-sync', ['nodemon'], function () {
      }
      });*/
     browserSync.init(null, {
-        proxy: "http://127.0.0.1:3000",
+        proxy: "http" + (argv.https ? "s" : "") + "://127.0.0.1:3000",
         files: ["public/**/*.*"],
         //browser: "google chrome",
         port: 7000,
@@ -58,7 +59,7 @@ gulp.task('watch', function () {
 gulp.task('nodemon', function (cb) {
     var started = false;
     nodemon({
-        script: 'bin/www',
+        script: 'bin/www.http' + (argv.https ? 's' : '') + '.js',
         ignore: ['src/js/*.js', 'public/js/build.js']
     }).on('start', function () {
         if (!started) {
