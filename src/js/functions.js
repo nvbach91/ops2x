@@ -164,24 +164,18 @@ App.setUpMobileNumericInput = function () {
     }
 };
 
-App.showInCurtain = function (s) {
-    if (!App.curtain) {
-        App.curtain = $("<div>").attr("id", "curtain");
-        App.curtain.click(function () {
-            App.removeCurtain();
-        });
-        App.curtain.append(s).hide();
-        App.jAppContainer.append(App.curtain);
-        App.curtain.fadeIn(App.getAnimationTime());
+App.removeCurtain = function () {
+    if (App.curtain) {
+        App.curtain.remove();
+        App.curtain = null;
     }
 };
 
-App.removeCurtain = function () {
-    if (App.curtain) {
-        App.curtain.fadeOut(App.getAnimationTime(), function () {
-            App.curtain.remove();
-            App.curtain = null;
-        });
+App.showInCurtain = function (show) {
+    if (!App.curtain) {
+        App.curtain = $("<div>").attr("id", "curtain").click(function () {
+            App.removeCurtain();
+        }).append(show).hide().appendTo(App.jAppContainer).fadeIn(App.getAnimationTime());
     }
 };
 
@@ -427,19 +421,34 @@ App.bindQuickSales = function (qs) {
 };
 
 App.showWarning = function (msg) {
-    var warning = $("<div>").attr("id", "warning-box")
-            .click(function (e) {
-                e.stopPropagation();
-            });
-    $("<div>").addClass("wb-header")
-            .append($("<div>").addClass("wb-title").text("Warning"))
-            .append($("<button>").addClass("wb-close").click(function () {
-                App.removeCurtain();
-            })).appendTo(warning);
-    var warningBody = $("<div>").addClass("wb-body");
-    warningBody.text(msg);
-    warningBody.appendTo(warning);
+    var warning =
+            '<div id="curtain">\
+                <div id="warning-box">\
+                    <div class="wb-header">\
+                        <div class="wb-title">Warning</div>\
+                        <button class="wb-close"></button>\
+                    </div>\
+                    <div class="wb-body">' + msg + '</div>\
+                </div>\
+            </div>';
+    /*var warning = $("<div>").attr("id", "warning-box").click(function (e) {
+     e.stopPropagation();
+     });
+     $("<div>").addClass("wb-header")
+     .append($("<div>").addClass("wb-title").text("Warning"))
+     .append($("<button>").addClass("wb-close").click(function () {
+     App.removeCurtain();
+     })).appendTo(warning);
+     var warningBody = $("<div>").addClass("wb-body");
+     warningBody.text(msg);
+     warningBody.appendTo(warning);*/
     App.showInCurtain(warning);
+    App.curtain.find("#warning-box").click(function (e) {
+        e.stopPropagation();
+    });
+    App.curtain.find("button.wb-close").click(function () {
+        App.removeCurtain();
+    });
 };
 
 App.createWebRegisterDOM = function () {
@@ -552,6 +561,27 @@ App.bindKeyboard = function () {
                 }
         }
         App.beep();
+    });
+};
+
+App.init = function () {
+    App.jAppContainer = $("#app");
+    App.loadingScreen = $('<div id="loading"></div>');
+    App.curtain = null;
+    // esc to remove curtain, focus price input after hitting enter if price input is not yet focused
+    $(document).keydown(function (e) {
+        if (e.keyCode === 27) {
+            App.removeCurtain();
+        } else if (e.keyCode === 13) {
+            if (!App.curtain && App.jPriceInput) {
+                //if (!App.jPriceInput.is(":focus")) {
+                App.jPriceInput.focus();
+                //}
+            } else if (App.jCashInput) {
+                App.jCashInput.focus();
+            }
+        }
+        return true;
     });
 };
 
@@ -746,13 +776,13 @@ App.renderWebRegister = function () {
 
         //creating payment section
         var payment = $("<div>").attr("id", "payment");
-        App.cashInput = $("<input>");
+        App.jCashInput = $("<input>");
         $("<div>").addClass("cash-pay-label").text("Amount to pay").appendTo(payment);
         $("<div>").attr("id", "cash-pay-topay").text(total + " " + App.settings.currency.symbol)
                 .click(function () {
-                    App.cashInput.val(total).blur();
+                    App.jCashInput.val(total).blur();
                 }).appendTo(payment);
-        
+
         var quickCashLabel = $("<div>").addClass("cash-quick-label").text("Quick cash payment");
         quickCashLabel.appendTo(payment);
         var quickCash = $("<div>").addClass("cash-quick");
@@ -763,7 +793,7 @@ App.renderWebRegister = function () {
                     .click(function () {
                         var t = $(this);
                         var cash = t.text();
-                        App.cashInput.val(cash + "00").blur();
+                        App.jCashInput.val(cash + "00").blur();
                         t.parents("#payment").find("button.cash-confirm").removeClass("disabled");
                         cashChange.text("Change: " + (cash - parseFloat(total)).formatMoney() + " " + App.settings.currency.symbol);
                     })
@@ -772,12 +802,16 @@ App.renderWebRegister = function () {
         quickCash.appendTo(payment);
 
         $("<div>").addClass("cash-pay-label").text("Amount tendered").appendTo(payment);
-        App.cashInput.attr("id", "cash-input")
+        App.jCashInput.attr("id", "cash-input")
                 .attr("placeholder", "0.00")
                 .attr("maxlength", "9")
                 .val(/*parseFloat(total) < 0 ? 0 : */total)
                 .keydown(function (e) {
                     e.stopPropagation();
+                    if (e.keyCode === 27) {
+                        App.jCashInput.blur();
+                        return true;
+                    }
                     return App.checkNumericInput(e, this);
                 })
                 .blur(function () {
@@ -800,11 +834,11 @@ App.renderWebRegister = function () {
                 .focus(function () {
                     $(this).select();
                 });
-        App.cashInput.appendTo(payment);
+        App.jCashInput.appendTo(payment);
 
         //$("<div>").addClass("cash-pay-label").text("Change").appendTo(payment);
         cashChange.text("Change: " + Number(0).formatMoney() + " " + App.settings.currency.symbol).appendTo(payment);
-        
+
         $("<button>")
                 .addClass("cash-confirm").text("Confirm Payment")
                 .click(function () {
@@ -821,7 +855,7 @@ App.renderWebRegister = function () {
         paymentBody.appendTo(paymentBox);
 
         App.showInCurtain(paymentBox);
-        App.cashInput.focus();
+        App.jCashInput.focus();
     });
 
     //populating articles for scanning    
@@ -880,27 +914,11 @@ App.renderWebRegister = function () {
         e.keyCode = 13;
         jSearchBox.trigger(e);
         //jPriceInput.blur();
-        App.jRegistrySession.text(1);
+        App.jRegistrySession.text("1");
     });
 
-    // focus price input after hitting enter if price input is not yet focused
-    $(document).keydown(function (e) {
-        if (e.keyCode === 27) {
-            App.removeCurtain();
-        }
-        if (e.keyCode === 13) {
-            if (!App.curtain) {
-                if (!App.jPriceInput.is(":focus")) {
-                    App.jPriceInput.focus();
-                    return true;
-                }
-            } else {
-                App.cashInput.focus();
-            }
-        }
-    });
     $("#sign-out").click(function () {
-        App.showInCurtain(App.makeLoading());
+        App.showLoading();
         $.ajax({
             type: "GET",
             url: "/logout"
@@ -934,19 +952,11 @@ App.initWebRegister = function () {
             ).then(function () {
         App.renderWebRegister();
     });
-    /*$.ajax({
-     type: "GET",
-     url: "/api/settings",
-     dataType: "json"
-     }).done(function (settings) {
-     App.settings = settings;
-     App.renderWebRegister();
-     });*/
 };
 
 // show loading spin when making requests
-App.makeLoading = function () {
-    return $('<div id="loading"></div>');
+App.showLoading = function () {
+    App.showInCurtain(App.loadingScreen);
 };
 
 // check for valid email syntax, allows guest as valid
@@ -986,7 +996,7 @@ App.renderLogin = function () {
         if (!App.isValidEmail(username) || !password.length) {
             App.showWarning("Please enter your email and password to sign in");
         } else {
-            App.showInCurtain(App.makeLoading());
+            App.showLoading();
             $.ajax({
                 type: "POST",
                 url: "/auth",

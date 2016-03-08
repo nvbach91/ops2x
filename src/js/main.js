@@ -5,7 +5,7 @@
  */
 
 $(document).ready(function () {
-    App.jAppContainer = $("#app");
+    App.init();
     $.ajax({
         type: "POST",
         url: "/isAuthenticated"
