@@ -64,7 +64,7 @@ App.correctPrice = function (pr) {
         p = p.slice(1);
     }
     if (parseInt(p) === 0) {
-        return false;
+        return "0.00";
     }
     if (p.length > 2) {
         correctValue = p.slice(0, p.length - 2) + "." + p.slice(p.length - 2, p.length);
@@ -166,6 +166,7 @@ App.setUpMobileNumericInput = function () {
 
 App.removeCurtain = function () {
     if (App.curtain) {
+        App.jMain ? App.jMain.removeClass("blur") : null;
         App.curtain.remove();
         App.curtain = null;
     }
@@ -173,6 +174,7 @@ App.removeCurtain = function () {
 
 App.showInCurtain = function (show) {
     if (!App.curtain) {
+        App.jMain ? App.jMain.addClass("blur") : null;
         App.curtain = $("<div>").attr("id", "curtain").click(function () {
             App.removeCurtain();
         }).append(show).hide().appendTo(App.jAppContainer).fadeIn(App.getAnimationTime());
@@ -235,6 +237,7 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
             .click(function () {
                 saleitem.slideUp(App.getAnimationTime(), function () {
                     $(this).remove();
+                    App.jRegistrySession.text("1");
                     App.recalculateTotalCost();
                 });
             })
@@ -397,6 +400,7 @@ App.bindSaleGroups = function (sg) {
         var desc = t.text();
         App.addItemToCheckout(id, "", name, price, group, tax, tags, desc, mult);
         App.jRegistrySession.text("1");
+        App.justUsedScanner = false;
     });
 };
 
@@ -417,6 +421,7 @@ App.bindQuickSales = function (qs) {
         App.addItemToCheckout(id, "", name, price, group, tax, tags, desc, mult);
 
         App.jRegistrySession.text("1");
+        App.justUsedScanner = false;
     });
 };
 
@@ -431,17 +436,6 @@ App.showWarning = function (msg) {
                     <div class="wb-body">' + msg + '</div>\
                 </div>\
             </div>';
-    /*var warning = $("<div>").attr("id", "warning-box").click(function (e) {
-     e.stopPropagation();
-     });
-     $("<div>").addClass("wb-header")
-     .append($("<div>").addClass("wb-title").text("Warning"))
-     .append($("<button>").addClass("wb-close").click(function () {
-     App.removeCurtain();
-     })).appendTo(warning);
-     var warningBody = $("<div>").addClass("wb-body");
-     warningBody.text(msg);
-     warningBody.appendTo(warning);*/
     App.showInCurtain(warning);
     App.curtain.find("#warning-box").click(function (e) {
         e.stopPropagation();
@@ -568,15 +562,14 @@ App.init = function () {
     App.jAppContainer = $("#app");
     App.loadingScreen = $('<div id="loading"></div>');
     App.curtain = null;
+    App.justUsedScanner = true;
     // esc to remove curtain, focus price input after hitting enter if price input is not yet focused
     $(document).keydown(function (e) {
         if (e.keyCode === 27) {
             App.removeCurtain();
         } else if (e.keyCode === 13) {
-            if (!App.curtain && App.jPriceInput) {
-                //if (!App.jPriceInput.is(":focus")) {
+            if (!App.curtain && App.jPriceInput && !App.justUsedScanner) {
                 App.jPriceInput.focus();
-                //}
             } else if (App.jCashInput) {
                 App.jCashInput.focus();
             }
@@ -590,6 +583,7 @@ App.renderWebRegister = function () {
     App.removeCurtain();
     App.createWebRegisterDOM();
     App.bindKeyboard();
+    App.jMain = $("#main");
     App.jSiPlaceholder = $("#si-placeholder");
     App.beeper = new Audio("../sound/beep7.mp3");
     App.jKc = $("#kc");
@@ -617,6 +611,10 @@ App.renderWebRegister = function () {
 
     // Price input accepts only numeric values, also only reacts to enter and backspace
     App.jPriceInput.keydown(function (e) {
+        if (e.keyCode === 27) {
+            App.jPriceInput.blur();
+            return true;
+        }
         return App.checkPriceInput(e);
     }).blur(function () {
         var p = App.jPriceInput.val();
@@ -794,7 +792,6 @@ App.renderWebRegister = function () {
                         var t = $(this);
                         var cash = t.text();
                         App.jCashInput.val(cash + "00").blur();
-                        t.parents("#payment").find("button.cash-confirm").removeClass("disabled");
                         cashChange.text("Change: " + (cash - parseFloat(total)).formatMoney() + " " + App.settings.currency.symbol);
                     })
                     .appendTo(quickCash);
@@ -804,8 +801,8 @@ App.renderWebRegister = function () {
         $("<div>").addClass("cash-pay-label").text("Amount tendered").appendTo(payment);
         App.jCashInput.attr("id", "cash-input")
                 .attr("placeholder", "0.00")
-                .attr("maxlength", "9")
-                .val(/*parseFloat(total) < 0 ? 0 : */total)
+                .attr("maxlength", "11")
+                .val(total)
                 .keydown(function (e) {
                     e.stopPropagation();
                     if (e.keyCode === 27) {
@@ -818,29 +815,28 @@ App.renderWebRegister = function () {
                     var t = $(this);
                     var p = t.val();
                     var correctValue = App.correctPrice(p);
-                    if (!correctValue || !/^\-?\d+\.\d{2}$/g.test(correctValue)) {
+                    console.log(correctValue);
+                    t.val(correctValue);
+                    if (!correctValue || !/^\-?\d+\.\d{2}$/g.test(correctValue) || parseFloat(correctValue) < parseFloat(total)) {
                         t.addClass("invalid");
-                        t.parent().find("button.cash-confirm").addClass("disabled");
-                        return false;
+                        payment.find("#cash-confirm").addClass("disabled");
+                        return true;
                     }
                     t.removeClass("invalid");
-                    t.parent().find("button.cash-confirm").removeClass("disabled");
-                    t.val(correctValue);
+                    payment.find("#cash-confirm").removeClass("disabled");
                     var newChange = (parseFloat(t.val()) - parseFloat(total)).formatMoney();
                     cashChange.text("Change: " + newChange + " " + App.settings.currency.symbol);
-                    t.parents("#payment-box").find("#rs-tender .rs-value").text(t.val());
-                    t.parents("#payment-box").find("#rs-change .rs-value").text(newChange);
+                    paymentBox.find("#rs-tender .rs-value").text(t.val());
+                    paymentBox.find("#rs-change .rs-value").text(newChange);
                 })
                 .focus(function () {
                     $(this).select();
-                });
-        App.jCashInput.appendTo(payment);
+                }).appendTo(payment);
 
-        //$("<div>").addClass("cash-pay-label").text("Change").appendTo(payment);
         cashChange.text("Change: " + Number(0).formatMoney() + " " + App.settings.currency.symbol).appendTo(payment);
 
         $("<button>")
-                .addClass("cash-confirm").text("Confirm Payment")
+                .attr("id", "cash-confirm").text("Confirm Payment")
                 .click(function () {
                     var t = $(this);
                     if (!t.hasClass("disabled")) {
@@ -866,8 +862,8 @@ App.renderWebRegister = function () {
     articles.sort(function (a, b) {
         return a.ean < b.ean ? -1 : 1;
     });
-    var jSearchBox = $("#search");
-    jSearchBox.keyup(function (e) {
+    App.jSearchBox = $("#search");
+    App.jSearchBox.keyup(function (e) {
         var t = $(this);
         if (e.keyCode === 13) {
             var filter = t.val();
@@ -909,12 +905,13 @@ App.renderWebRegister = function () {
 
     $(document).scannerDetection(function (s) {
         App.removeCurtain();
-        jSearchBox.val(s);
+        App.jSearchBox.val(s);
         var e = $.Event("keyup");
         e.keyCode = 13;
-        jSearchBox.trigger(e);
+        App.jSearchBox.trigger(e);
         //jPriceInput.blur();
         App.jRegistrySession.text("1");
+        App.justUsedScanner = true;
     });
 
     $("#sign-out").click(function () {
@@ -925,7 +922,9 @@ App.renderWebRegister = function () {
         }).done(function () {
             App.renderLogin();
         }).fail(function () {
-            App.renderLogin();
+            //App.renderLogin();
+            App.removeCurtain();
+            App.showWarning("Could not logout. Please check your connection");
         });
     });
     /*
