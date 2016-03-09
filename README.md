@@ -116,10 +116,11 @@ rs
 * BrowserSync is awesome! Open multiple browsers, i.e. on you phone, table and desktop and navigate to the app and watch BrowserSync show off!
 
 ## Todos ##
-* implement settings module
 * ~~add virtual keyboard~~
-* resite pay button
-* add quickSale categories
+* ~~resite pay button~~
 * ~~add manual product name input~~
-* EAN PLU in price input?
+* ~~EAN PLU in price input?~~
 * implement sale history
+* add quickSale categories
+* implement settings module
+* add keyboard shortcuts module

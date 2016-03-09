@@ -1,14 +1,17 @@
 
 /* global App */
 
+// returns current window width for animations
 App.getWindowWidth = function () {
     return window.innerWidth;
 };
 
+// decides on animation time
 App.getAnimationTime = function () {
     return App.getWindowWidth() > 799 ? 100 : 0;
 };
 
+// binary search of ean code in array
 Array.prototype.binaryIndexOf = function (searchEAN) {
     "use strict";
 
@@ -35,10 +38,12 @@ Array.prototype.binaryIndexOf = function (searchEAN) {
     return -1;
 };
 
+// compares the value with the suffix of a string
 String.prototype.endsWith = function (suffix) {
     return this.indexOf(suffix, this.length - suffix.length) !== -1;
 };
 
+// formats a number to a price string, e.g. 5.00
 Number.prototype.formatMoney = function (c, d, t) {
     //d = App.settings.decimal_delimiter;
     var n = this,
@@ -51,12 +56,14 @@ Number.prototype.formatMoney = function (c, d, t) {
     return s + (j ? i.substr(0, j) + t : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) + (c ? d + Math.abs(n - i).toFixed(c).slice(2) : "");
 };
 
+// plays beep sound
 App.beep = function () {
     App.beeper.pause();
     App.beeper.currentTime = 0;
     App.beeper.play();
 };
 
+// corrects input price value, eg. adds decimal points, reformats bad inputs
 App.correctPrice = function (pr) {
     var p = pr.replace(/\./g, "");
     var correctValue = "";
@@ -76,6 +83,7 @@ App.correctPrice = function (pr) {
     return correctValue;
 };
 
+// goes through current sale list and calculates the total cost
 App.recalculateTotalCost = function () {
     if (App.jSaleList.children().size() === 1) {
         App.jSiPlaceholder.removeClass("hidden");
@@ -103,9 +111,46 @@ App.recalculateTotalCost = function () {
     App.jCheckoutLabel.text("CHECKOUT (" + itemsCnt + " item" + (itemsCnt !== 1 ? "s" : "") + ")");
 };
 
+// corrects input in price input
+App.correctPriceInput = function () {
+    var p = App.jPriceInput.val();
+    if (!/^\-?\d+\*?(\d+)?$/g.test(p) || p === "-") {
+        App.jPriceInput.val("");
+        return false;
+    }
+    var a = p.indexOf("*");
+    if (p.indexOf("*") >= 0) {
+        var mult = App.getMultiplicationNumber();
+        var price = a >= 0 ? p.slice(a + 1, p.length) : p;
+        if (price.length) {
+            if (/^0+$/.test(price)) {
+                price = "";
+            }
+        }
+        App.jPriceInput.val(mult + " * " + App.correctPrice(price));
+        return true;
+    }
+    var sign = "";
+    if (p.charAt(0) === "-") {
+        p = p.slice(1);
+        sign = "-";
+    }
+    var correctValue = App.correctPrice(p);
+    if (!correctValue) {
+        App.jPriceInput.val("");
+        return false;
+    }
+    App.jPriceInput.val(sign + correctValue);
+};
+
+// checks inputs for price input
 App.checkPriceInput = function (e) {
     e.stopPropagation();
     App.jKc.text("keyCode: " + e.keyCode);
+    if (e.keyCode === 27) {
+        App.jPriceInput.blur();
+        return true;
+    }
     if (e.keyCode === 13) { // allow enter 
         if (App.jPriceInput.val().length) {
             App.jPriceInput.blur();
@@ -144,6 +189,7 @@ App.checkPriceInput = function (e) {
     }
 };
 
+// allows only numbers
 App.checkNumericInput = function (e, t) {
     if (e.keyCode === 13) { // allow enter and blur upon press
         t.blur();
@@ -158,13 +204,15 @@ App.checkNumericInput = function (e, t) {
     }
 };
 
+// sets the mobile device native keyboard to numeric
 App.setUpMobileNumericInput = function () {
     if ($.browser.mobile) {
         App.jPriceInput.attr("type", "number");
     }
 };
 
-App.removeCurtain = function () {
+// curtain closes
+App.closeCurtain = function () {
     if (App.curtain) {
         App.jMain ? App.jMain.removeClass("blur") : null;
         App.curtain.remove();
@@ -172,15 +220,17 @@ App.removeCurtain = function () {
     }
 };
 
+// used for showing boxes and messages
 App.showInCurtain = function (show) {
     if (!App.curtain) {
         App.jMain ? App.jMain.addClass("blur") : null;
         App.curtain = $("<div>").attr("id", "curtain").click(function () {
-            App.removeCurtain();
+            App.closeCurtain();
         }).append(show).hide().appendTo(App.jAppContainer).fadeIn(App.getAnimationTime());
     }
 };
 
+// parses the multiplication number in the price input for multiple checkout
 App.getMultiplicationNumber = function () {
     var m = App.jPriceInput.val().replace(/[\s\.]+/g, "");
     if (!m.match(/^\-?[1-9](\d+)?\*(\d+)?$/g)) {
@@ -189,6 +239,7 @@ App.getMultiplicationNumber = function () {
     return parseInt(m.slice(0, m.indexOf("*")));
 };
 
+// adds an item(s) to the checkout
 App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, mult) {
     var lastItem = App.jSaleList.find(".sale-item.last");
     if (id.toString() === lastItem.find(".si-id").text()) {
@@ -237,8 +288,8 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
             .click(function () {
                 saleitem.slideUp(App.getAnimationTime(), function () {
                     $(this).remove();
-                    App.jRegistrySession.text("1");
                     App.recalculateTotalCost();
+                    App.jPriceInput.blur();
                 });
             })
             .appendTo(siMain);
@@ -322,7 +373,7 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
                 $("<div>").addClass("db-header")
                         .append($("<div>").addClass("db-title").text("Product Details"))
                         .append($("<button>").addClass("db-close").click(function () {
-                            App.removeCurtain();
+                            App.closeCurtain();
                         })).appendTo(detailsBox);
                 var lbBody = $("<div>").addClass("db-body");
                 var lbInfo = $("<div>").addClass("db-info");
@@ -357,6 +408,7 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
     App.beep();
 };
 
+// increments the quantity of the last item in the checkout
 App.incrementLastItem = function (lastItem) {
     var lastQuantity = lastItem.find(".si-quantity");
     lastQuantity.val(parseInt(lastQuantity.val()) + 1);
@@ -364,6 +416,7 @@ App.incrementLastItem = function (lastItem) {
     App.beep();
 };
 
+// binds salegroups button events
 App.bindSaleGroups = function (sg) {
     // Clicking on sale-group buttons adds an item to the sale list
     sg.find("button").click(function () {
@@ -404,6 +457,7 @@ App.bindSaleGroups = function (sg) {
     });
 };
 
+// binds quicksales button events
 App.bindQuickSales = function (qs) {
     // bind quick sale buttons
     qs.find(".qs-item button").click(function () {
@@ -425,6 +479,7 @@ App.bindQuickSales = function (qs) {
     });
 };
 
+// displays a warning message
 App.showWarning = function (msg) {
     var warning =
             '<div id="curtain">\
@@ -441,10 +496,11 @@ App.showWarning = function (msg) {
         e.stopPropagation();
     });
     App.curtain.find("button.wb-close").click(function () {
-        App.removeCurtain();
+        App.closeCurtain();
     });
 };
 
+// appends the dom structure to web register
 App.createWebRegisterDOM = function () {
     // nav, menu-left, registry-session
     var appDOM =
@@ -470,7 +526,7 @@ App.createWebRegisterDOM = function () {
              <div id="main">\
                 <div id="col-1">\
                     <div id="live-search">\
-                        <input id="search" placeholder="Search by EAN PLU" autocomplete="off">\
+                        <input id="search" maxlength="13" placeholder="PLU" autocomplete="off">\
                         <ul id="dropdown"></ul>\
                     </div>\
                     <input id="price-input" placeholder="0.00", maxlength="9">\
@@ -523,50 +579,89 @@ App.createWebRegisterDOM = function () {
             ;
     App.jAppContainer.html(appDOM);
 };
+
+// returns a enter keyup event
+App.simulateEnterKeyup = function () {
+    var e = $.Event("keyup");
+    e.keyCode = 13;
+    return e;
+};
+
+// binds events to virtual keyboard
 App.bindKeyboard = function () {
+    var keyboard = $("#keyboard");
+    var btnPLU = keyboard.find("#btnp");
+    var btnMul = keyboard.find("#btnm");
     $("#keyboard button").click(function () {
         var t = $(this);
         var id = t.attr("id");
-        var p = App.jPriceInput.val();
+        var isPluActive = btnPLU.hasClass("activePLU");
+        var activeInput = isPluActive ? App.jSearchBox : App.jPriceInput;
+        var inputMaxlength = isPluActive ? 13 : 9;
+        var p = activeInput.val();
         switch (id) {
-            case "btnp":
-                break;
-            case "btnm":
-                if (p.length > 0 && p.indexOf("*") < 0) {
-                    App.jPriceInput.val(p + "*");
+            case "btnp": //PLU
+                if (!isPluActive) { // turn on PLU input and turn off Price input
+                    btnPLU.addClass("activePLU");
+                    App.jLiveSearch.css({display: "flex"});
+                    App.jPriceInput.hide();
+                    btnMul.text("OK").addClass("activePLU");
+                    activeInput.val("");
+                    activeInput = App.jSearchBox;
+                    activeInput.focus();
+                } else { // turn off PLU input and turn on Price input
+                    btnPLU.removeClass("activePLU");
+                    App.jLiveSearch.hide();
+                    App.jPriceInput.show();
+                    btnMul.text("×").removeClass("activePLU");
+                    activeInput.val("");
+                    activeInput = App.jPriceInput;
                 }
                 break;
-            case "btnn":
-                if (p.length === 0) {
-                    App.jPriceInput.val("-");
+            case "btnm": //multiplication symbol or confirm PLU
+                if (!isPluActive) {
+                    if (p.length > 0 && p.indexOf("*") < 0) {
+                        activeInput.val(p + "*");
+                    }
+                } else {
+                    App.jSearchBox.trigger(App.simulateEnterKeyup());
                 }
                 break;
-            case "btnc":
-                App.jPriceInput.val("");
+            case "btnn": //negative symbol
+                if (!isPluActive) {
+                    if (p.length === 0) {
+                        activeInput.val("-");
+                    }
+                }
                 break;
-            case "btnb":
+            case "btnc": //clear
+                activeInput.val("");
+                break;
+            case "btnb": //backspace
                 if (p.length > 0) {
-                    App.jPriceInput.val(p.slice(0, -1));
+                    activeInput.val(p.slice(0, -1));
                 }
                 break;
-            default:
-                if (p.length + t.text().length <= 9) {
-                    App.jPriceInput.val(p + t.text());
+            default: //numbers
+                if ((p + t.text()).length <= inputMaxlength) {
+                    activeInput.val(p + t.text());
                 }
         }
         App.beep();
     });
 };
 
+// initializes some global variables and functions
 App.init = function () {
     App.jAppContainer = $("#app");
     App.loadingScreen = $('<div id="loading"></div>');
     App.curtain = null;
-    App.justUsedScanner = true;
+    App.justUsedScanner = false;
+    App._timeBetweenConsecutiveScannings = 2000;
     // esc to remove curtain, focus price input after hitting enter if price input is not yet focused
     $(document).keydown(function (e) {
         if (e.keyCode === 27) {
-            App.removeCurtain();
+            App.closeCurtain();
         } else if (e.keyCode === 13) {
             if (!App.curtain && App.jPriceInput && !App.justUsedScanner) {
                 App.jPriceInput.focus();
@@ -580,7 +675,7 @@ App.init = function () {
 
 // render web register view
 App.renderWebRegister = function () {
-    App.removeCurtain();
+    App.closeCurtain();
     App.createWebRegisterDOM();
     App.bindKeyboard();
     App.jMain = $("#main");
@@ -592,6 +687,7 @@ App.renderWebRegister = function () {
     App.jPayAmount = $("#pay-amount");
     App.jCheckoutTotal = $("#checkout-total");
     App.jCheckoutLabel = $("#checkout-label");
+    App.jLiveSearch = $("#live-search");
 
     // call numpad on mobile devices
     App.setUpMobileNumericInput();
@@ -611,40 +707,9 @@ App.renderWebRegister = function () {
 
     // Price input accepts only numeric values, also only reacts to enter and backspace
     App.jPriceInput.keydown(function (e) {
-        if (e.keyCode === 27) {
-            App.jPriceInput.blur();
-            return true;
-        }
         return App.checkPriceInput(e);
     }).blur(function () {
-        var p = App.jPriceInput.val();
-        if (!/^\-?\d+\*?(\d+)?$/g.test(p) || p === "-") {
-            App.jPriceInput.val("");
-            return false;
-        }
-        var a = p.indexOf("*");
-        if (p.indexOf("*") >= 0) {
-            var mult = App.getMultiplicationNumber();
-            var price = a >= 0 ? p.slice(a + 1, p.length) : p;
-            if (price.length) {
-                if (/^0+$/.test(price)) {
-                    price = "";
-                }
-            }
-            App.jPriceInput.val(mult + " * " + App.correctPrice(price));
-            return true;
-        }
-        var sign = "";
-        if (p.charAt(0) === "-") {
-            p = p.slice(1);
-            sign = "-";
-        }
-        var correctValue = App.correctPrice(p);
-        if (!correctValue) {
-            App.jPriceInput.val("");
-            return false;
-        }
-        App.jPriceInput.val(sign + correctValue);
+        return App.correctPriceInput();
     }).click(function () {
         App.jPriceInput.val("");
         App.jRegistrySession.text("0");
@@ -707,7 +772,7 @@ App.renderWebRegister = function () {
         $("<div>").addClass("pb-header")
                 .append($("<div>").addClass("pb-title").text("Payment"))
                 .append($("<button>").addClass("pb-close").click(function () {
-                    App.removeCurtain();
+                    App.closeCurtain();
                 })).appendTo(paymentBox);
         var paymentBody = $("<div>").addClass("pb-body");
         var receipt = $("<div>").addClass("receipt");
@@ -801,7 +866,7 @@ App.renderWebRegister = function () {
         $("<div>").addClass("cash-pay-label").text("Amount tendered").appendTo(payment);
         App.jCashInput.attr("id", "cash-input")
                 .attr("placeholder", "0.00")
-                .attr("maxlength", "11")
+                .attr("maxlength", "9")
                 .val(total)
                 .keydown(function (e) {
                     e.stopPropagation();
@@ -815,7 +880,6 @@ App.renderWebRegister = function () {
                     var t = $(this);
                     var p = t.val();
                     var correctValue = App.correctPrice(p);
-                    console.log(correctValue);
                     t.val(correctValue);
                     if (!correctValue || !/^\-?\d+\.\d{2}$/g.test(correctValue) || parseFloat(correctValue) < parseFloat(total)) {
                         t.addClass("invalid");
@@ -862,7 +926,7 @@ App.renderWebRegister = function () {
     articles.sort(function (a, b) {
         return a.ean < b.ean ? -1 : 1;
     });
-    App.jSearchBox = $("#search");
+    App.jSearchBox = App.jLiveSearch.find("#search");
     App.jSearchBox.keyup(function (e) {
         var t = $(this);
         if (e.keyCode === 13) {
@@ -886,32 +950,37 @@ App.renderWebRegister = function () {
                 App.jRegistrySession.text("0");
                 App.jPriceInput.val(item.price);
                 t.removeClass("not-found");
+                t.attr("placeholder", "PLU");
             } else {
                 t.addClass("not-found");
-                t.attr("placeholder", "This EAN " + filter + " is not defined");
+                t.attr("placeholder", "PLU not found");
                 //App.makeWarning("This EAN " + filter + " is not defined");
             }
             t.val("");
+        } else if (e.keyCode === 27) {
+            t.blur();
         }
     }).keydown(function (e) {
         e.stopPropagation();
     }).click(function () {
         $(this).removeClass("not-found");
-        $(this).attr("placeholder", "Search by EAN PLU");
+        $(this).attr("placeholder", "PLU");
     }).focus(function () {
         $(this).removeClass("not-found");
-        $(this).attr("placeholder", "Search by EAN PLU");
+        $(this).attr("placeholder", "PLU");
     });
 
     $(document).scannerDetection(function (s) {
-        App.removeCurtain();
-        App.jSearchBox.val(s);
-        var e = $.Event("keyup");
-        e.keyCode = 13;
-        App.jSearchBox.trigger(e);
-        //jPriceInput.blur();
-        App.jRegistrySession.text("1");
+        clearTimeout(App._scannerTimingOut);
+        App.jPriceInput.blur();
         App.justUsedScanner = true;
+        App._scannerTimingOut = setTimeout(function () {
+            App.justUsedScanner = false;
+        }, App._timeBetweenConsecutiveScannings);
+        App.closeCurtain();
+        App.jSearchBox.val(s);
+        App.jSearchBox.trigger(App.simulateEnterKeyup());
+        App.jRegistrySession.text("1");
     });
 
     $("#sign-out").click(function () {
@@ -923,7 +992,7 @@ App.renderWebRegister = function () {
             App.renderLogin();
         }).fail(function () {
             //App.renderLogin();
-            App.removeCurtain();
+            App.closeCurtain();
             App.showWarning("Could not logout. Please check your connection");
         });
     });
@@ -974,7 +1043,7 @@ App.renderSignUp = function () {
 
 // render login view
 App.renderLogin = function () {
-    App.removeCurtain();
+    App.closeCurtain();
     var loginDOM =
             '<div class="center-box">\
                 <div id="sign-in-welcome">Welcome to OPS</div>\
@@ -1011,7 +1080,7 @@ App.renderLogin = function () {
                     alert("Wrong credentials");
                 }
             }).fail(function (data) {
-                App.removeCurtain();
+                App.closeCurtain();
                 var msg = "The username and/or password is invalid";
                 if (data.status === 0) {
                     msg = "Network error. Please check your internet connection";
@@ -1032,7 +1101,7 @@ App.renderLogin = function () {
     };
 
     var afterPrint = function () {
-        App.removeCurtain();
+        App.closeCurtain();
     };
 
     if (window.matchMedia) {
