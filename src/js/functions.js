@@ -127,7 +127,7 @@ App.correctPriceInput = function () {
                 price = "";
             }
         }
-        App.jPriceInput.val(mult + " * " + App.correctPrice(price));
+        App.jPriceInput.val(mult + "*" + App.correctPrice(price));
         return true;
     }
     var sign = "";
@@ -174,7 +174,7 @@ App.checkPriceInput = function (e) {
     // allow asterisk for scanner multiplication
     // do not allow more than 99*
     if (e.keyCode === 106) {
-        if (App.jPriceInput.val().length === 0 || App.jPriceInput.val().length > 2) {
+        if (App.jPriceInput.val().length === 0 || App.jPriceInput.val().length > 3) {
             return false;
         }
         if (App.jPriceInput.val().indexOf("*") < 0) {
@@ -552,7 +552,7 @@ App.createWebRegisterDOM = function () {
                         <button id="btn7">7</button>\
                         <button id="btn8">8</button>\
                         <button id="btn9">9</button>\
-                        <button id="btnm">×</button>\
+                        <button id="btnm"></button>\
                         <button id="btn4">4</button>\
                         <button id="btn5">5</button>\
                         <button id="btn6">6</button>\
@@ -593,6 +593,10 @@ App.bindKeyboard = function () {
     var btnPLU = keyboard.find("#btnp");
     var btnMul = keyboard.find("#btnm");
     $("#keyboard button").click(function () {
+        if (App.jRegistrySession.text() === "1") {
+            App.jRegistrySession.text("0");
+            App.jPriceInput.val("");
+        }
         var t = $(this);
         var id = t.attr("id");
         var isPluActive = btnPLU.hasClass("activePLU");
@@ -613,18 +617,18 @@ App.bindKeyboard = function () {
                     btnPLU.removeClass("activePLU");
                     App.jLiveSearch.hide();
                     App.jPriceInput.show();
-                    btnMul.text("×").removeClass("activePLU");
+                    btnMul.text("").removeClass("activePLU");
                     activeInput.val("");
                     activeInput = App.jPriceInput;
                 }
                 break;
             case "btnm": //multiplication symbol or confirm PLU
-                if (!isPluActive) {
-                    if (p.length > 0 && p.indexOf("*") < 0) {
+                if (isPluActive) {
+                    App.jSearchBox.trigger(App.simulateEnterKeyup());
+                } else {
+                    if (p.length > 0 && p.length <= 3 && p.indexOf("*") < 0) {
                         activeInput.val(p + "*");
                     }
-                } else {
-                    App.jSearchBox.trigger(App.simulateEnterKeyup());
                 }
                 break;
             case "btnn": //negative symbol
@@ -692,7 +696,7 @@ App.renderWebRegister = function () {
     // call numpad on mobile devices
     App.setUpMobileNumericInput();
 
-    // registry session means a session when user types in prices
+    // registry session means a session when user types in prices with both physical keyboard and virtual keyboard
     // used to handle multiple articles in sale list
     App.jRegistrySession = $("#registry-session");
 
@@ -785,13 +789,17 @@ App.renderWebRegister = function () {
         App.jSaleList.find(".sale-item").each(function () {
             var t = $(this);
             var q = t.find(".si-quantity").val();
+            var p = t.find(".si-price").text();
             var n = t.find(".si-name").val();
             var thisTotal = t.find(".si-total").text();
             var receiptItem = $("<li>").addClass("receipt-item")
                     .append($("<div>").addClass("ri-n").text(n))
-                    .append($("<div>").addClass("ri-x"))
-                    .append($("<div>").addClass("ri-q").text(q))
-                    .append($("<div>").addClass("ri-tt").text(thisTotal));
+                    .append($("<div>").addClass("ri-v")
+                            .append($("<div>").addClass("ri-p").text(p))
+                            .append($("<div>").addClass("ri-x"))
+                            .append($("<div>").addClass("ri-q").text(q))
+                            .append($("<div>").addClass("ri-tt").text(thisTotal))
+                            );
             receiptBody.append(receiptItem);
 
             var taxRate = t.find(".si-tax").text();
@@ -947,10 +955,12 @@ App.renderWebRegister = function () {
                         // multiplication number
                         mult
                         );
-                App.jRegistrySession.text("0");
-                App.jPriceInput.val(item.price);
                 t.removeClass("not-found");
                 t.attr("placeholder", "PLU");
+
+                App.jRegistrySession.text("0");
+                App.jPriceInput.blur();
+                App.jPriceInput.val(item.price);
             } else {
                 t.addClass("not-found");
                 t.attr("placeholder", "PLU not found");
@@ -972,7 +982,7 @@ App.renderWebRegister = function () {
 
     $(document).scannerDetection(function (s) {
         clearTimeout(App._scannerTimingOut);
-        App.jPriceInput.blur();
+        App.jSearchBox.blur();
         App.justUsedScanner = true;
         App._scannerTimingOut = setTimeout(function () {
             App.justUsedScanner = false;
@@ -993,7 +1003,7 @@ App.renderWebRegister = function () {
         }).fail(function () {
             //App.renderLogin();
             App.closeCurtain();
-            App.showWarning("Could not logout. Please check your connection");
+            App.showWarning("Unable to logout. Please check your connection");
         });
     });
     /*
