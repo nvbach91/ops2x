@@ -369,14 +369,12 @@ button#park-sale, button#discard-sale {
 .sg:hover, .qs-item button:hover {
     /*background-color: #E4644B; */
 }
-#sale-groups button {
+#sale-groups button, .qs-item button {
     border: 1px solid #fff;
-    border-radius: 0;
+    border-radius: 7px;
 }
 .qs-item button {
-    border: 1px solid #fff;
     width: 100%;
-    border-radius: 0;
 }
 .qs-item div {
     display: none;
@@ -527,17 +525,18 @@ button.si-remove:hover {
 #keyboard > button:hover {
     background-color: #E8E8E8;
 }
-#btnb {
-    /*text-indent: -9999px;*/
-}
-#btnb:before {
+button#btnb:before {
     content: "\232b";
 }
 button#btnp.activePLU {
     background-color: #E4644B;
     color: #fff;
 }
-#btnm:before {
+button#btnm.activePLU {
+    background-color: #4DB94D;
+    color: #fff;
+}
+button#btnm:before {
     content: "\00d7";
 }
 button#btnm.activePLU:before {
@@ -560,12 +559,19 @@ button#btnm.activePLU:before {
     background-color: #334C60;
 }
 #pay {
+    cursor: pointer;
+    color: #fff;
     display: flex;
-    justify-content: space-between;
+    align-items: center;
     text-align: left;
     padding: 0 20px;
     width: 75%;
     background-color: #E4644B;    
+}
+#pay:active {    
+    -webkit-filter: grayscale(.7);
+    -moz-filter: grayscale(.7);
+    filter: grayscale(.7);
 }
 #pay-label {
     flex-grow: 1;
@@ -573,6 +579,10 @@ button#btnm.activePLU:before {
 #pay-amount {
     font-weight: bold;
     margin-right: 5px
+}
+#pay-amount.checked:before {
+    content: "\2713";
+    /*color: #9FEF7E;*/
 }
 .shadow {    
     -webkit-box-shadow: 0px 0px 3px 0px rgba(0,0,0,0.5);

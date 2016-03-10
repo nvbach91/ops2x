@@ -241,9 +241,10 @@ App.getMultiplicationNumber = function () {
 
 // adds an item(s) to the checkout
 App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, mult) {
+    App.jPayAmount.removeClass("checked");
     var lastItem = App.jSaleList.find(".sale-item.last");
     if (id.toString() === lastItem.find(".si-id").text()) {
-        if (App.jRegistrySession.text() === "1") {
+        if (App.isInRegistrySession/*.text() === "1"*/) {
             App.incrementLastItem(lastItem);
             return true;
         }
@@ -328,9 +329,9 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
                     t.val(correctValue);
                     t.parents().eq(2).find(".si-price").text(correctValue);
                     /**************ATTENTION****************/
-                    if (App.jSaleList.find(".d-discount").val() <= 100) {
-                        App.recalculateTotalCost();
-                    }
+                    //if (App.jSaleList.find(".d-discount").val() <= 100) {
+                    App.recalculateTotalCost();
+                    //}
                 }
             })
             .focus(function () {
@@ -350,10 +351,11 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
             .blur(function () {
                 var t = $(this);
                 if (/^\d{1,2}$|^100$/g.test(t.val())) {
-                    t.removeClass("invalid");
+                    //t.removeClass("invalid");
                     App.recalculateTotalCost();
                 } else {
-                    t.addClass("invalid");
+                    //t.addClass("invalid");
+                    t.val(0);
                 }
             })
             .focus(function () {
@@ -426,7 +428,7 @@ App.bindSaleGroups = function (sg) {
         // reset the price input and play error sound
         var lastItem = App.jSaleList.find(".sale-item.last");
         if (lastItem.size() && t.attr("sg-id") !== lastItem.find(".si-id").text()
-                && App.jRegistrySession.text() === "1") {
+                && App.isInRegistrySession/*.text() === "1"*/) {
             App.jPriceInput.val("");
             return false;
         }
@@ -452,7 +454,7 @@ App.bindSaleGroups = function (sg) {
         var tags = t.attr("sg-group");
         var desc = t.text();
         App.addItemToCheckout(id, "", name, price, group, tax, tags, desc, mult);
-        App.jRegistrySession.text("1");
+        App.isInRegistrySession = true/*.text("1")*/;
         App.justUsedScanner = false;
     });
 };
@@ -474,7 +476,7 @@ App.bindQuickSales = function (qs) {
 
         App.addItemToCheckout(id, "", name, price, group, tax, tags, desc, mult);
 
-        App.jRegistrySession.text("1");
+        App.isInRegistrySession = true/*.text("1")*/;
         App.justUsedScanner = false;
     });
 };
@@ -567,11 +569,11 @@ App.createWebRegisterDOM = function () {
                    </div>\
                    <div id="paycalc">\
                        <button id="subtotal">Sub</button>\
-                       <button id="pay">\
-                           <span id="pay-label">Pay</span>\
-                           <span id="pay-amount">0</span>\
-                           <span id="pay-currency">' + App.settings.currency.symbol + '</span>\
-                       </button>\
+                       <div id="pay">\
+                           <div id="pay-label">Pay</div>\
+                           <div id="pay-amount">0</div>\
+                           <div id="pay-currency">' + App.settings.currency.symbol + '</div>\
+                       </div>\
                     </div>\
                 </div>\
              </div>\
@@ -593,8 +595,8 @@ App.bindKeyboard = function () {
     var btnPLU = keyboard.find("#btnp");
     var btnMul = keyboard.find("#btnm");
     $("#keyboard button").click(function () {
-        if (App.jRegistrySession.text() === "1") {
-            App.jRegistrySession.text("0");
+        if (App.isInRegistrySession/*.text() === "1"*/) {
+            App.isInRegistrySession = false/*.text("0")*/;
             App.jPriceInput.val("");
         }
         var t = $(this);
@@ -626,7 +628,7 @@ App.bindKeyboard = function () {
                 if (isPluActive) {
                     App.jSearchBox.trigger(App.simulateEnterKeyup());
                 } else {
-                    if (p.length > 0 && p.length <= 3 && p.indexOf("*") < 0) {
+                    if (p.length > 0 && p.length <= 3 && p.indexOf("*") < 0 && p !== "-") {
                         activeInput.val(p + "*");
                     }
                 }
@@ -698,7 +700,7 @@ App.renderWebRegister = function () {
 
     // registry session means a session when user types in prices with both physical keyboard and virtual keyboard
     // used to handle multiple articles in sale list
-    App.jRegistrySession = $("#registry-session");
+    App.isInRegistrySession = true/*$("#registry-session")*/;
 
     // reset checkout
     var jDiscardSale = $("#discard-sale");
@@ -716,10 +718,10 @@ App.renderWebRegister = function () {
         return App.correctPriceInput();
     }).click(function () {
         App.jPriceInput.val("");
-        App.jRegistrySession.text("0");
+        App.isInRegistrySession = false/*.text("0")*/;
     }).focus(function () {
         App.jPriceInput.val("");
-        App.jRegistrySession.text("0");
+        App.isInRegistrySession = false/*.text("0")*/;
     });
 
     // generate sale groups and quick sale
@@ -762,6 +764,12 @@ App.renderWebRegister = function () {
         jMenuLeft.removeClass("visible");
     });
 
+    $("#subtotal").click(function(){
+        App.recalculateTotalCost();
+        App.jPayAmount.addClass("checked");
+        App.beep();
+    });
+    
     // bind pay button to proceed to payment, generate payment box
     $("#pay").click(function () {
         if (App.jSaleList.find(".sale-item").size() < 1) {
@@ -958,7 +966,7 @@ App.renderWebRegister = function () {
                 t.removeClass("not-found");
                 t.attr("placeholder", "PLU");
 
-                App.jRegistrySession.text("0");
+                App.isInRegistrySession = false/*.text("0")*/;
                 App.jPriceInput.blur();
                 App.jPriceInput.val(item.price);
             } else {
@@ -990,7 +998,7 @@ App.renderWebRegister = function () {
         App.closeCurtain();
         App.jSearchBox.val(s);
         App.jSearchBox.trigger(App.simulateEnterKeyup());
-        App.jRegistrySession.text("1");
+        App.isInRegistrySession = true/*.text("1")*/;
     });
 
     $("#sign-out").click(function () {
