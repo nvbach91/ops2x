@@ -4,7 +4,7 @@
  */
 @font-face {
     font-family: "Open Sans";
-    src: url('../font/OpenSans.ttf');
+    src: url("../font/OpenSans.ttf");
 }
 ::-webkit-scrollbar {
     width: 6px;
@@ -53,7 +53,7 @@ html, body, #app, #main, #curtain {
     color: #fff;
     padding: 15px 20px;
     border-radius: 3px 3px 0 0;
-    background-image: url('../img/logo.png');
+    background-image: url("../img/logo.png");
     background-position: 98%;
     background-repeat: no-repeat;
     background-size: 50px;
@@ -79,10 +79,10 @@ form#sign-in input {
     text-indent: 40px;
 }
 form#sign-in #username {
-    background-image: url('../img/icons/user.svg');
+    background-image: url("../img/icons/user.svg");
 }
 form#sign-in #password {
-    background-image: url('../img/icons/lock.svg');
+    background-image: url("../img/icons/lock.svg");
 }
 form#sign-in #submit {
     text-indent: 0;
@@ -149,11 +149,11 @@ nav {
 }
 #sign-out {
     text-indent: 15px;
-    background-image: url('../img/icons/signout.svg');
+    background-image: url("../img/icons/signout.svg");
 }
 #profile {
     text-indent: 20px;
-    background-image: url('../img/icons/userwhite.svg');    
+    background-image: url("../img/icons/userwhite.svg");    
 }
 #menu-left {
     display: flex;
@@ -735,7 +735,7 @@ button.db-close:before, button.pb-close:before, button.wb-close:before {
     width: 100px;
 }
 .ri-q {
-    width: 20px;
+    width: 40px;
     text-align: right;
 }
 div.ri-x {
@@ -783,12 +783,7 @@ div#taxes-label {
     width: 20%;
 }
 .receipt-footer {
-    line-height: 30px;
-    background-image: url("../img/logo-black.png");
-    background-size: contain;
-    background-position: 60px;
-    background-repeat: no-repeat;
-    text-indent: 20px;
+    display: none;
 }
 .receipt:after {
     content: '';
@@ -815,11 +810,13 @@ div#taxes-label {
     cursor: pointer;
     font-size: 30px;
     line-height: 30px;
-    width: 300px;
+    width: 100%;
     padding: 20px 0;
     background-color: #334C60;
     color: #fff;
     margin: 0 auto;
+    border-left: 2px solid #F8F8F8;
+    border-right: 2px solid #F8F8F8;
 }
 #cash-input {
     width: 100%;
@@ -835,7 +832,7 @@ div#taxes-label {
 }
 #cash-confirm { 
     margin: 0 auto;
-    width: 80%;
+    width: 60%;
     padding: 30px 0;
     font-size: 20px;
 }
@@ -849,7 +846,6 @@ div#taxes-label {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    padding: 0 5px;
 }
 .cash-button {
     height: 40px;
@@ -1267,10 +1263,11 @@ div#taxes-label {
         border-top: 1px solid #000;
     }
     .receipt-footer {
-        text-indent: 20px;
+        display: block;
+        line-height: 40px;
         font-size: 12px;
         background-image: url("../img/logo-black.png");
-        background-size: contain;
+        background-size: 25px;
         background-position: 60px;
         background-repeat: no-repeat;
     }

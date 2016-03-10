@@ -764,12 +764,14 @@ App.renderWebRegister = function () {
         jMenuLeft.removeClass("visible");
     });
 
-    $("#subtotal").click(function(){
-        App.recalculateTotalCost();
-        App.jPayAmount.addClass("checked");
-        App.beep();
+    $("#subtotal").click(function () {
+        if (App.jSaleList.find(".sale-item").size()) {
+            App.recalculateTotalCost();
+            App.jPayAmount.addClass("checked");
+            App.beep();
+        }
     });
-    
+
     // bind pay button to proceed to payment, generate payment box
     $("#pay").click(function () {
         if (App.jSaleList.find(".sale-item").size() < 1) {
@@ -803,9 +805,9 @@ App.renderWebRegister = function () {
             var receiptItem = $("<li>").addClass("receipt-item")
                     .append($("<div>").addClass("ri-n").text(n))
                     .append($("<div>").addClass("ri-v")
-                            .append($("<div>").addClass("ri-p").text(p))
-                            .append($("<div>").addClass("ri-x"))
                             .append($("<div>").addClass("ri-q").text(q))
+                            .append($("<div>").addClass("ri-x"))
+                            .append($("<div>").addClass("ri-p").text(p))
                             .append($("<div>").addClass("ri-tt").text(thisTotal))
                             );
             receiptBody.append(receiptItem);
@@ -832,7 +834,7 @@ App.renderWebRegister = function () {
                 .append($("<div>").addClass("rs-label").text("Change:"))
                 .append($("<div>").addClass("rs-value").text(Number(0).formatMoney()))
                 .appendTo(receiptSummary);
-        $("<div>").attr("id", "taxes-label").text("Taxes summary:").appendTo(receiptSummary);
+        $("<div>").attr("id", "taxes-label").text("VAT summary:").appendTo(receiptSummary);
         $("<div>").attr("id", "tax-header")
                 .append($("<div>").addClass("th-rate").text("Rate"))
                 .append($("<div>").addClass("th-value").text("Tax"))
@@ -857,7 +859,7 @@ App.renderWebRegister = function () {
         var payment = $("<div>").attr("id", "payment");
         App.jCashInput = $("<input>");
         $("<div>").addClass("cash-pay-label").text("Amount to pay").appendTo(payment);
-        $("<div>").attr("id", "cash-pay-topay").text(total + " " + App.settings.currency.symbol)
+        $("<div>").attr("id", "cash-pay-topay").text("Total: " + total + " " + App.settings.currency.symbol)
                 .click(function () {
                     App.jCashInput.val(total).blur();
                 }).appendTo(payment);
@@ -916,7 +918,7 @@ App.renderWebRegister = function () {
         cashChange.text("Change: " + Number(0).formatMoney() + " " + App.settings.currency.symbol).appendTo(payment);
 
         $("<button>")
-                .attr("id", "cash-confirm").text("Confirm Payment")
+                .attr("id", "cash-confirm").text("CONFIRM PAYMENT")
                 .click(function () {
                     var t = $(this);
                     if (!t.hasClass("disabled")) {
