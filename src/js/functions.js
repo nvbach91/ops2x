@@ -83,6 +83,13 @@ App.getDate = function () {
     return day + " " + date + "/" + month + "/" + year + " " + hh + ":" + mm + ":" + ss;
 };
 
+App.startReceiptTime = function () {
+    clearInterval(App._receiptTimeInterval);
+    App._receiptTimeInterval = setInterval(function(){
+        App.receiptTime.text(App.getDate());
+    }, 500);
+};
+
 // plays beep sound
 App.beep = function () {
     App.beeper.pause();
@@ -241,6 +248,7 @@ App.setUpMobileNumericInput = function () {
 // curtain closes
 App.closeCurtain = function () {
     if (App.curtain) {
+        clearInterval(App._receiptTimeInterval);
         App.jMain ? App.jMain.removeClass("blur") : null;
         App.curtain.remove();
         App.curtain = null;
@@ -911,9 +919,11 @@ App.renderWebRegister = function () {
             }
         }
         receiptSummary.appendTo(receipt);
+        App.receiptTime = $("<div>").attr("id", "receipt-time").text(App.getDate());
+        App.startReceiptTime();
         $("<div>").addClass("receipt-row")
                 .append($("<div>").addClass("receipt-clerk").text("Clerk: Joe Car"))
-                .append($("<div>").addClass("receipt-time").text(App.getDate())).appendTo(receipt);
+                .append(App.receiptTime).appendTo(receipt);
         $("<div>").addClass("receipt-gratitude").text("Thank you for stopping by!").appendTo(receipt);
 
         //creating receipt footer
