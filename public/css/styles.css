@@ -710,11 +710,29 @@ button.db-close:before, button.pb-close:before, button.wb-close:before {
     font-size: 16px;
     box-shadow: 2px 5px 15px 0px rgba(0,0,0,0.5);
 }
+.receipt > div, .receipt > ul {
+    margin-left: 5px;
+}
 .receipt-header {
+    font-size: 12px;
+}
+.company-name {
+    font-size: 16px;
+    font-weight: bold;
+}
+.company-name, .address-1, .address-2, .tin, .vat, #receipt-number {
+    display: none;
+}
+#receipt-number {
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+.preview {
+    display: block;
     line-height: 30px;
+    font-size: 16px;
 }
 .receipt-body {
-    margin: 0 0 0 5px;
     overflow-y: scroll;
     height: 220px;
     flex-grow: 1;
@@ -755,7 +773,6 @@ div.ri-x {
     padding-right: 0;
 }
 #receipt-summary {
-    margin: 0 0 0 5px;
     font-size: 12px;
     display: flex;
     flex-direction: column;
@@ -771,7 +788,6 @@ div.ri-x {
 div#taxes-label {
     display: inline-block;
     text-align: center;
-    font-weight: bold;
 }
 #tax-header > div, .rs-tax > div {
     flex-grow: 1;
@@ -781,6 +797,14 @@ div#taxes-label {
 #tax-header > div.th-rate, .rs-tax > div.rs-tax-rate{
     text-align: left;
     width: 20%;
+}
+.receipt-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+}
+.receipt-gratitude {
+    display: none;
 }
 .receipt-footer {
     display: none;
@@ -824,15 +848,17 @@ div#taxes-label {
     padding: 5px;
     text-align: center;
     border-radius: 3px;
-    box-shadow: 0 0 1px 0 rgba(0,0,0,0.5);
+    box-shadow: inset 0 0 1px rgba(0,0,0,0.5);
     margin-right: 5px;
+    border-left: 2px solid #F8F8F8;
+    border-right: 2px solid #F8F8F8;
 }
 #cash-input.invalid {
     box-shadow: 0 0 5px 1px red;
 }
 #cash-confirm { 
     margin: 0 auto;
-    width: 60%;
+    width: 320px;
     padding: 30px 0;
     font-size: 20px;
 }
@@ -1217,14 +1243,18 @@ div#taxes-label {
         flex-direction: column;
         background-color: transparent;
     }
-    .receipt-header {
-        text-indent: -9999px;
+    .company-name, .address-1, .address-2, .tin, .vat, #receipt-number {
+        display: block;
+    }
+    .preview {
+        display: none;
+        /*text-indent: -9999px;
         background-image: url("../img/logo-black.png");
         background-size: contain;
         background-repeat: no-repeat;
         background-position: center;
-        height: 100px;
-        white-space: nowrap;
+        height: 100px;*/
+        /*white-space: nowrap;*/
     }
     .receipt-container {
         max-width: 270px;
@@ -1258,13 +1288,19 @@ div#taxes-label {
     }
     #receipt-summary {
         font-size: 12px;
-        padding-top: 5px;
-        margin-top: 5px;
+        padding: 5px 0;
+        margin: 5px 0 5px 5px;
         border-top: 1px solid #000;
+        border-bottom: 1px solid #000;
+    }
+    .receipt-gratitude {
+        font-style: italic;
+        display: block;
+        font-size: 12px;
     }
     .receipt-footer {
         display: block;
-        line-height: 40px;
+        line-height: 25px;
         font-size: 12px;
         background-image: url("../img/logo-black.png");
         background-size: 25px;

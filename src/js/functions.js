@@ -56,6 +56,33 @@ Number.prototype.formatMoney = function (c, d, t) {
     return s + (j ? i.substr(0, j) + t : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) + (c ? d + Math.abs(n - i).toFixed(c).slice(2) : "");
 };
 
+App.parseTime = function (s) {
+    return s < 10 ? "0" + s : s;
+};
+
+App.week = [
+    {short: "Mon", long: "Monday"},
+    {short: "Tue", long: "Tuesday"},
+    {short: "Wed", long: "Wednesday"},
+    {short: "Thu", long: "Thursday"},
+    {short: "Fri", long: "Friday"},
+    {short: "Sat", long: "Saturday"},
+    {short: "Sun", long: "Sunday"}
+];
+
+App.getDate = function () {
+    var now = new Date();
+    var day = App.week[now.getDay()].short;
+    var date = App.parseTime(now.getDate());
+    var month = App.parseTime(now.getMonth() + 1);
+    var year = App.parseTime(now.getFullYear());
+    var hh = App.parseTime(now.getHours());
+    var mm = App.parseTime(now.getMinutes());
+    var ss = App.parseTime(now.getSeconds());
+
+    return day + " " + date + "/" + month + "/" + year + " " + hh + ":" + mm + ":" + ss;
+};
+
 // plays beep sound
 App.beep = function () {
     App.beeper.pause();
@@ -256,7 +283,7 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
         App.jSaleList.children().eq(App.jSaleList.children().size() - 1).removeClass("last");
     }
     // creating sale item and bind events
-    var saleitem = $("<li>").addClass("sale-item last");
+    var saleItem = $("<li>").addClass("sale-item last");
     var siMain = $("<div>").addClass("sale-item-main");
     $("<div>").addClass("si-id").text(id).appendTo(siMain);
     $("<div>").addClass("si-ean").text(ean).appendTo(siMain);
@@ -287,7 +314,7 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
     $("<button>")
             .addClass("si-remove")
             .click(function () {
-                saleitem.slideUp(App.getAnimationTime(), function () {
+                saleItem.slideUp(App.getAnimationTime(), function () {
                     $(this).remove();
                     App.recalculateTotalCost();
                     App.jPriceInput.blur();
@@ -295,7 +322,7 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
             })
             .appendTo(siMain);
     siMain.children(".si-price, .si-total").click(function () {
-        saleitem.find(".sale-item-extend")
+        saleItem.find(".sale-item-extend")
                 .slideToggle(App.getAnimationTime(), function () {
                     var t = $(this);
                     if (t.is(":hidden")) {
@@ -305,8 +332,8 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
                     }
                 });
     });
-    siMain.appendTo(saleitem);
-    var extend = $("<div>").addClass("sale-item-extend");
+    siMain.appendTo(saleItem);
+    var siExtension = $("<div>").addClass("sale-item-extend");
 
     var individualPrice = $("<div>").addClass("change-price");
     $("<div>").addClass("d-label").text("Individual Price").appendTo(individualPrice);
@@ -394,13 +421,13 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
             })
             .appendTo(openDetailsLightbox);
 
-    individualPrice.appendTo(extend);
-    individualDiscount.appendTo(extend);
-    openDetailsLightbox.appendTo(extend);
+    individualPrice.appendTo(siExtension);
+    individualDiscount.appendTo(siExtension);
+    openDetailsLightbox.appendTo(siExtension);
 
-    extend.hide();
-    extend.appendTo(saleitem);
-    saleitem.appendTo(App.jSaleList);
+    siExtension.hide();
+    siExtension.appendTo(saleItem);
+    saleItem.appendTo(App.jSaleList);
 
     App.jSaleList.animate({
         scrollTop: App.jSaleList[0].scrollHeight
@@ -531,7 +558,7 @@ App.createWebRegisterDOM = function () {
                         <input id="search" maxlength="13" placeholder="PLU" autocomplete="off">\
                         <ul id="dropdown"></ul>\
                     </div>\
-                    <input id="price-input" placeholder="0.00", maxlength="9">\
+                    <input id="price-input" placeholder="0.00" maxlength="9">\
                     <div id="sale-groups"></div>\
                     <div id="quick-sales"></div>\
                 </div>\
@@ -727,32 +754,38 @@ App.renderWebRegister = function () {
     // generate sale groups and quick sale
     var btns = App.settings.buttons;
     var sg = $("#sale-groups");
-    for (var i = 0; i < btns.saleGroups.length; i++) {
-        $("<button>", {
+    var sgContent = "";
+    var nSgs = btns.saleGroups.length;
+    for (var i = 0; i < nSgs; i++) {
+        sgContent += $("<button>", {
             class: "sg",
             "sg-id": "sg" + i,
             "sg-tax": btns.saleGroups[i].tax,
             "sg-group": btns.saleGroups[i].group,
             text: btns.saleGroups[i].text,
-            css: {"background-color": "#" + btns.saleGroups[i].bg}
-        }).appendTo(sg);
+            style: "background-color: #" + btns.saleGroups[i].bg
+        }).prop("outerHTML");
     }
+    sg.append(sgContent);
     App.bindSaleGroups(sg);
 
     var qs = $("#quick-sales");
-    for (var i = 0; i < btns.quickSales.length; i++) {
+    var qsContent = "";
+    var nQss = btns.quickSales.length;
+    for (var i = 0; i < nQss; i++) {
         var t = btns.quickSales[i];
-        $("<div>")
-                .addClass("qs-item")
-                .append($("<button>").text(t.text))
-                .append($("<div>").addClass("qs-id").text("qs" + i))
-                .append($("<div>").addClass("qs-price").text(t.price))
-                .append($("<div>").addClass("qs-group").text(t.group))
-                .append($("<div>").addClass("qs-tax").text(t.tax))
-                .append($("<div>").addClass("qs-tags").text(t.tags))
-                .append($("<div>").addClass("qs-desc").text(t.desc))
-                .appendTo(qs);
+        qsContent +=
+                '<div class="qs-item">\
+                    <button>' + t.text + '</button>\
+                    <div class="qs-id">qs' + i + '</div>\
+                    <div class="qs-price">' + t.price + '</div>\
+                    <div class="qs-group">' + t.group + '</div>\
+                    <div class="qs-tax">' + t.tax + '</div>\
+                    <div class="qs-tags">' + t.tags + '</div>\
+                    <div class="qs-desc">' + t.desc + '</div>\
+                </div>';
     }
+    qs.append(qsContent);
     App.bindQuickSales(qs);
 
     var jMenuLeft = $("#menu-left");
@@ -790,15 +823,33 @@ App.renderWebRegister = function () {
                 })).appendTo(paymentBox);
         var paymentBody = $("<div>").addClass("pb-body");
         var receipt = $("<div>").addClass("receipt");
-        $("<div>").addClass("receipt-header").text("Receipt Preview").appendTo(receipt);
+        /* var receiptHeader = $("<div>").addClass("receipt-header");
+         $("<div>").addClass().text("Receipt Preview").appendTo(receipt);*/
+        var rh = $(
+                '<div class="receipt-header">\
+                    <div class="preview">' + 'Receipt Preview' + '</div>\
+                    <div class="company-name">' + 'Your Convenient Store' + '</div>\
+                    <div class="address-1">' + 'Sheppherd Bush Rd 42' + '</div>\
+                    <div class="address-2">' + '4WE520 London' + '</div>\
+                    <div class="receipt-row">\
+                        <div class="tin">' + 'TIN: ' + '12345678' + '</div>\
+                        <div class="vat">' + 'VAT Reg No. ' + 'CZ1234567890' + '</div>\
+                    </div>\
+                </div>');
+        App.receiptNumber = $("<div>").attr("id", "receipt-number").appendTo(rh);
+        App.receiptNumber.text("Receipt No. " + 123);
+        receipt.append(rh);
         var receiptBody = $("<ul>").addClass("receipt-body");
         var taxValues = {};
-        for (var i = 0; i < App.settings.tax_rates.length; i++) {
+        var nTrs = App.settings.tax_rates.length;
+        for (var i = 0; i < nTrs; i++) {
             taxValues[App.settings.tax_rates[i]] = {tax: null, total: null};
         }
+        var totalItems = 0;
         App.jSaleList.find(".sale-item").each(function () {
             var t = $(this);
             var q = t.find(".si-quantity").val();
+            totalItems += parseFloat(q);
             var p = t.find(".si-price").text();
             var n = t.find(".si-name").val();
             var thisTotal = t.find(".si-total").text();
@@ -822,6 +873,10 @@ App.renderWebRegister = function () {
 
         //creating receipt summary
         var receiptSummary = $("<div>").attr("id", "receipt-summary");
+        $("<div>").attr("id", "rs-total-items")
+                .append($("<div>").addClass("rs-label").text("Total items:"))
+                .append($("<div>").addClass("rs-value").text(totalItems))
+                .appendTo(receiptSummary);
         $("<div>").attr("id", "rs-total")
                 .append($("<div>").addClass("rs-label").text("Total:"))
                 .append($("<div>").addClass("rs-value").text(total))
@@ -837,20 +892,29 @@ App.renderWebRegister = function () {
         $("<div>").attr("id", "taxes-label").text("VAT summary:").appendTo(receiptSummary);
         $("<div>").attr("id", "tax-header")
                 .append($("<div>").addClass("th-rate").text("Rate"))
+                .append($("<div>").addClass("th-net").text("Net"))
                 .append($("<div>").addClass("th-value").text("Tax"))
                 .append($("<div>").addClass("th-total").text("Total"))
                 .appendTo(receiptSummary);
+
+        // calculate taxes
         var taxRates = Object.keys(taxValues);
-        for (var i = 0; i < taxRates.length; i++) {
+        var nTrsv = taxRates.length;
+        for (var i = 0; i < nTrsv; i++) {
             if (taxValues[taxRates[i]].tax !== null) {
                 $("<div>").addClass("rs-tax")
                         .append($("<div>").addClass("rs-tax-rate").text(taxRates[i] + "%"))
+                        .append($("<div>").addClass("rs-tax-net").text((taxValues[taxRates[i]].total.toFixed(2) - taxValues[taxRates[i]].tax.toFixed(2)).toFixed(2)))
                         .append($("<div>").addClass("rs-tax-tax").text(taxValues[taxRates[i]].tax.toFixed(2)))
                         .append($("<div>").addClass("rs-tax-total").text(taxValues[taxRates[i]].total.toFixed(2)))
                         .appendTo(receiptSummary);
             }
         }
         receiptSummary.appendTo(receipt);
+        $("<div>").addClass("receipt-row")
+                .append($("<div>").addClass("receipt-clerk").text("Clerk: Joe Car"))
+                .append($("<div>").addClass("receipt-time").text(App.getDate())).appendTo(receipt);
+        $("<div>").addClass("receipt-gratitude").text("Thank you for stopping by!").appendTo(receipt);
 
         //creating receipt footer
         $("<div>").addClass("receipt-footer").text("EnterpriseApps").appendTo(receipt);
@@ -869,7 +933,8 @@ App.renderWebRegister = function () {
         var quickCash = $("<div>").addClass("cash-quick");
         var cashChange = $("<div>").attr("id", "cash-change");
         var qcs = [100, 200, 500, 1000, 2000, 5000];
-        for (var i = 0; i < qcs.length; i++) {
+        var nQcs = qcs.length;
+        for (var i = 0; i < nQcs; i++) {
             $("<button>").addClass("cash-button").text(qcs[i])
                     .click(function () {
                         var t = $(this);
@@ -938,7 +1003,8 @@ App.renderWebRegister = function () {
 
     //populating articles for scanning    
     var articles = App.catalog.articles;
-    for (var i = 0; i < articles.length; i++) {
+    var nArticles = articles.length;
+    for (var i = 0; i < nArticles; i++) {
         articles[i].id = i;
     }
     articles.sort(function (a, b) {
@@ -972,7 +1038,7 @@ App.renderWebRegister = function () {
                 App.jPriceInput.blur();
                 App.jPriceInput.val(item.price);
             } else {
-                t.addClass("not-found");
+                //t.addClass("not-found");
                 t.attr("placeholder", "PLU not found");
                 //App.makeWarning("This EAN " + filter + " is not defined");
             }
