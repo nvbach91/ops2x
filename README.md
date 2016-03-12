@@ -48,6 +48,8 @@ $ npm install -g gulp nodemon
 $ npm install
 ```
 
+* Note: If you see red problems and warnings regarding socket.io (and freak out because you're not familiar with NodeJS), the project should still work and can be started, but if you want a clean installation with no errors and warnings, check [this solution](https://github.com/npm/npm/issues/9563#issuecomment-142666465)
+
 ### Database (optional) ###
 * configure default database path and run database service
 ```
