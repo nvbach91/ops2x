@@ -85,7 +85,7 @@ App.getDate = function () {
 
 App.startReceiptTime = function () {
     clearInterval(App._receiptTimeInterval);
-    App._receiptTimeInterval = setInterval(function(){
+    App._receiptTimeInterval = setInterval(function () {
         App.receiptTime.text(App.getDate());
     }, 500);
 };
@@ -537,6 +537,19 @@ App.showWarning = function (msg) {
     });
 };
 
+App.bindTabNavs = function () {
+    var tabs = App.tabNavs.find(".tab-nav");
+    tabs.each(function () {
+        var t = $(this);
+        t.click(function () {
+            tabs.each(function () {
+                $(this).removeClass("activeTab");
+            });
+            t.addClass("activeTab");
+        });
+    });
+};
+
 // appends the dom structure to web register
 App.createWebRegisterDOM = function () {
     // nav, menu-left, registry-session
@@ -567,8 +580,18 @@ App.createWebRegisterDOM = function () {
                         <ul id="dropdown"></ul>\
                     </div>\
                     <input id="price-input" placeholder="0.00" maxlength="9">\
-                    <div id="sale-groups"></div>\
-                    <div id="quick-sales"></div>\
+                    <div id="reg-buttons">\
+                        <div id="sale-groups"></div>\
+                        <div id="quick-sales"></div>\
+                    </div>\
+                    <div id="tab-navs">\
+                        <div class="tab-nav activeTab">Tab 1</div>\
+                        <div class="tab-nav">Tab 2</div>\
+                        <div class="tab-nav">Tab 3</div>\
+                        <div class="tab-nav">Tab 4</div>\
+                        <div class="tab-nav">Tab 5</div>\
+                        <div class="tab-nav">Tab 6</div>\
+                    </div>\
                 </div>\
                 <div id="col-2">\
                    <div id="checkout-header">\
@@ -729,6 +752,9 @@ App.renderWebRegister = function () {
     App.jCheckoutTotal = $("#checkout-total");
     App.jCheckoutLabel = $("#checkout-label");
     App.jLiveSearch = $("#live-search");
+    App.tabNavs = $("#tab-navs");
+
+    App.bindTabNavs();
 
     // call numpad on mobile devices
     App.setUpMobileNumericInput();
@@ -922,7 +948,7 @@ App.renderWebRegister = function () {
         App.receiptTime = $("<div>").attr("id", "receipt-time").text(App.getDate());
         App.startReceiptTime();
         $("<div>").addClass("receipt-row")
-                .append($("<div>").addClass("receipt-clerk").text("Clerk: Joe Car"))
+                .append($("<div>").addClass("receipt-clerk").text("Checked: Joe Car"))
                 .append(App.receiptTime).appendTo(receipt);
         $("<div>").addClass("receipt-gratitude").text("Thank you for stopping by!").appendTo(receipt);
 
@@ -1009,6 +1035,7 @@ App.renderWebRegister = function () {
 
         App.showInCurtain(paymentBox);
         App.jCashInput.focus();
+        App.beep();
     });
 
     //populating articles for scanning    

@@ -346,24 +346,41 @@ button#park-sale, button#discard-sale {
 #discard-sale {
     background-image: url("../img/logo-black.png");
 }
+#reg-buttons {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
 #sale-groups, #quick-sales {
+    position: relative;
+    width: 100%;
     background-color: #FFF;
     margin: 0;
     flex-wrap: wrap;
     padding: 1px;
     border-bottom: 1px solid #E8E8E8;
-    display: inline-block;
     overflow-x: scroll;
     overflow-y: hidden;
     white-space: nowrap;
 }
-#sale-groups::-webkit-scrollbar, #quick-sales::-webkit-scrollbar {
+#sale-groups:after, #quick-sales:after, #tab-navs:after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: calc(50% - 8px);
+    border: 8px solid transparent;
+    border-left-color: #fff;
+}
+#quick-sales {    
+    flex-grow: 1;
+    align-content: flex-start;
+}
+#sale-groups::-webkit-scrollbar, #quick-sales::-webkit-scrollbar, #tab-navs::-webkit-scrollbar {
     display: none;
 }
 #sale-groups button, .qs-item {
     width: 33.33333%;
     margin: 0px;
-    box-shadow: none;
     display: inline-block;
 }
 .sg:hover, .qs-item button:hover {
@@ -371,13 +388,49 @@ button#park-sale, button#discard-sale {
 }
 #sale-groups button, .qs-item button {
     border: 1px solid #fff;
-    border-radius: 7px;
+    border-radius: 0;
 }
 .qs-item button {
     width: 100%;
 }
 .qs-item div {
     display: none;
+}
+#tab-navs {
+    position: relative;
+    width: 100%;
+    font-size: 0px;    
+    background-color: #fff;
+    flex-wrap: wrap;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    white-space: nowrap;
+}
+#tab-navs .tab-nav {
+    font-size: 14px;
+    width: 33.33333%;
+    display: inline-block;
+    cursor: pointer;
+    line-height: 30px;
+    color: #fff;
+    text-align: center;
+    background-color: #334C60; 
+}
+#tab-navs .tab-nav.activeTab{
+    position: relative;
+    background-color: #202F3C !important;
+    cursor: initial;
+}
+#tab-navs .tab-nav.activeTab:before {
+    content: "";
+    position: absolute;
+    left: calc(50% - 12px);
+    top: -24px;
+    border: 12px solid transparent;
+    border-bottom-color: #202F3C;
+}
+#tab-navs .tab-nav:hover {
+    background-color: #E4644B;
 }
 #sale-list {
     margin-bottom: 1px;
@@ -543,13 +596,12 @@ button#btnm.activePLU:before {
     content: "";
 }
 #paycalc {
-    border-bottom: 3px solid #E8E8E8;
-    width: 100%;
+    border-bottom: 3px solid transparent;
     display: flex;
+    height: 75px;
 }
 #pay, #subtotal {
     border: 1px solid #E8E8E8;
-    height: 75px;
     font-size: 24px;
     border-radius: 0;
 }
@@ -559,6 +611,7 @@ button#btnm.activePLU:before {
     background-color: #334C60;
 }
 #pay {
+    position: relative;
     cursor: pointer;
     color: #fff;
     display: flex;
@@ -582,7 +635,10 @@ button#btnm.activePLU:before {
 }
 #pay-amount.checked:before {
     content: "\2713";
-    /*color: #9FEF7E;*/
+    position: absolute;
+    top: 20px;
+    left: 150px;
+    color: #9FEF7E;
 }
 .shadow {    
     -webkit-box-shadow: 0px 0px 3px 0px rgba(0,0,0,0.5);
@@ -596,7 +652,7 @@ button#btnm.activePLU:before {
     position: relative;
 }
 #col-1 {
-    margin-bottom: 5px;
+    border-bottom: 4px solid transparent;
 }
 #col-2 {
     flex-grow: 1;
@@ -624,7 +680,6 @@ button#btnm.activePLU:before {
     width: 100%;
     height: 300px;
     margin: auto;
-    border-radius: 3px;
     color: #353535;
     background-color: #fff;
     box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.3);
@@ -659,9 +714,7 @@ button.db-close:before, button.pb-close:before, button.wb-close:before {
     background-color: #F8F8F8;
     padding: 10px;
     display: flex;
-    /* flex-direction: column; */
     flex-grow: 1;
-    border-radius: 0 0 5px 5px;
 }
 .db-info {
     line-height: 30px;
@@ -689,7 +742,6 @@ button.db-close:before, button.pb-close:before, button.wb-close:before {
     overflow-y: scroll;
     background-color: #F8F8F8;
     flex-grow: 1;
-    border-radius: 0 0 3px 3px;
     justify-content: center;
     flex-direction: column;
 }
@@ -891,7 +943,6 @@ div#taxes-label {
     background-color: #F8F8F8;
     flex-grow: 1;
     line-height: 60px;
-    border-radius: 0 0 3px 3px;
 }
 /*
 @media screen and (min-height: 0px){
@@ -969,7 +1020,7 @@ div#taxes-label {
     }
 }
 @media screen and (min-width: 420px){
-    #sale-groups button, .qs-item {
+    #sale-groups button, .qs-item, #tab-navs .tab-nav {
         width: 25%;
     }        
     #checkout-header {
@@ -987,12 +1038,12 @@ div#taxes-label {
     .sg, .qs-item button {
         height: 45px;
     }
-    #sale-groups button, .qs-item {
+    #sale-groups button, .qs-item, #tab-navs .tab-nav {
         width: 20%;
-    }
+    }/*
     #sale-groups button, .qs-item button {
         border: 2px solid #fff;
-    }
+    }*/
     #checkout-header {
         font-size: 20px;
     }
@@ -1002,6 +1053,10 @@ div#taxes-label {
 }
 
 @media screen and (min-width: 720px){
+    #tab-navs .tab-nav {
+        line-height: 70px;
+        font-size: 16px;
+    }
     #keyboard {
         display: flex;
     }
@@ -1057,25 +1112,32 @@ div#taxes-label {
     #sale-list input.si-quantity {
         width: 35px;
     }
-    #sale-groups, #quick-sales {
-        overflow: hidden;
+    #sale-groups, #quick-sales, #tab-navs {
+        overflow-x: visible;
+        overflow-y: visible;
         display: flex;
-    } 
+    }
+    #quick-sales {
+        margin-bottom: 12px;
+    }
+    #sale-groups:after, #quick-sales:after, #tab-navs:after  {
+        border-left-color: transparent;
+    }
+    #tab-navs {
+        flex-wrap: nowrap;
+    }
     .sg, .qs-item button {
         font-size: 12px;
         height: 60px;
     }
     #sale-groups button, .qs-item {
         width: 33.33%;
-    }
+    }/*
     #sale-groups button, .qs-item button {
         border: 3px solid #fff;
-    }
+    }*/
     .qs-item {
         border: none;
-    }
-    .qs-item button {
-        border: 3px solid #fff;
     }
     #checkout-header, .sale-item-main div, input.si-name {
         font-size: 12px;
@@ -1175,7 +1237,7 @@ div#taxes-label {
 }
 @media screen and (min-width: 1280px){
     #sale-groups button, .qs-item button {
-        height: 100px;
+        height: 80px;
         font-size: 16px;
     }
 }/*
@@ -1208,7 +1270,7 @@ div#taxes-label {
     #menu-header > div {
         transition: transform .2s ease;
     }
-    button, form#sign-in #submit {
+    button, form#sign-in #submit, #tab-navs .tab-nav {
         transition: background-color .2s ease;
     }
     button#park-sale, button#discard-sale {
