@@ -351,7 +351,7 @@ button#park-sale, button#discard-sale {
     display: flex;
     flex-direction: column;
 }
-#sale-groups, #quick-sales {
+#sale-groups, .quick-sales {
     position: relative;
     width: 100%;
     background-color: #FFF;
@@ -363,7 +363,7 @@ button#park-sale, button#discard-sale {
     overflow-y: hidden;
     white-space: nowrap;
 }
-#sale-groups:after, #quick-sales:after, #tab-navs:after {
+#sale-groups:after, .quick-sales:after, #tab-navs:after {
     content: "";
     position: absolute;
     right: 0;
@@ -371,11 +371,18 @@ button#park-sale, button#discard-sale {
     border: 8px solid transparent;
     border-left-color: #fff;
 }
-#quick-sales {    
+#tabs {
     flex-grow: 1;
-    align-content: flex-start;
+    background-color: #fff;
 }
-#sale-groups::-webkit-scrollbar, #quick-sales::-webkit-scrollbar, #tab-navs::-webkit-scrollbar {
+.quick-sales {    
+    align-content: flex-start;
+    display: none;
+}
+.quick-sales.activeTab {
+    display: inherit;
+}
+#sale-groups::-webkit-scrollbar, .quick-sales::-webkit-scrollbar, #tab-navs::-webkit-scrollbar {
     display: none;
 }
 #sale-groups button, .qs-item {
@@ -400,7 +407,7 @@ button#park-sale, button#discard-sale {
     position: relative;
     width: 100%;
     font-size: 0px;    
-    background-color: #fff;
+    background-color: #334C60;
     flex-wrap: wrap;
     overflow-x: scroll;
     overflow-y: hidden;
@@ -1032,7 +1039,7 @@ div#taxes-label {
 }
 
 @media screen and (min-width: 520px){
-    #sale-groups, #quick-sales {
+    #sale-groups, .quick-sales {
         padding: 2px;
     } 
     .sg, .qs-item button {
@@ -1053,10 +1060,6 @@ div#taxes-label {
 }
 
 @media screen and (min-width: 720px){
-    #tab-navs .tab-nav {
-        line-height: 70px;
-        font-size: 16px;
-    }
     #keyboard {
         display: flex;
     }
@@ -1112,15 +1115,22 @@ div#taxes-label {
     #sale-list input.si-quantity {
         width: 35px;
     }
-    #sale-groups, #quick-sales, #tab-navs {
+    #sale-groups, #tab-navs {
         overflow-x: visible;
         overflow-y: visible;
         display: flex;
     }
-    #quick-sales {
+    #tab-navs .tab-nav {
+        line-height: 70px;
+        font-size: 16px;
+    }
+    #tabs {
         margin-bottom: 12px;
     }
-    #sale-groups:after, #quick-sales:after, #tab-navs:after  {
+    .quick-sales.activeTab {
+        display: flex;
+    }
+    #sale-groups:after, .quick-sales:after, #tab-navs:after  {
         border-left-color: transparent;
     }
     #tab-navs {
@@ -1245,12 +1255,12 @@ div#taxes-label {
     #sale-groups button, .qs-item {
         width: 14.2857142857%;
     }
-}
+}*/
 @media screen and (min-width: 1440px){
     #sale-groups button, .qs-item {
-        width: 12.5%;
+        width: 16.66666%;
     }
-}
+}/*
 @media screen and (min-width: 1600px){
     #sale-groups button, .qs-item {
         width: 10%;

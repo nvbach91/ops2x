@@ -29,14 +29,19 @@ var Settings = new Schema({
                 tax: Number
             }
         ],
-        quickSales: [
+        tabs: [
             {
-                text: String,
-                price: String,
-                group: String,
-                tax: Number,
-                tags: [String],
-                desc: String
+                name: String,
+                quickSales: [
+                    {
+                        text: String,
+                        price: String,
+                        group: String,
+                        tax: Number,
+                        tags: [String],
+                        desc: String
+                    }
+                ]
             }
         ]
     }

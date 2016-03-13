@@ -537,19 +537,6 @@ App.showWarning = function (msg) {
     });
 };
 
-App.bindTabNavs = function () {
-    var tabs = App.tabNavs.find(".tab-nav");
-    tabs.each(function () {
-        var t = $(this);
-        t.click(function () {
-            tabs.each(function () {
-                $(this).removeClass("activeTab");
-            });
-            t.addClass("activeTab");
-        });
-    });
-};
-
 // appends the dom structure to web register
 App.createWebRegisterDOM = function () {
     // nav, menu-left, registry-session
@@ -582,16 +569,9 @@ App.createWebRegisterDOM = function () {
                     <input id="price-input" placeholder="0.00" maxlength="9">\
                     <div id="reg-buttons">\
                         <div id="sale-groups"></div>\
-                        <div id="quick-sales"></div>\
+                        <div id="tabs"></div>\
                     </div>\
-                    <div id="tab-navs">\
-                        <div class="tab-nav activeTab">Tab 1</div>\
-                        <div class="tab-nav">Tab 2</div>\
-                        <div class="tab-nav">Tab 3</div>\
-                        <div class="tab-nav">Tab 4</div>\
-                        <div class="tab-nav">Tab 5</div>\
-                        <div class="tab-nav">Tab 6</div>\
-                    </div>\
+                    <div id="tab-navs"></div>\
                 </div>\
                 <div id="col-2">\
                    <div id="checkout-header">\
@@ -752,9 +732,6 @@ App.renderWebRegister = function () {
     App.jCheckoutTotal = $("#checkout-total");
     App.jCheckoutLabel = $("#checkout-label");
     App.jLiveSearch = $("#live-search");
-    App.tabNavs = $("#tab-navs");
-
-    App.bindTabNavs();
 
     // call numpad on mobile devices
     App.setUpMobileNumericInput();
@@ -803,24 +780,56 @@ App.renderWebRegister = function () {
     sg.append(sgContent);
     App.bindSaleGroups(sg);
 
-    var qs = $("#quick-sales");
-    var qsContent = "";
-    var nQss = btns.quickSales.length;
-    for (var i = 0; i < nQss; i++) {
-        var t = btns.quickSales[i];
-        qsContent +=
-                '<div class="qs-item">\
-                    <button>' + t.text + '</button>\
-                    <div class="qs-id">qs' + i + '</div>\
-                    <div class="qs-price">' + t.price + '</div>\
-                    <div class="qs-group">' + t.group + '</div>\
-                    <div class="qs-tax">' + t.tax + '</div>\
-                    <div class="qs-tags">' + t.tags + '</div>\
-                    <div class="qs-desc">' + t.desc + '</div>\
-                </div>';
+    var tabsContainer = $("#tabs");
+    var tabNavsContainer = $("#tab-navs");
+    var tabs = App.settings.buttons.tabs;
+    var nTabs = tabs.length;
+    var tabsContent = "";
+    var tabNavsContent = [];
+    for (var i = 0; i < nTabs; i++) {
+        var qss = tabs[i].quickSales;
+        var nQs = qss.length;
+        tabsContent += '<div class="quick-sales'
+                + (i === 0 ? ' activeTab' : '')
+                + '">';
+        for (var j = 0; j < nQs; j++) {
+            var t = qss[j];
+            tabsContent +=
+                    '<div class="qs-item">\
+                        <button>' + t.text + '</button>\
+                        <div class="qs-id">qs-' + i + "-" + j + '</div>\
+                        <div class="qs-price">' + t.price + '</div>\
+                        <div class="qs-group">' + t.group + '</div>\
+                        <div class="qs-tax">' + t.tax + '</div>\
+                        <div class="qs-tags">' + t.tags + '</div>\
+                        <div class="qs-desc">' + t.desc + '</div>\
+                    </div>'
+                    ;
+        }
+        tabsContent += '</div>';
+        tabNavsContent += '<div class="tab-nav'
+                + (i === 0 ? ' activeTab' : '')
+                + '">' + tabs[i].name + '</div>';
     }
-    qs.append(qsContent);
-    App.bindQuickSales(qs);
+    tabsContainer.append(tabsContent);
+    App.bindQuickSales(tabsContainer);
+    tabNavsContainer.append(tabNavsContent);
+
+    var tabQs = tabsContainer.find(".quick-sales");
+    var tabNavs = tabNavsContainer.find(".tab-nav");
+    tabNavs.each(function (index) {
+        var t = $(this);
+        t.click(function () {
+            tabNavs.each(function () {
+                $(this).removeClass("activeTab");
+            });
+            t.addClass("activeTab");
+            tabQs.each(function () {
+                $(this).removeClass("activeTab");
+            });
+            tabQs.eq(index).addClass("activeTab");
+        });
+    });
 
     var jMenuLeft = $("#menu-left");
     // bind control panel buttons
@@ -1167,7 +1176,7 @@ App.renderSignUp = function () {
 // render login view
 App.renderLogin = function () {
     App.closeCurtain();
-    var loginDOM =
+    var loginDOM = [
             '<div class="center-box">\
                 <div id="sign-in-welcome">Welcome to OPS</div>\
                 <form id="sign-in" action="" method="POST">\
@@ -1177,7 +1186,7 @@ App.renderLogin = function () {
                     <input id="submit" type="submit" value="SIGN IN">\
                 </form>\
              </div>'
-            ;
+    ];
     App.jAppContainer.html(loginDOM);
     $("form#sign-in").submit(function (e) {
         e.preventDefault();
