@@ -122,7 +122,7 @@ rs
 * ~~resite pay button~~
 * ~~add manual product name input~~
 * ~~EAN PLU in price input?~~
+* ~~add quickSale categories (tabs)~~
 * implement sale history
-* add quickSale categories
 * implement settings module
 * add keyboard shortcuts module
