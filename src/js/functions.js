@@ -239,16 +239,15 @@ App.checkNumericInput = function (e, t) {
 };
 
 // sets the mobile device native keyboard to numeric
-App.setUpMobileNumericInput = function () {
+App.setUpMobileNumericInput = function (input) {
     if ($.browser.mobile) {
-        App.jPriceInput.attr("type", "number");
+        input.attr("type", "number");
     }
 };
 
 // curtain closes
 App.closeCurtain = function () {
     if (App.curtain) {
-        clearInterval(App._receiptTimeInterval);
         App.jMain ? App.jMain.removeClass("blur") : null;
         App.curtain.remove();
         App.curtain = null;
@@ -517,15 +516,13 @@ App.bindQuickSales = function (qs) {
 // displays a warning message
 App.showWarning = function (msg) {
     var warning =
-            '<div id="curtain">\
-                <div id="warning-box">\
+            '<div id="warning-box">\
                     <div class="wb-header">\
                         <div class="wb-title"></div>\
                         <button class="wb-close"></button>\
                     </div>\
                     <div class="wb-body">' + msg + '</div>\
-                </div>\
-            </div>';
+                </div>';
     App.showInCurtain(warning);
     App.curtain.find("#warning-box").click(function (e) {
         e.stopPropagation();
@@ -581,10 +578,6 @@ App.createWebRegisterDOM = function () {
                         <div id="tabs"></div>\
                     </div>\
                     <div id="tab-navs"></div>\
-                    <div id="utils">\
-                        <div id="print-history"></div>\
-                        <div id="help"></div>\
-                    </div>\
                 </div>\
                 <div id="col-2">\
                    <div id="checkout-header">\
@@ -750,7 +743,7 @@ App.renderWebRegister = function () {
     App.cpBody = App.jControlPanel.find("#cp-body");
     App.createControlPanel();
     // call numpad on mobile devices
-    App.setUpMobileNumericInput();
+    App.setUpMobileNumericInput(App.jPriceInput);
 
     // registry session means a session when user types in prices with both physical keyboard and virtual keyboard
     // used to handle multiple articles in sale list
@@ -865,7 +858,7 @@ App.renderWebRegister = function () {
         if (App.jSaleList.find(".sale-item").size() < 1) {
             return false;
         }
-
+        App.jPriceInput.val("");
         //creating payment box
         var paymentBox = $("<div>").attr("id", "payment-box")
                 .click(function (e) {
@@ -933,7 +926,7 @@ App.renderWebRegister = function () {
                 .append($("<div>").addClass("rs-value").text(totalItems))
                 .appendTo(receiptSummary);
         $("<div>").attr("id", "rs-total")
-                .append($("<div>").addClass("rs-label").text("Total:"))
+                .append($("<div>").addClass("rs-label").text("Total amount:"))
                 .append($("<div>").addClass("rs-value").text(total))
                 .appendTo(receiptSummary);
         $("<div>").attr("id", "rs-tender")
@@ -979,16 +972,17 @@ App.renderWebRegister = function () {
         //creating payment section
         var payment = $("<div>").attr("id", "payment");
         App.jCashInput = $("<input>");
-        $("<div>").addClass("cash-pay-label").text("Amount to pay").appendTo(payment);
+        //$("<div>").addClass("cash-pay-label").text("Amount to pay").appendTo(payment);
         $("<div>").attr("id", "cash-pay-topay").text("Total: " + total + " " + App.settings.currency.symbol)
                 .click(function () {
                     App.jCashInput.val(total).blur();
                 }).appendTo(payment);
 
-        var quickCashLabel = $("<div>").addClass("cash-quick-label").text("Quick cash payment");
-        quickCashLabel.appendTo(payment);
+        //var quickCashLabel = $("<div>").addClass("cash-quick-label").text("Quick cash payment");
+        //quickCashLabel.appendTo(payment);
         var quickCash = $("<div>").addClass("cash-quick");
         var cashChange = $("<div>").attr("id", "cash-change");
+        App.changeAmount = 0;
         var qcs = [100, 200, 500, 1000, 2000, 5000];
         var nQcs = qcs.length;
         for (var i = 0; i < nQcs; i++) {
@@ -997,13 +991,13 @@ App.renderWebRegister = function () {
                         var t = $(this);
                         var cash = t.text();
                         App.jCashInput.val(cash + "00").blur();
-                        cashChange.text("Change: " + (cash - parseFloat(total)).formatMoney() + " " + App.settings.currency.symbol);
                     })
                     .appendTo(quickCash);
         }
         quickCash.appendTo(payment);
 
-        $("<div>").addClass("cash-pay-label").text("Amount tendered").appendTo(payment);
+        //var payForm = $("<div>").addClass("pay-form");
+        $("<div>").addClass("cash-pay-label").text("Cash").appendTo(payment);
         App.jCashInput.attr("id", "cash-input")
                 .attr("placeholder", "0.00")
                 .attr("maxlength", "9")
@@ -1028,27 +1022,60 @@ App.renderWebRegister = function () {
                     }
                     t.removeClass("invalid");
                     payment.find("#cash-confirm").removeClass("disabled");
-                    var newChange = (parseFloat(t.val()) - parseFloat(total)).formatMoney();
-                    cashChange.text("Change: " + newChange + " " + App.settings.currency.symbol);
+                    App.changeAmount = (parseFloat(t.val()) - parseFloat(total)).formatMoney();
+                    cashChange.text("Change: " + App.changeAmount + " " + App.settings.currency.symbol);
                     paymentBox.find("#rs-tender .rs-value").text(t.val());
-                    paymentBox.find("#rs-change .rs-value").text(newChange);
+                    paymentBox.find("#rs-change .rs-value").text(App.changeAmount);
                 })
                 .focus(function () {
                     $(this).select();
                 }).appendTo(payment);
-
+        //payForm.appendTo(payment);
+        App.setUpMobileNumericInput(App.jCashInput);
         cashChange.text("Change: " + Number(0).formatMoney() + " " + App.settings.currency.symbol).appendTo(payment);
 
-        $("<button>")
-                .attr("id", "cash-confirm").text("CONFIRM PAYMENT")
-                .click(function () {
-                    var t = $(this);
-                    if (!t.hasClass("disabled")) {
-                        window.print();
-                        App.discardSale(true);
-                        App.jPriceInput.focus();
-                    }
+        var receiptPrinted = false;
+
+        $("<button>").attr("id", "cash-confirm").text("CONFIRM PAYMENT").click(function () {
+            var t = $(this);
+            if (!t.hasClass("disabled")) {
+                clearInterval(App._receiptTimeInterval);
+                payment.children().remove();
+                App.discardSale(true);
+                $("<div>").addClass("pc-label").text("Sale complete!").appendTo(payment);
+                if (App.changeAmount !== "0.00") {
+                    $("<div>").addClass("pc-change").text("Issue change of " + App.changeAmount + " " + App.settings.currency.symbol).appendTo(payment);
+                }
+                $("<button>").attr("id", "print-receipt").text("Print receipt").click(function () {
+                    window.print();
+                    receiptPrinted = true;
                 }).appendTo(payment);
+                var emailReceipt = $("<div>").addClass("email-receipt").appendTo(payment);
+                var emailInput = $("<input>").attr("id", "email-input").click(function () {
+                    emailInput.removeClass("invalid");
+                    emailInput.val("@");
+                    emailInput.select();
+                }).val("@").appendTo(emailReceipt);
+                $("<button>").attr("id", "email-send").text("Email receipt").click(function () {
+                    var recipient = emailInput.val();
+                    if (App.isValidEmail(recipient)) {
+                        $(this).text("Email sent").addClass("sent").off();
+                        emailInput.remove();
+                    } else {
+                        emailInput.addClass("invalid").val("Invalid email syntax!");
+                    }
+                }).appendTo(emailReceipt);
+                emailReceipt.appendTo(payment);
+                //payment.append(paymentComplete);
+                $("<button>").attr("id", "done-payment").text("Done").click(function () {
+                    if (!receiptPrinted) {
+                        window.print();
+                    }
+                    App.closeCurtain();
+                    App.jPriceInput.focus();
+                }).appendTo(payment);
+            }
+        }).appendTo(payment);
         payment.appendTo(paymentBody);
         $("<div>").addClass("receipt-container").append(receipt).appendTo(paymentBody);
 
@@ -1196,7 +1223,10 @@ App.renderLogin = function () {
                     <input id="username" type="text" placeholder="EMAIL">\
                     <input id="password" type="password" placeholder="PASSWORD">\
                     <input type="submit" value="SIGN IN">\
-                    <a id="forgot">Forgot your password?</a>\
+                    <div id="sign-in-help">\
+                        <a id="signup">Don\'t have an account?</a>\
+                        <a id="forgot">Forgot your password?</a>\
+                    </div>\
                 </form>\
              </div>'
             ;
@@ -1226,7 +1256,7 @@ App.renderLogin = function () {
                 }
             }).fail(function (resp) {
                 App.closeCurtain();
-                var msg = "The username and/or password is invalid";
+                var msg = "Incorrect username and/or password";
                 if (resp.status === 0) {
                     msg = "Network error. Please check your internet connection";
                 }
@@ -1248,7 +1278,7 @@ App.renderLogin = function () {
     };
 
     var afterPrint = function () {
-        App.closeCurtain();
+        //App.closeCurtain();
     };
 
     if (window.matchMedia) {
@@ -1268,16 +1298,16 @@ App.renderLogin = function () {
 }());
 
 App.createControlPanel = function () {
-    var controlPanelContent = $(
-            '<div class="menu-item" id="sale-history">Sale History</div>\
-             <div class="menu-item" id="acc-settings">Account Settings</div>\
-             <div class="menu-item" id="pos-settings">Point of Sale Settings</div>\
-             <div class="menu-item" id="plu-settings">Edit PLU Articles</div>\
-             <div class="menu-item" id="sgs-settings">Edit Sale Groups</div>\
-             <div class="menu-item" id="qss-settings">Edit Quick Sales</div>\
-             <div class="menu-item" id="rec-settings">Edit Receipt</div>'
+    var cpContent = $(
+            '<div class="cp-item" id="sale-history">Sales History</div>\
+             <div class="cp-item" id="acc-settings">Account Settings</div>\
+             <div class="cp-item" id="pos-settings">Point of Sale Settings</div>\
+             <div class="cp-item" id="plu-settings">Edit PLU Articles</div>\
+             <div class="cp-item" id="sgs-settings">Edit Sale Groups</div>\
+             <div class="cp-item" id="qss-settings">Edit Quick Sales</div>\
+             <div class="cp-item" id="rec-settings">Edit Receipt</div>'
             );
-    App.cpBody.append(controlPanelContent);
+    App.cpBody.append(cpContent);
     App.bindControlPanel();
 };
 
@@ -1299,8 +1329,8 @@ App.renderAccountSettings = function () {
         App.cpBody.html("");
         App.createControlPanel();
     });
-    
-    App.cpBody.find(".center-box").append(goBack);
+
+    App.cpBody.find(".center-box").prepend(goBack);
     var minPasswordLength = 5;
     App.cpBody.find("form#change-password").submit(function (e) {
         e.preventDefault();
@@ -1351,30 +1381,30 @@ App.renderAccountSettings = function () {
 };
 
 App.bindControlPanel = function () {
-    App.cpBody.find(".menu-item").each(function () {
+    App.cpBody.find(".cp-item").each(function () {
         var t = $(this);
         var id = t.attr("id");
         switch (id) {
             case "sale-history":
-                //t.click(App.renderSaleHistory);
+                t.click(function(){t.text("Not yet available");});
                 break;
             case "acc-settings":
                 t.click(App.renderAccountSettings);
                 break;
             case "pos-settings":
-                //t.click(App.renderAccountSettings);
+                t.click(function(){t.text("Not yet available");});
                 break;
             case "plu-settings":
-                //t.click(App.renderAccountSettings);
+                t.click(function(){t.text("Not yet available");});
                 break;
             case "sgs-settings":
-                //t.click(App.renderAccountSettings);
+                t.click(function(){t.text("Not yet available");});
                 break;
             case "qss-settings":
-                //t.click(App.renderAccountSettings);
+                t.click(function(){t.text("Not yet available");});
                 break;
             case "rec-settings":
-                //t.click(App.renderAccountSettings);
+                t.click(function(){t.text("Not yet available");});
                 break;
             default:
 
