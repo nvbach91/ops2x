@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">
+    <!-- Generator: Sketch 3.3.3 (12072) - http://www.bohemiancoding.com/sketch -->
+    <title>circle-arrow_back-previous-outline-stroke</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="miu" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
+        <g id="Artboard-1" sketch:type="MSArtboardGroup" transform="translate(-359.000000, -155.000000)">
+            <g id="slice" sketch:type="MSLayerGroup" transform="translate(215.000000, 119.000000)"></g>
+            <path d="M375.083426,166.99764 L372.047892,170.033174 L372.754999,170.740281 L376.99764,166.49764 L372.754999,162.254999 L372.047892,162.962106 L375.084989,165.999202 L366.00236,165.999202 L366.00236,166.99764 L375.083426,166.99764 Z M360,166.5 C360,160.148725 365.148725,155 371.5,155 C377.851275,155 383,160.148725 383,166.5 C383,172.851275 377.851275,178 371.5,178 C365.148725,178 360,172.851275 360,166.5 Z M382,166.5 C382,160.70101 377.29899,156 371.5,156 C365.70101,156 361,160.70101 361,166.5 C361,172.29899 365.70101,177 371.5,177 C377.29899,177 382,172.29899 382,166.5 Z" id="circle-arrow_back-previous-outline-stroke" fill="#E8E8E8" sketch:type="MSShapeGroup" transform="translate(371.500000, 166.500000) scale(-1, 1) translate(-371.500000, -166.500000) "></path>
+        </g>
+    </g>
+</svg>

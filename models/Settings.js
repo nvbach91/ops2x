@@ -34,6 +34,7 @@ var Settings = new Schema({
                 name: String,
                 quickSales: [
                     {
+                        bg: String,
                         text: String,
                         price: String,
                         group: String,

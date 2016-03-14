@@ -386,10 +386,8 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
             .blur(function () {
                 var t = $(this);
                 if (/^\d{1,2}$|^100$/g.test(t.val())) {
-                    //t.removeClass("invalid");
                     App.recalculateTotalCost();
                 } else {
-                    //t.addClass("invalid");
                     t.val(0);
                 }
             })
@@ -497,17 +495,17 @@ App.bindSaleGroups = function (sg) {
 // binds quicksales button events
 App.bindQuickSales = function (qs) {
     // bind quick sale buttons
-    qs.find(".qs-item button").click(function () {
+    qs.find(".qs-item").click(function () {
         var t = $(this);
-        var price = t.parent().find(".qs-price").text();
+        var price = t.find(".qs-price").text().replace(/[^\d\.]/g, "");
         var mult = App.getMultiplicationNumber();
         App.jPriceInput.val(price);
-        var name = t.text();
-        var id = t.parent().find(".qs-id").text();
-        var tax = t.parent().find(".qs-tax").text();
-        var group = t.parent().find(".qs-group").text();
-        var tags = t.parent().find(".qs-tags").text();
-        var desc = t.parent().find(".qs-desc").text();
+        var name = t.find("button").text();//
+        var id = t.find(".qs-id").text();
+        var tax = t.find(".qs-tax").text();
+        var group = t.find(".qs-group").text();
+        var tags = t.find(".qs-tags").text();
+        var desc = t.find(".qs-desc").text();
 
         App.addItemToCheckout(id, "", name, price, group, tax, tags, desc, mult);
 
@@ -522,7 +520,7 @@ App.showWarning = function (msg) {
             '<div id="curtain">\
                 <div id="warning-box">\
                     <div class="wb-header">\
-                        <div class="wb-title">Warning</div>\
+                        <div class="wb-title"></div>\
                         <button class="wb-close"></button>\
                     </div>\
                     <div class="wb-body">' + msg + '</div>\
@@ -537,27 +535,38 @@ App.showWarning = function (msg) {
     });
 };
 
+// remove the current sale list
+App.discardSale = function (immediate) {
+    if (immediate) {
+        App.jSaleList.find(".sale-item").remove();
+        App.recalculateTotalCost();
+    } else {
+        App.jSaleList.find(".sale-item").slideUp(App.getAnimationTime(), function () {
+            $(this).remove();
+            App.recalculateTotalCost();
+        });
+    }
+};
+
 // appends the dom structure to web register
 App.createWebRegisterDOM = function () {
     // nav, menu-left, registry-session
     var appDOM =
             '<nav>\
-                <div id="logo"><div></div></div>\
+                <div id="logo"><div class="logo"></div></div>\
                 <div id="brand">EnterpriseApps</div>\
                 <div id="menu-top">\
                     <div id="profile">' + App.settings.name + '</div>\
                     <div id="sign-out">Sign out</div>\
                 </div>\
              </nav>\
-             <div id="menu-left">\
-                <div id="menu-header">\
-                    <div></div>\
+             <div id="control-panel">\
+                <div id="cp-header">\
+                   <div class="logo"></div>\
+                   <div class="label">Control Panel</div>\
+                   <div class="close"></div>\
                 </div>\
-                <div id="menu-body">\
-                    <button class="menu-item"></button>\
-                    <button class="menu-item"></button>\
-                    <button class="menu-item"></button>\
-                </div>\
+                <div id="cp-body"></div>\
              </div>\
              <div id="registry-session">1</div>\
              <div id="main">\
@@ -572,6 +581,10 @@ App.createWebRegisterDOM = function () {
                         <div id="tabs"></div>\
                     </div>\
                     <div id="tab-navs"></div>\
+                    <div id="utils">\
+                        <div id="print-history"></div>\
+                        <div id="help"></div>\
+                    </div>\
                 </div>\
                 <div id="col-2">\
                    <div id="checkout-header">\
@@ -647,7 +660,7 @@ App.bindKeyboard = function () {
             case "btnp": //PLU
                 if (!isPluActive) { // turn on PLU input and turn off Price input
                     btnPLU.addClass("activePLU");
-                    App.jLiveSearch.css({display: "flex"});
+                    App.jLiveSearch.addClass("activePLU");
                     App.jPriceInput.hide();
                     btnMul.text("OK").addClass("activePLU");
                     activeInput.val("");
@@ -655,7 +668,7 @@ App.bindKeyboard = function () {
                     activeInput.focus();
                 } else { // turn off PLU input and turn on Price input
                     btnPLU.removeClass("activePLU");
-                    App.jLiveSearch.hide();
+                    App.jLiveSearch.removeClass("activePLU");
                     App.jPriceInput.show();
                     btnMul.text("").removeClass("activePLU");
                     activeInput.val("");
@@ -732,7 +745,10 @@ App.renderWebRegister = function () {
     App.jCheckoutTotal = $("#checkout-total");
     App.jCheckoutLabel = $("#checkout-label");
     App.jLiveSearch = $("#live-search");
+    App.jControlPanel = $("#control-panel");
 
+    App.cpBody = App.jControlPanel.find("#cp-body");
+    App.createControlPanel();
     // call numpad on mobile devices
     App.setUpMobileNumericInput();
 
@@ -743,10 +759,7 @@ App.renderWebRegister = function () {
     // reset checkout
     var jDiscardSale = $("#discard-sale");
     jDiscardSale.click(function () {
-        App.jSaleList.find(".sale-item").slideUp(App.getAnimationTime(), function () {
-            $(this).remove();
-            App.recalculateTotalCost();
-        });
+        App.discardSale(false);
     });
 
     // Price input accepts only numeric values, also only reacts to enter and backspace
@@ -797,8 +810,8 @@ App.renderWebRegister = function () {
             tabsContent +=
                     '<div class="qs-item">\
                         <button>' + t.text + '</button>\
-                        <div class="qs-id">qs-' + i + "-" + j + '</div>\
-                        <div class="qs-price">' + t.price + '</div>\
+                        <div class="qs-id">qs-t' + (i + 1) + "-" + j + '</div>\
+                        <div class="qs-price">' + t.price + ' ' + App.settings.currency.symbol + '</div>\
                         <div class="qs-group">' + t.group + '</div>\
                         <div class="qs-tax">' + t.tax + '</div>\
                         <div class="qs-tags">' + t.tags + '</div>\
@@ -831,13 +844,12 @@ App.renderWebRegister = function () {
         });
     });
 
-    var jMenuLeft = $("#menu-left");
     // bind control panel buttons
-    $("#logo > div").click(function () {
-        jMenuLeft.addClass("visible");
+    $("#logo > .logo").click(function () {
+        App.jControlPanel.addClass("visible");
     });
-    $("#menu-header > div, #main").click(function () {
-        jMenuLeft.removeClass("visible");
+    $("#cp-header > .close, #cp-header > .logo, #main").click(function () {
+        App.jControlPanel.removeClass("visible");
     });
 
     $("#subtotal").click(function () {
@@ -1033,7 +1045,7 @@ App.renderWebRegister = function () {
                     var t = $(this);
                     if (!t.hasClass("disabled")) {
                         window.print();
-                        jDiscardSale.click();
+                        App.discardSale(true);
                         App.jPriceInput.focus();
                     }
                 }).appendTo(payment);
@@ -1115,7 +1127,7 @@ App.renderWebRegister = function () {
         App.isInRegistrySession = true/*.text("1")*/;
     });
 
-    $("#sign-out").click(function () {
+    App.signout = $("#sign-out").click(function () {
         App.showLoading();
         $.ajax({
             type: "GET",
@@ -1176,17 +1188,18 @@ App.renderSignUp = function () {
 // render login view
 App.renderLogin = function () {
     App.closeCurtain();
-    var loginDOM = [
+    var loginDOM =
             '<div class="center-box">\
-                <div id="sign-in-welcome">Welcome to OPS</div>\
+                <div class="form-header">Welcome to OPS</div>\
                 <form id="sign-in" action="" method="POST">\
-                    <div id="sign-in-label">OPEN YOUR STORE</div>\
+                    <div class="form-label">OPEN YOUR STORE</div>\
                     <input id="username" type="text" placeholder="EMAIL">\
                     <input id="password" type="password" placeholder="PASSWORD">\
-                    <input id="submit" type="submit" value="SIGN IN">\
+                    <input type="submit" value="SIGN IN">\
+                    <a id="forgot">Forgot your password?</a>\
                 </form>\
              </div>'
-    ];
+            ;
     App.jAppContainer.html(loginDOM);
     $("form#sign-in").submit(function (e) {
         e.preventDefault();
@@ -1205,16 +1218,16 @@ App.renderLogin = function () {
                     username: username || " ",
                     password: password || " "
                 }
-            }).done(function (data) {
-                if (data.isAuthenticated) {
+            }).done(function (resp) {
+                if (resp.isAuthenticated) {
                     App.initWebRegister();
                 } else {
                     alert("Wrong credentials");
                 }
-            }).fail(function (data) {
+            }).fail(function (resp) {
                 App.closeCurtain();
                 var msg = "The username and/or password is invalid";
-                if (data.status === 0) {
+                if (resp.status === 0) {
                     msg = "Network error. Please check your internet connection";
                 }
                 App.showWarning(msg);
@@ -1222,6 +1235,8 @@ App.renderLogin = function () {
         }
 
         t.find("#password").val("");
+    }).find("#forgot").click(function () {
+        $(this).text("How unfortunate");
     });
 };
 
@@ -1251,3 +1266,118 @@ App.renderLogin = function () {
     window.onafterprint = afterPrint;
 
 }());
+
+App.createControlPanel = function () {
+    var controlPanelContent = $(
+            '<div class="menu-item" id="sale-history">Sale History</div>\
+             <div class="menu-item" id="acc-settings">Account Settings</div>\
+             <div class="menu-item" id="pos-settings">Point of Sale Settings</div>\
+             <div class="menu-item" id="plu-settings">Edit PLU Articles</div>\
+             <div class="menu-item" id="sgs-settings">Edit Sale Groups</div>\
+             <div class="menu-item" id="qss-settings">Edit Quick Sales</div>\
+             <div class="menu-item" id="rec-settings">Edit Receipt</div>'
+            );
+    App.cpBody.append(controlPanelContent);
+    App.bindControlPanel();
+};
+
+App.renderAccountSettings = function () {
+    var accDOM =
+            '<div class="center-box">\
+                <div class="form-header">Account Settings</div>\
+                <form id="change-password" action="" method="POST">\
+                    <div class="form-label">CHANGE YOUR PASSWORD</div>\
+                    <input id="old-password" type="password" placeholder="OLD PASSWORD">\
+                    <input id="new-password" type="password" placeholder="NEW PASSWORD">\
+                    <input id="con-password" type="password" placeholder="CONFIRM PASSWORD">\
+                    <input type="submit" value="SUBMIT">\
+                </form>\
+             </div>';
+    App.cpBody.html(accDOM);
+
+    var goBack = $('<div id="go-back">Go back</div>').click(function () {
+        App.cpBody.html("");
+        App.createControlPanel();
+    });
+    
+    App.cpBody.find(".center-box").append(goBack);
+    var minPasswordLength = 5;
+    App.cpBody.find("form#change-password").submit(function (e) {
+        e.preventDefault();
+        var t = $(this);
+        var oldPass = t.find("#old-password");
+        var newPass = t.find("#new-password");
+        var conPass = t.find("#con-password");
+        if (newPass.val().length < minPasswordLength
+                || conPass.val().length < minPasswordLength
+                || oldPass.val().length < minPasswordLength) {
+            App.showWarning("The minimum length for a password is " + minPasswordLength + " characters");
+            return false;
+        }
+        if (newPass.val() !== conPass.val()) {
+            App.showWarning("Passwords do not match");
+            return false;
+        }
+        App.showLoading();
+        $.ajax({
+            type: "POST",
+            url: "changepassword",
+            dataType: "json",
+            data: {
+                oldpassword: oldPass.val(),
+                newpassword: newPass.val()
+            }
+        }).done(function (resp) {
+            App.closeCurtain();
+            if (resp.passwordChanged === true) {
+                App.showWarning("Password was successfully changed");
+            } else {
+                App.showWarning("Incorrect password");
+            }
+        }).fail(function (resp) {
+            App.closeCurtain();
+            var msg = "The password is invalid";
+            if (resp.status === 0) {
+                msg = "Network error. Please check your internet connection";
+            }
+            App.showWarning(msg);
+        });
+        oldPass.val("");
+        newPass.val("");
+        conPass.val("");
+    }).click(function (e) {
+        e.stopPropagation();
+    });
+};
+
+App.bindControlPanel = function () {
+    App.cpBody.find(".menu-item").each(function () {
+        var t = $(this);
+        var id = t.attr("id");
+        switch (id) {
+            case "sale-history":
+                //t.click(App.renderSaleHistory);
+                break;
+            case "acc-settings":
+                t.click(App.renderAccountSettings);
+                break;
+            case "pos-settings":
+                //t.click(App.renderAccountSettings);
+                break;
+            case "plu-settings":
+                //t.click(App.renderAccountSettings);
+                break;
+            case "sgs-settings":
+                //t.click(App.renderAccountSettings);
+                break;
+            case "qss-settings":
+                //t.click(App.renderAccountSettings);
+                break;
+            case "rec-settings":
+                //t.click(App.renderAccountSettings);
+                break;
+            default:
+
+        }
+    });
+};

@@ -51,6 +51,8 @@ var logout = require('./routes/logout');
 var settings = require('./routes/settings');
 var catalog = require('./routes/catalog');
 
+var changepassword = require('./routes/changepassword');
+
 app.use('/', index);
 app.use('/', isAuthenticated);
 app.use('/', auth);
@@ -58,6 +60,8 @@ app.use('/', logout);
 app.use('/api', ensureAuthenticated);
 app.use('/api', settings);
 app.use('/api', catalog);
+
+app.use('/', changepassword);
 
 
 

@@ -32,7 +32,7 @@ html, body, ul, input {
     font-size: 24px;
     list-style-type: none;
 }
-html, body, #app, #main, #curtain {
+html, body, #app, #main, #curtain, #control-panel {
     color: #353535;
     height: 100%;
     width: 100%;
@@ -46,28 +46,26 @@ html, body, #app, #main, #curtain {
     justify-content: center;
     align-items: center;
 }
-#sign-in-welcome {
+.form-header {
     width: 100%;
     max-width: 640px;
     background-color: #334C60;
     color: #fff;
     padding: 15px 20px;
-    border-radius: 3px 3px 0 0;
     background-image: url("../img/logo.png");
     background-position: 98%;
     background-repeat: no-repeat;
     background-size: 50px;
 }
-form#sign-in {
+form {
     background-color: #fff;
-    border-radius: 0 0 3px 3px;
     padding: 20px;
     width: 100%;
     max-width: 640px;
     display: flex;
     flex-direction: column;
 }
-form#sign-in input {
+form input {
     border: 1px solid #CACACA;
     font-size: 14px;
     padding: 20px;
@@ -78,26 +76,34 @@ form#sign-in input {
     background-size: 20px;
     text-indent: 40px;
 }
-form#sign-in #username {
+form #username {
     background-image: url("../img/icons/user.svg");
 }
-form#sign-in #password {
+form [type="password"] {
     background-image: url("../img/icons/lock.svg");
 }
-form#sign-in #submit {
+form [type="submit"] {
     text-indent: 0;
     cursor: pointer;
     color: #fff;
     background-color: #01AA93;
     background-image: none;
 }
-form#sign-in #submit:hover {    
+form [type="submit"]:hover {    
     background-color: #59AAD3;
 }
-form#sign-in #sign-in-label {    
+form .form-label {   
+    color: #353535;
     font-size: 18px;
     line-height: 40px;
     width: 100%;
+}
+#forgot {
+    cursor: pointer;
+    font-size: 16px;
+    text-decoration: underline;
+    color: #298FE0;
+    margin: 0 0 0 auto;
 }
 #registry-session {
     display: none;
@@ -106,7 +112,7 @@ form#sign-in #sign-in-label {
     background-color: #903030;
     cursor: pointer;
 }
-#logo > div {
+#logo > div.logo {
     background-image: url("../img/logo.png");
     background-repeat: no-repeat;
     background-size: contain;
@@ -155,20 +161,35 @@ nav {
     text-indent: 20px;
     background-image: url("../img/icons/userwhite.svg");    
 }
-#menu-left {
+#control-panel {
+    z-index: 1;
     display: flex;
     flex-direction: column;
     position: fixed;
     top: 0;
-    height: 100%;
-    width: 80px;
-    left: -85px;
+    left: -100%;
     color: #E8E8E8;
-    background-color: rgb(34, 36, 38);
-    box-shadow: 1px 0px 5px 1px rgba(0,0,0,0.7);
+    background-color: #222426;
 }
-#menu-left.visible {
+#control-panel.visible {
     left: 0;
+}
+#go-back {
+    cursor: pointer;
+    font-size: 16px;
+    text-align: center;
+    line-height: 75px;
+    background-color: #903030;
+    width: 100%;
+    max-width: 640px;
+    margin-top: 20px;
+    background-image: url("../img/icons/circle-arrow-back.svg");
+    background-position: 20px;
+    background-size: 40px;
+    background-repeat: no-repeat;
+}
+#go-back:hover {
+    background-color: #334C60;
 }
 #main {
     margin: 0 auto;
@@ -184,31 +205,54 @@ nav {
     -moz-filter: blur(1px);
     filter: blur(1px);
 }
-#menu-header {
+#cp-header {
+    display: flex;
     background-color: #903030;
     margin-bottom: 50px;
+    line-height: 50px;
+    font-size: 18px;
 }
-#menu-header > div {
+#cp-header > .logo {
     background: url("../img/logo.png") 100% / cover;
     height: 50px;
     width: 50px;
-    margin: 0 auto;
+    margin: 0 0 0 auto;
     cursor: pointer;
 }
-#menu-header > div:hover {
+#cp-header > .label {
+    margin: 0 auto 0 0;
+}
+#cp-header > .close {
+    cursor: pointer; 
+    height: 100%;
+    width: 50px;
+    text-align: center;
+    font-size: 24px;
+}
+#cp-header > .close:before {
+    content: "\00d7";   
+}
+#cp-header > .close:hover {
+    background-color: #222426;   
+}
+#cp-header > .logo:hover {
     transform: rotate(-90deg);
 }
-#menu-body {
+#cp-body {
     display: flex;
     flex-direction: column;
 }
-.menu-item {
-    background: url("../img/logo.png") 100% / cover;
-    height: 50px;
-    width: 50px;
+.menu-item {    
+    cursor: pointer;
+    font-size: 16px;
+    background-color: #903030;
+    text-align: center;
+    line-height: 50px;
+    width: 300px;
     margin: 5px auto;
-    border: 1px solid #ccc;
-    border-radius: 3px;
+}
+.menu-item:hover {
+    background-color: #425B71;
 }
 input {
     border: none;
@@ -217,9 +261,11 @@ input {
     position: relative;
     margin: 0 0 5px 0;
     flex-grow: 0;
-    display: flex;
     flex-direction: column;
     display: none;
+}
+#live-search.activePLU {
+    display: flex;
 }
 #search {
     font-size: 40px;
@@ -307,7 +353,7 @@ button {
     overflow: hidden;
     cursor: pointer;
     border: none;
-    color: #FFF;
+    color: #fff;
     padding: 0;
     border-radius: 3px;
     background-color: #334C60;
@@ -328,11 +374,11 @@ button#park-sale, button#discard-sale {
     flex-grow: 0;
     font-size: 16px;
     text-align: right;
-    padding: 0 10px;
+    padding: 0 5px;
     border: 1px solid transparent;
-    text-indent: 30px;
-    background-size: 30px 30px;
-    background-position: 6px 4px;
+    text-indent: 25px;
+    background-size: 18px;
+    background-position: 5px center;
     background-repeat: no-repeat;
     background-color: transparent;
 }
@@ -341,10 +387,10 @@ button#park-sale, button#discard-sale {
 }
 #park-sale {
     display: none;  
-    background-image: url("../img/logo-black.png");
+    background-image: url("../img/icons/clock.svg");
 }
 #discard-sale {
-    background-image: url("../img/logo-black.png");
+    background-image: url("../img/icons/bin.svg");
 }
 #reg-buttons {
     flex-grow: 1;
@@ -389,6 +435,7 @@ button#park-sale, button#discard-sale {
     width: 33.33333%;
     margin: 0px;
     display: inline-block;
+    position: relative;
 }
 .sg:hover, .qs-item button:hover {
     /*background-color: #E4644B; */
@@ -402,6 +449,15 @@ button#park-sale, button#discard-sale {
 }
 .qs-item div {
     display: none;
+}
+.qs-item .qs-price {
+    cursor: pointer;
+    display: flex;
+    position: absolute;
+    bottom: 10%;
+    right: 10%;
+    color: #fff;
+    font-size: 0px;
 }
 #tab-navs {
     position: relative;
@@ -605,7 +661,7 @@ button#btnm.activePLU:before {
 #paycalc {
     border-bottom: 3px solid transparent;
     display: flex;
-    height: 75px;
+    height: 60px;
 }
 #pay, #subtotal {
     border: 1px solid #E8E8E8;
@@ -664,7 +720,6 @@ button#btnm.activePLU:before {
 #col-2 {
     flex-grow: 1;
 }
-
 #curtain {
     padding-top: 45px;
     z-index: 2;
@@ -946,6 +1001,13 @@ div#taxes-label {
 #warning-box {
     height: 100px;
 }
+.wb-title {
+    background-image: url('../img/icons/info.svg');
+    background-size: 24px;
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 40px;
+}
 .wb-body {
     background-color: #F8F8F8;
     flex-grow: 1;
@@ -1060,6 +1122,9 @@ div#taxes-label {
 }
 
 @media screen and (min-width: 720px){
+    #paycalc {
+        height: 75px;
+    }
     #keyboard {
         display: flex;
     }
@@ -1132,6 +1197,9 @@ div#taxes-label {
     }
     #sale-groups:after, .quick-sales:after, #tab-navs:after  {
         border-left-color: transparent;
+    }
+    .qs-item .qs-price {
+        font-size: 12px;
     }
     #tab-navs {
         flex-wrap: nowrap;
@@ -1209,7 +1277,7 @@ div#taxes-label {
     #col-1 {
         flex-grow: 1;
     }
-    form#sign-in {
+    form {
         padding: 40px;
     }
     .cash-button {
@@ -1250,6 +1318,9 @@ div#taxes-label {
         height: 80px;
         font-size: 16px;
     }
+    .qs-item .qs-price {
+        font-size: 14px;
+    }
 }/*
 @media screen and (min-width: 1366px){
     #sale-groups button, .qs-item {
@@ -1259,6 +1330,12 @@ div#taxes-label {
 @media screen and (min-width: 1440px){
     #sale-groups button, .qs-item {
         width: 16.66666%;
+    }
+    #sale-groups button, .qs-item button {
+        height: 90px;
+    }
+    .qs-item .qs-price {
+        font-size: 16px;
     }
 }/*
 @media screen and (min-width: 1600px){
@@ -1274,13 +1351,14 @@ div#taxes-label {
     #menu-top > div { 
         transition: border-bottom .2s ease;
     }
-    #menu-left {
+    #control-panel {
         transition: left .2s ease;
     }
-    #menu-header > div {
+    #cp-header > div {
         transition: transform .2s ease;
     }
-    button, form#sign-in #submit, #tab-navs .tab-nav {
+    button, form [type="submit"], #tab-navs .tab-nav, .menu-item,
+    #cp-header > .close, #go-back {
         transition: background-color .2s ease;
     }
     button#park-sale, button#discard-sale {
@@ -1301,7 +1379,7 @@ div#taxes-label {
     html, body {
         font-family: "Open Sans", sans-serif;
     }
-    nav, #menu-left, #main, .pb-header, #payment {
+    nav, #control-panel, #main, .pb-header, #payment {
         display: none;
     }
     #curtain {
