@@ -52,7 +52,7 @@ html, body, #app, #main, #curtain, #control-panel {
     background-color: #334C60;
     color: #fff;
     padding: 15px 20px;
-    background-image: url("../img/logo.png");
+    background-image: url("../img/logow.svg");
     background-position: 98%;
     background-repeat: no-repeat;
     background-size: 50px;
@@ -117,7 +117,7 @@ form .form-label {
     cursor: pointer;
 }
 #logo > div.logo {
-    background-image: url("../img/logo.png");
+    background-image: url("../img/logow.svg");
     background-repeat: no-repeat;
     background-size: contain;
     width: 40px;
@@ -217,7 +217,7 @@ nav {
     font-size: 18px;
 }
 #cp-header > .logo {
-    background: url("../img/logo.png") 100% / cover;
+    background: url("../img/logow.svg") 100% / cover;
     height: 50px;
     width: 50px;
     margin: 0 0 0 auto;
@@ -801,7 +801,7 @@ button.db-close:before, button.pb-close:before, button.wb-close:before {
     /* justify-content: space-between; */
 }
 .db-img {
-    background-image: url("../img/logo-black.png");
+    background-image: url("../img/logob.svg");
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
@@ -1034,7 +1034,7 @@ div#taxes-label {
     border: 1px solid transparent;
 }
 #print-receipt:hover {
-    border: 1px solid #434343;
+    border: 1px solid #aaa;
 }
 .pc-label {
     width: 100%;
@@ -1490,13 +1490,6 @@ div#taxes-label {
     }
     .preview {
         display: none;
-        /*text-indent: -9999px;
-        background-image: url("../img/logo-black.png");
-        background-size: contain;
-        background-repeat: no-repeat;
-        background-position: center;
-        height: 100px;*/
-        /*white-space: nowrap;*/
     }
     .receipt-container {
         max-width: 270px;
@@ -1544,7 +1537,7 @@ div#taxes-label {
         display: block;
         line-height: 25px;
         font-size: 12px;
-        background-image: url("../img/logo-black.png");
+        background-image: url("../img/logob.svg");
         background-size: 25px;
         background-position: 60px;
         background-repeat: no-repeat;

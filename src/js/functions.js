@@ -802,7 +802,7 @@ App.renderWebRegister = function () {
             var t = qss[j];
             tabsContent +=
                     '<div class="qs-item">\
-                        <button>' + t.text + '</button>\
+                        <button style="background-color:#' + t.bg + '">' + t.text + '</button>\
                         <div class="qs-id">qs-t' + (i + 1) + "-" + j + '</div>\
                         <div class="qs-price">' + t.price + ' ' + App.settings.currency.symbol + '</div>\
                         <div class="qs-group">' + t.group + '</div>\
@@ -1062,7 +1062,7 @@ App.renderWebRegister = function () {
                         $(this).text("Email sent").addClass("sent").off();
                         emailInput.remove();
                     } else {
-                        emailInput.addClass("invalid").val("Invalid email syntax!");
+                        emailInput.addClass("invalid").val("Invalid email");
                     }
                 }).appendTo(emailReceipt);
                 emailReceipt.appendTo(payment);
