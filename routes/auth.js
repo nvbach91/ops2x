@@ -5,7 +5,7 @@ var crypto = require('crypto');
 var Users = require('../models/Users');
 
 function isValidUsername(username) {
-    if (username === "guest") {
+    if (["guest", "tester"].indexOf(username) >= 0) {
         return true;
     }
     var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;

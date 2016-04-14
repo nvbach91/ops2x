@@ -12,40 +12,23 @@ var Settings = new Schema({
         zip: String,
         country: String
     },
-    phones: [String],
+    phone: String,
     currency: {
         code: String,
         symbol: String
     },
-    decimal_delimiter: String,
-    timezone: String,
     tax_rates: [Number],
-    buttons: {
-        saleGroups: [
-            {
-                text: String,
-                bg: String,
-                group: String,
-                tax: Number
-            }
-        ],
-        tabs: [
-            {
-                name: String,
-                quickSales: [
-                    {
-                        bg: String,
-                        text: String,
-                        price: String,
-                        group: String,
-                        tax: Number,
-                        tags: [String],
-                        desc: String
-                    }
-                ]
-            }
-        ]
-    }
+    staff: [
+        {
+            number: {
+                type: Number,
+                unique: true
+            },
+            role: String,
+            name: String,
+            pin: String
+        }
+    ]
 });
 
 module.exports = mongoose.model("settings", Settings);

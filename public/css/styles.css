@@ -13,7 +13,7 @@
     background-color: #E4644B;
 }
 #kc {
-    /*display: none;*/
+    display: none;
     position: fixed;
     right: 0;
     bottom: 0;
@@ -76,6 +76,9 @@ form input {
     background-size: 20px;
     text-indent: 40px;
 }
+form#sign-up input {
+    padding: 5px 20px;
+}
 form #username {
     background-image: url("../img/ico/user.svg");
 }
@@ -89,6 +92,10 @@ form [type="submit"] {
     background-color: #01AA93;
     background-image: none;
 }
+form#sign-up [type="submit"] {
+    background-color: #77D061;
+    padding: 20px;
+}
 form [type="submit"]:hover {    
     background-color: #59AAD3;
 }
@@ -98,13 +105,13 @@ form .form-label {
     line-height: 40px;
     width: 100%;
 }
-#forgot, #signup {
+#forgot, #signup, #signin {
     cursor: pointer;
     font-size: 14px;
     text-decoration: underline;
     color: #298FE0;
 }
-#sign-in-help {
+#form-help {
     padding: 10px 0;
     display: flex;
     justify-content: space-between;
@@ -264,6 +271,7 @@ nav {
 }
 #sale-history {background-image: url('../img/ico/history.svg');}
 #acc-settings {background-image: url('../img/ico/userwhite.svg');}
+#sta-settings {background-image: url('../img/ico/staff.svg');}
 #pos-settings {background-image: url('../img/ico/pos.svg');}
 #plu-settings {background-image: url('../img/ico/barcode.svg');}
 #sgs-settings {background-image: url('../img/ico/sg.svg');}
@@ -1552,9 +1560,7 @@ div#taxes-label {
     to { transform: rotate(360deg); }
 }
 #loading {
-    position: absolute;
-    top: 50%;
-    left: 50%;    
+    margin: auto;
     height: 59px;    
     width: 59px;
     border-top: 4px solid #fff;

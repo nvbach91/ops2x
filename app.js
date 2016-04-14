@@ -6,6 +6,7 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var helmet = require('helmet');
 
 var expressSession = require('express-session');
 var passport = require('passport');
@@ -21,6 +22,7 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
+app.use(helmet());
 app.use(favicon(path.join(__dirname, 'public/img', 'favicon.png')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
@@ -31,7 +33,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(expressSession({
     secret: process.env.SESSION_SECRET || 'suchclassifiedveryconfidentialmuchsecreetwow',
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,    
+    cookie: {maxAge: 86400000} // 24 hours
 }));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -46,20 +49,26 @@ var ensureAuthenticated = function (req, res, next) {
 
 var index = require('./routes/index');
 var isAuthenticated = require('./routes/isAuthenticated');
+var signup = require('./routes/signup');
 var auth = require('./routes/auth');
 var logout = require('./routes/logout');
 var settings = require('./routes/settings');
+var buttons = require('./routes/buttons');
 var catalog = require('./routes/catalog');
+var sales = require('./routes/sales');
 
 var changepassword = require('./routes/changepassword');
 
 app.use('/', index);
+app.use('/', signup);
 app.use('/', isAuthenticated);
 app.use('/', auth);
 app.use('/', logout);
 app.use('/api', ensureAuthenticated);
 app.use('/api', settings);
+app.use('/api', buttons);
 app.use('/api', catalog);
+app.use('/api', sales);
 
 app.use('/', changepassword);
 

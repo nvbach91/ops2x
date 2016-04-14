@@ -376,7 +376,7 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
     var individualDiscount = $("<div>").addClass("change-discount");
     $("<div>").addClass("d-label").text("Individual Discount (%)").appendTo(individualDiscount);
     $("<input>").addClass("d-discount")
-            .attr({maxlength: 3, placeholder: "0 - 100"})
+            .attr({maxlength: 2, placeholder: "0 - 100"})
             .val(0)
             .keydown(function (e) {
                 e.stopPropagation();
@@ -769,7 +769,7 @@ App.renderWebRegister = function () {
     });
 
     // generate sale groups and quick sale
-    var btns = App.settings.buttons;
+    var btns = App.buttons;
     var sg = $("#sale-groups");
     var sgContent = "";
     var nSgs = btns.saleGroups.length;
@@ -788,7 +788,7 @@ App.renderWebRegister = function () {
 
     var tabsContainer = $("#tabs");
     var tabNavsContainer = $("#tab-navs");
-    var tabs = App.settings.buttons.tabs;
+    var tabs = App.buttons.tabs;
     var nTabs = tabs.length;
     var tabsContent = "";
     var tabNavsContent = [];
@@ -1051,10 +1051,12 @@ App.renderWebRegister = function () {
                     receiptPrinted = true;
                 }).appendTo(payment);
                 var emailReceipt = $("<div>").addClass("email-receipt").appendTo(payment);
-                var emailInput = $("<input>").attr("id", "email-input").click(function () {
+                var emailInput = $("<input>").attr("id", "email-input").focus(function () {
                     emailInput.removeClass("invalid");
-                    emailInput.val("@");
-                    emailInput.select();
+                    if (emailInput.val() !== "@") {
+                        emailInput.val("@");
+                        emailInput.select();
+                    }
                 }).val("@").appendTo(emailReceipt);
                 $("<button>").attr("id", "email-send").text("Email receipt").click(function () {
                     var recipient = emailInput.val();
@@ -1160,7 +1162,7 @@ App.renderWebRegister = function () {
             type: "GET",
             url: "/logout"
         }).done(function () {
-            App.renderLogin();
+            App.renderSignin();
         }).fail(function () {
             //App.renderLogin();
             App.closeCurtain();
@@ -1187,6 +1189,9 @@ App.initWebRegister = function () {
             }),
             $.getJSON("/api/settings", function (settings) {
                 App.settings = settings;
+            }),
+            $.getJSON("/api/buttons", function (buttons) {
+                App.buttons = buttons;
             })
             ).then(function () {
         App.renderWebRegister();
@@ -1200,22 +1205,98 @@ App.showLoading = function () {
 
 // check for valid email syntax, allows guest as valid
 App.isValidEmail = function (email) {
-    if (email === "guest") {
+    if (["guest", "tester"].indexOf(email) >= 0) {
         return true;
     }
     var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(email);
 };
 
-// render signup view
-App.renderSignUp = function () {
+// render signup
+App.renderSignup = function () {
+    var signupDOM =
+            '<div class="center-box">\
+                <div class="form-header">Welcome to OPS</div>\
+                <form id="sign-up" action="" method="POST">\
+                    <div class="form-label">CREATE A NEW STORE</div>\
+                    <input id="username" type="text" placeholder="EMAIL" required>\
+                    <input id="password" type="password" placeholder="PASSWORD" pattern=".{5,}" title="Password must be at least 5 characters long" required>\
+                    <input id="confirm" type="password" placeholder="CONFIRM PASSWORD" pattern=".{5,}" title="Password must be at least 5 characters long" required>\
+                    <input id="name" type="text" placeholder="Name" required>\
+                    <input id="tin" type="text" placeholder="Taxpayer Identification Number" pattern="\\d{4,10}" title="Invalid TIN. Example: 12345678" required>\
+                    <input id="vat" type="text" placeholder="Value Added Tax Number" pattern="CZ\\w{4,10}" title="Invalid VAT. Example: CZ0123456789" required>\
+                    <input id="street" type="text" placeholder="Street and Property Number" required>\
+                    <input id="city" type="text" placeholder="City" required>\
+                    <input id="zip" type="text" placeholder="ZIP Code" required>\
+                    <input id="country" type="text" placeholder="Country" required>\
+                    <input id="phone" type="text" placeholder="Phone Number" pattern="\\d{9}" title="9 Digits Phone Number" required>\
+                    <input type="submit" value="SIGN UP">\
+                    <div id="form-help">\
+                        <a id="signin">Go back to sign in</a>\
+                    </div>\
+                </form>\
+             </div>'
+            ;
+    App.jAppContainer.html(signupDOM);
 
+    var form = $("#sign-up");
+    form.find("#signin").click(function () {
+        App.renderSignin();
+    });
+    form.submit(function (e) {
+        e.preventDefault();
+        var username = $("#username");
+        if (!App.isValidEmail(username.val())) {
+            App.showWarning("<strong>" + username.val() + "</strong> is not a valid emaill address!");
+            return false;
+        }
+        var password = $("#password");
+        var confirm = $("#confirm");
+        if (password.val() !== confirm.val()) {
+            App.showWarning("Passwords do not match!");
+            return false;
+        }
+        var signupRequest = {
+            email: username.val(),
+            password: password.val(),
+            name: $(this).find("#name").val(),
+            tin: $(this).find("#tin").val(),
+            vat: $(this).find("#vat").val(),
+            street: $(this).find("#street").val(),
+            city: $(this).find("#city").val(),
+            zip: $(this).find("#zip").val(),
+            country: $(this).find("#country").val(),
+            phone: $(this).find("#phone").val()
+        };
+        App.showLoading();
+        $.ajax({
+            type: "POST",
+            url: "/signup",
+            dataType: "json",
+            data: signupRequest
+        }).done(function (resp) {
+            if (resp.success) {
+                App.renderSignin();
+                App.showWarning(resp.msg + "<br>Please check your inbox at <strong>" + username.val() + "</strong> for a confirmation link.");
+            } else {
+                App.closeCurtain();
+                App.showWarning(resp.msg);
+            }
+        }).fail(function (resp) {
+            App.closeCurtain();
+            var msg = "Incorrect username and/or password";
+            if (resp.status === 0) {
+                msg = "Network error. Please check your internet connection";
+            }
+            App.showWarning(msg);
+        });
+    });
 };
 
 // render login view
-App.renderLogin = function () {
+App.renderSignin = function () {
     App.closeCurtain();
-    var loginDOM =
+    var signinDOM =
             '<div class="center-box">\
                 <div class="form-header">Welcome to OPS</div>\
                 <form id="sign-in" action="" method="POST">\
@@ -1223,15 +1304,22 @@ App.renderLogin = function () {
                     <input id="username" type="text" placeholder="EMAIL">\
                     <input id="password" type="password" placeholder="PASSWORD">\
                     <input type="submit" value="SIGN IN">\
-                    <div id="sign-in-help">\
+                    <div id="form-help">\
                         <a id="signup">Don\'t have an account?</a>\
                         <a id="forgot">Forgot your password?</a>\
                     </div>\
                 </form>\
              </div>'
             ;
-    App.jAppContainer.html(loginDOM);
-    $("form#sign-in").submit(function (e) {
+    App.jAppContainer.html(signinDOM);
+    var form = $("#sign-in");
+    form.find("#forgot").click(function () {
+        $(this).text("How unfortunate");
+    });
+    form.find("#signup").click(function () {
+        App.renderSignup();
+    });
+    form.submit(function (e) {
         e.preventDefault();
         var t = $(this);
         var username = t.find("#username").val();
@@ -1265,8 +1353,6 @@ App.renderLogin = function () {
         }
 
         t.find("#password").val("");
-    }).find("#forgot").click(function () {
-        $(this).text("How unfortunate");
     });
 };
 
@@ -1301,6 +1387,7 @@ App.createControlPanel = function () {
     var cpContent = $(
             '<div class="cp-item" id="sale-history">Sales History</div>\
              <div class="cp-item" id="acc-settings">Account Settings</div>\
+             <div class="cp-item" id="sta-settings">Staff Settings</div>\
              <div class="cp-item" id="pos-settings">Point of Sale Settings</div>\
              <div class="cp-item" id="plu-settings">Edit PLU Articles</div>\
              <div class="cp-item" id="sgs-settings">Edit Sale Groups</div>\
@@ -1386,25 +1473,42 @@ App.bindControlPanel = function () {
         var id = t.attr("id");
         switch (id) {
             case "sale-history":
-                t.click(function(){t.text("Not yet available");});
+                t.click(function () {
+                    t.text("Not yet available");
+                });
                 break;
             case "acc-settings":
                 t.click(App.renderAccountSettings);
                 break;
+            case "sta-settings":
+                t.click(function () {
+                    t.text("Not yet available");
+                });
+                break;
             case "pos-settings":
-                t.click(function(){t.text("Not yet available");});
+                t.click(function () {
+                    t.text("Not yet available");
+                });
                 break;
             case "plu-settings":
-                t.click(function(){t.text("Not yet available");});
+                t.click(function () {
+                    t.text("Not yet available");
+                });
                 break;
             case "sgs-settings":
-                t.click(function(){t.text("Not yet available");});
+                t.click(function () {
+                    t.text("Not yet available");
+                });
                 break;
             case "qss-settings":
-                t.click(function(){t.text("Not yet available");});
+                t.click(function () {
+                    t.text("Not yet available");
+                });
                 break;
             case "rec-settings":
-                t.click(function(){t.text("Not yet available");});
+                t.click(function () {
+                    t.text("Not yet available");
+                });
                 break;
             default:
 

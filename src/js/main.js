@@ -11,7 +11,7 @@ $(document).ready(function () {
         url: "/isAuthenticated"
     }).done(function (data) {
         if (!data.isAuthenticated) {
-            App.renderLogin();
+            App.renderSignin();
         } else {
             App.initWebRegister();
         }
