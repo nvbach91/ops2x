@@ -28,4 +28,4 @@ var Settings = new Schema({
     ]
 });
 
-module.exports = mongoose.model("settings", Settings);
+module.exports = mongoose.model('settings', Settings);

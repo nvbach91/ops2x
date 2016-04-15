@@ -10,13 +10,7 @@ var Sales = require('../models/Sales');
 var ObjectID = require('mongodb').ObjectID;
 
 var nodemailer = require('nodemailer');
-var transporter = nodemailer.createTransport({
-    service: 'Gmail',
-    auth: {
-        user: "info.enterpriseapps@gmail.com",
-        pass: "trello2015"
-    }
-});
+var transporter = nodemailer.createTransport(config.mail_transport);
 
 function isValidUsername(username) {
     var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -30,76 +24,67 @@ function hash(password) {
 ;
 
 router.post('/signup', function (req, res) {
-    var email = req.body.email;
-    Users.findOne({email: email}, function (err, user) {
+    var newEmail = req.body.email;
+    Users.findOne({email: newEmail}, function (err, user) {
         if (user) {
-            res.json({success: false, msg: "Account <strong>" + email + "</strong> already exists"});
+            res.json({success: false, msg: 'Account ' + newEmail + ' already registered'});
         } else {
-            var errors = [];
             var newUserId = new ObjectID();
-            var newUser = new Users({
-                _id: newUserId,
-                email: email,
-                password: hash(req.body.password),
-                validated: false
-            });
-
-            newUser.save(function (err) {
-                if (err) {
-                    errors.push(err);
-                }
-            }).then(function () {
-                var newSettings = new Settings(generateDefaultSettings(newUserId, req.body));
-                newSettings.save(function (err) {
-                    if (err) {
-                        errors.push(err);
+            var newUser = new Users(generateNewUser(newUserId, newEmail, req.body.password));
+            var newSettings = new Settings(generateDefaultSettings(newUserId, req.body));
+            var newButtons = new Buttons(generateDefaultButtons(newUserId));
+            var newCatalog = new Catalogs(generateDefaultCatalog(newUserId));
+            var newSales = new Sales(generateDefaultSales(newUserId));
+            newUser.save().then(function (s) {
+                console.log('User     created: ' + s._id);
+                return newSettings.save();
+            }).then(function (s) {
+                console.log('Settings created: ' + s.userId);
+                return newButtons.save();
+            }).then(function (s) {
+                console.log('Buttons  created: ' + s.userId);
+                return newCatalog.save();
+            }).then(function (s) {
+                console.log('Catalog  created: ' + s.userId);
+                return newSales.save();
+            }).then(function (s) {
+                console.log('Sales    created: ' + s.userId);
+                transporter.sendMail(config.generateMail(newEmail, newUserId.valueOf()), function (error, info) {
+                    if (error) {
+                        return console.log(error);
                     }
-                });
-            }).then(function () {
-                var newButtons = new Buttons(generateDefaultButtons(newUserId));
-                newButtons.save(function (err) {
-                    if (err) {
-                        errors.push(err);
-                    }
-                });
-            }).then(function () {
-                var newCatalog = new Catalogs(generateDefaultCatalog(newUserId));
-                newCatalog.save(function (err) {
-                    if (err) {
-                        errors.push(err);
-                    }
-                });
-            }).then(function () {
-                var newSales = new Sales(generateDefaultSales(newUserId));
-                newSales.save(function (err) {
-                    if (err) {
-                        errors.push(err);
-                    }
-                });
-            }).then(function () {
-                res.json({
-                    success: errors.length ? false : true,
-                    msg: errors.length ? errors : "Account <strong>" + email + "</strong> was sucessfully created"
-                });
-                if (errors.length === 0) {
-                    var mailOptions = {
-                        from: '"EnterpriseApps" <nvbachx9@gmail.com>',
-                        to: email,
-                        subject: "Online Point of Sale System Sign Up",
-                        text: "Hello,\n\nyou have recently registered an account on Online Point of Sale System. Please visit the following link to complete your registration.\n\n"
-                                + config.host + "/validate?key=" + newUserId.valueOf()
-                                + "\n\nBest regards,\nOnline Point of Sale System Team",
-                        html: ""
-                    };
-                    transporter.sendMail(mailOptions, function (error, info) {
-                        if (error) {
-                            return console.log(error);
-                        }
-                        console.log('Message sent: ' + info.response);
+                    console.log('Message sent to ' + newEmail + ': ' + info.response);
+                    res.json({
+                        success: true,
+                        msg: newEmail
                     });
-                }
+                });
+            }).catch(function (err) {
+                console.log(err);
+                console.log('Reverting mongoose saves...');
+                Users.findOneAndRemove({_id: newUserId}).exec().then(function () {
+                    console.log('User     removed: ' + newUserId);
+                    return Settings.findOneAndRemove({userId: newUserId}).exec();
+                }).then(function () {
+                    console.log('Settings removed: ' + newUserId);
+                    return Buttons.findOneAndRemove({userId: newUserId}).exec();
+                }).then(function () {
+                    console.log('Buttons  removed: ' + newUserId);
+                    return Catalogs.findOneAndRemove({userId: newUserId}).exec();
+                }).then(function () {
+                    console.log('Catalog  removed: ' + newUserId);
+                    return Sales.findOneAndRemove({userId: newUserId}).exec();
+                }).then(function () {
+                    console.log('Sales    removed: ' + newUserId);
+                    res.json({
+                        success: false,
+                        msg: err
+                    });
+                    console.log('Reverted mongoose saves...');
+                }).catch(function (err) {
+                    console.log(err);
+                });
             });
-
         }
     });
 });
@@ -108,6 +93,46 @@ module.exports = router;
 
 
 // defaults
+function generateNewUser(newUserId, newEmail, password) {
+    return {
+        _id: newUserId,
+        email: newEmail,
+        password: hash(password),
+        activated: false
+    };
+}
+;
+function generateDefaultSettings(newUserId, request) {
+    return {
+        userId: newUserId,
+        tin: request.tin,
+        vat: request.vat,
+        name: request.name,
+        address: {
+            street: request.street,
+            city: request.city,
+            zip: request.zip,
+            country: request.country
+        },
+        phone: request.phone,
+        currency: JSON.parse(request.currency),
+        tax_rates: [
+            0,
+            10,
+            15,
+            21
+        ],
+        staff: [
+            {
+                number: 0,
+                role: "Admin",
+                name: "Admin",
+                pin: "0000"
+            }
+        ]
+    };
+}
+;
 function generateDefaultButtons(newUserId) {
     return {
         userId: newUserId,
@@ -285,40 +310,6 @@ function generateDefaultButtons(newUserId) {
                         text: "Sample 3"
                     }
                 ]
-            }
-        ]
-    };
-}
-;
-function generateDefaultSettings(newUserId, request) {
-    return {
-        userId: newUserId,
-        tin: request.tin,
-        vat: request.vat,
-        name: request.name,
-        address: {
-            street: request.street,
-            city: request.city,
-            zip: request.zip,
-            country: request.country
-        },
-        phone: request.phone,
-        currency: {
-            code: "CZK",
-            symbol: "Kč"
-        },
-        tax_rates: [
-            0,
-            10,
-            15,
-            21
-        ],
-        staff: [
-            {
-                number: 0,
-                role: "Admin",
-                name: "Admin",
-                pin: "0000"
             }
         ]
     };

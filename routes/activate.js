@@ -2,18 +2,18 @@ var router = require('express').Router();
 var Users = require('../models/Users');
 var ObjectID = require('mongodb').ObjectID
 
-router.get('/validate', function (req, res) {
+router.get('/activate', function (req, res) {
     var key = req.query.key;
     if (!ObjectID.isValid(key)) {
-        res.redirect("/");
+        res.render('invalidrequest');
         return;
     }
     var query = {_id: new ObjectID(key)};
-    Users.findOneAndUpdate(query, {validated: true}, function (err, user) {
+    Users.findOneAndUpdate(query, {$set:{activated: true}}, function (err, user) {
         if (user) {
-            res.redirect("/");
+            res.render('activationsuccess');
         } else {
-            res.redirect("/");
+            res.render('invalidrequest');
         }
     });
 });

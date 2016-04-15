@@ -21,4 +21,4 @@ var Sales = new Schema({
     ]
 });
 
-module.exports = mongoose.model("sales", Sales);
+module.exports = mongoose.model('sales', Sales);

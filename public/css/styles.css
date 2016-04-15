@@ -26,6 +26,9 @@
 body {
     background-color: #E8E8E8;
 }
+a {
+    color: #298FE0
+}
 html, body, ul, input {
     padding: 0;
     margin: 0;
@@ -46,7 +49,10 @@ html, body, #app, #main, #curtain, #control-panel {
     justify-content: center;
     align-items: center;
 }
-.form-header {
+#activation-success, #invalid-request {
+   text-align: center;
+}
+.form-header, .form-footer {
     width: 100%;
     max-width: 640px;
     background-color: #334C60;
@@ -57,6 +63,11 @@ html, body, #app, #main, #curtain, #control-panel {
     background-repeat: no-repeat;
     background-size: 50px;
 }
+.form-footer {
+    font-size: 12px;
+    padding: 10px 20px;
+    background-size: 25px;
+}
 form {
     background-color: #fff;
     padding: 20px;
@@ -64,6 +75,10 @@ form {
     max-width: 640px;
     display: flex;
     flex-direction: column;
+}
+form select {
+    padding: 5px 20px;
+    text-indent: 36px;
 }
 form input {
     border: 1px solid #CACACA;
@@ -93,7 +108,7 @@ form [type="submit"] {
     background-image: none;
 }
 form#sign-up [type="submit"] {
-    background-color: #77D061;
+    background-color: #6EC179;
     padding: 20px;
 }
 form [type="submit"]:hover {    
@@ -110,7 +125,7 @@ form .form-label {
     font-size: 14px;
     text-decoration: none;
     color: #298FE0;
-    padding: 10px;
+    padding: 0 10px;
 }
 #forgot:hover, #signup:hover, #signin:hover {    
     text-decoration: underline;

@@ -29,4 +29,4 @@ var Buttons = new Schema({
     ]
 });
 
-module.exports = mongoose.model("buttons", Buttons);
+module.exports = mongoose.model('buttons', Buttons);

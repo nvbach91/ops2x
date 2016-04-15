@@ -721,6 +721,9 @@ App.init = function () {
         }
         return true;
     });
+    /*$(window).on("beforeunload", function () {
+        return "You are about to close this application. Any unsaved work will be lost!";
+    });*/
 };
 
 // render web register view
@@ -1230,11 +1233,16 @@ App.renderSignup = function () {
                     <input id="zip" type="text" placeholder="ZIP Code" required>\
                     <input id="country" type="text" placeholder="Country" required>\
                     <input id="phone" type="text" placeholder="Phone Number" pattern="\\d{9}" title="9 Digits Phone Number" required>\
+                    <select id="currency">\
+                        <option data=\'{"code":"CZK","symbol":"Kč"}\' selected>CZK</option>\
+                        <option data=\'{"code":"SKK","symbol":"Sk"}\'>SKK</option>\
+                    </select>\
                     <input type="submit" value="SIGN UP">\
                     <div id="form-help">\
                         <div id="signin">Back to sign in</div>\
                     </div>\
                 </form>\
+                <div class="form-footer">Powered by EnterpriseApps</div>\
              </div>'
             ;
     App.jAppContainer.html(signupDOM);
@@ -1266,7 +1274,8 @@ App.renderSignup = function () {
             city: $(this).find("#city").val(),
             zip: $(this).find("#zip").val(),
             country: $(this).find("#country").val(),
-            phone: $(this).find("#phone").val()
+            phone: $(this).find("#phone").val(),
+            currency: $(this).find("#currency").find(":selected").attr("data")
         };
         App.showLoading();
         $.ajax({
@@ -1277,10 +1286,10 @@ App.renderSignup = function () {
         }).done(function (resp) {
             if (resp.success) {
                 App.renderSignin();
-                App.showWarning(resp.msg + "<br>Please check your inbox at <strong>" + username.val() + "</strong> for a confirmation link.");
+                App.showWarning("Thank you for creating an account<br>Please check your inbox at <strong>" + resp.msg + "</strong> to complete the registration");
             } else {
                 App.closeCurtain();
-                App.showWarning(resp.msg);
+                App.showWarning("Unable to create account<br><strong>" + resp.msg + "</strong><br>Please let us know at <a href='mailto:info.enterpriseapps@gmail.com'>info.enterpriseapps@gmail.com</a>");
             }
         }).fail(function (resp) {
             App.closeCurtain();
@@ -1309,6 +1318,7 @@ App.renderSignin = function () {
                         <div id="forgot">Forgot your password?</div>\
                     </div>\
                 </form>\
+                <div class="form-footer">Powered by EnterpriseApps</div>\
              </div>'
             ;
     App.jAppContainer.html(signinDOM);
@@ -1404,9 +1414,9 @@ App.renderAccountSettings = function () {
                 <div class="form-header">Account Settings</div>\
                 <form id="change-password" action="" method="POST">\
                     <div class="form-label">CHANGE YOUR PASSWORD</div>\
-                    <input id="old-password" type="password" placeholder="OLD PASSWORD">\
-                    <input id="new-password" type="password" placeholder="NEW PASSWORD">\
-                    <input id="con-password" type="password" placeholder="CONFIRM PASSWORD">\
+                    <input id="old-password" type="password" pattern=".{5,}" title="Password must be at least 5 characters long" placeholder="OLD PASSWORD">\
+                    <input id="new-password" type="password" pattern=".{5,}" title="Password must be at least 5 characters long" placeholder="NEW PASSWORD">\
+                    <input id="con-password" type="password" pattern=".{5,}" title="Password must be at least 5 characters long" placeholder="CONFIRM PASSWORD">\
                     <input type="submit" value="SUBMIT">\
                 </form>\
              </div>';

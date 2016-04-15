@@ -16,4 +16,4 @@ var Catalogs = new Schema({
     ]
 });
 
-module.exports = mongoose.model("catalogs", Catalogs);
+module.exports = mongoose.model('catalogs', Catalogs);

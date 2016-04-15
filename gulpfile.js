@@ -37,13 +37,13 @@ gulp.task('css', function () {
 gulp.task('browser-sync', ['nodemon'], function () {
     /*browserSync({
      server: {
-     baseDir: "./public/"
+     baseDir: './public/'
      }
      });*/
     browserSync.init(null, {
-        proxy: "http" + (argv.https ? "s" : "") + "://127.0.0.1:3000",
-        files: ["public/**/*.*"],
-        //browser: "google chrome",
+        proxy: 'http' + (argv.https ? 's' : '') + '://127.0.0.1:3000',
+        files: ['public/**/*.*'],
+        //browser: 'google chrome',
         port: 7000,
         online: false
     });

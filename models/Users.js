@@ -4,7 +4,7 @@ var Schema = mongoose.Schema;
 var Users = new Schema({
     email: {type: String, required: true, index: {unique: true}},
     password: {type: String, required: true},
-    validated: Boolean
+    activated: Boolean
 });
 
-module.exports = mongoose.model("users", Users);
+module.exports = mongoose.model('users', Users);
