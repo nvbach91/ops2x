@@ -1,3 +1,5 @@
+var config = require('../config');
+
 var router = require('express').Router();
 var crypto = require('crypto');
 var Users = require('../models/Users');
@@ -6,6 +8,15 @@ var Settings = require('../models/Settings');
 var Catalogs = require('../models/Catalogs');
 var Sales = require('../models/Sales');
 var ObjectID = require('mongodb').ObjectID;
+
+var nodemailer = require('nodemailer');
+var transporter = nodemailer.createTransport({
+    service: 'Gmail',
+    auth: {
+        user: "info.enterpriseapps@gmail.com",
+        pass: "trello2015"
+    }
+});
 
 function isValidUsername(username) {
     var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -22,14 +33,15 @@ router.post('/signup', function (req, res) {
     var email = req.body.email;
     Users.findOne({email: email}, function (err, user) {
         if (user) {
-            res.json({success: false, msg: "Account " + email + " already exists"});
+            res.json({success: false, msg: "Account <strong>" + email + "</strong> already exists"});
         } else {
             var errors = [];
             var newUserId = new ObjectID();
             var newUser = new Users({
                 _id: newUserId,
                 email: email,
-                password: hash(req.body.password)
+                password: hash(req.body.password),
+                validated: false
             });
 
             newUser.save(function (err) {
@@ -67,8 +79,25 @@ router.post('/signup', function (req, res) {
             }).then(function () {
                 res.json({
                     success: errors.length ? false : true,
-                    msg: errors.length ? errors : "Account " + email + " created"
+                    msg: errors.length ? errors : "Account <strong>" + email + "</strong> was sucessfully created"
                 });
+                if (errors.length === 0) {
+                    var mailOptions = {
+                        from: '"EnterpriseApps" <nvbachx9@gmail.com>',
+                        to: email,
+                        subject: "Online Point of Sale System Sign Up",
+                        text: "Hello,\n\nyou have recently registered an account on Online Point of Sale System. Please visit the following link to complete your registration.\n\n"
+                                + config.host + "/validate?key=" + newUserId.valueOf()
+                                + "\n\nBest regards,\nOnline Point of Sale System Team",
+                        html: ""
+                    };
+                    transporter.sendMail(mailOptions, function (error, info) {
+                        if (error) {
+                            return console.log(error);
+                        }
+                        console.log('Message sent: ' + info.response);
+                    });
+                }
             });
 
         }
@@ -273,11 +302,11 @@ function generateDefaultSettings(newUserId, request) {
             zip: request.zip,
             country: request.country
         },
+        phone: request.phone,
         currency: {
             code: "CZK",
             symbol: "Kč"
         },
-        phone: request.phone,
         tax_rates: [
             0,
             10,

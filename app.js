@@ -1,4 +1,5 @@
 /* global __dirname, process */
+var config = require('./config');
 
 var express = require('express');
 var path = require('path');
@@ -13,7 +14,7 @@ var passport = require('passport');
 
 var mongoose = require('mongoose');
 // use one of the following mongodb connections, either a local instance or a remote instance
-mongoose.connect('mongodb://127.0.0.1/test');
+mongoose.connect(config.mongodb_host);
 //mongoose.connect('mongodb://81.2.236.231:37017/test', {user: 'guest', pass: 'tseug'});
 
 var app = express();
@@ -50,6 +51,7 @@ var ensureAuthenticated = function (req, res, next) {
 var index = require('./routes/index');
 var isAuthenticated = require('./routes/isAuthenticated');
 var signup = require('./routes/signup');
+var validate = require('./routes/validate');
 var auth = require('./routes/auth');
 var logout = require('./routes/logout');
 var settings = require('./routes/settings');
@@ -61,6 +63,7 @@ var changepassword = require('./routes/changepassword');
 
 app.use('/', index);
 app.use('/', signup);
+app.use('/', validate);
 app.use('/', isAuthenticated);
 app.use('/', auth);
 app.use('/', logout);

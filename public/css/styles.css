@@ -108,8 +108,12 @@ form .form-label {
 #forgot, #signup, #signin {
     cursor: pointer;
     font-size: 14px;
-    text-decoration: underline;
+    text-decoration: none;
     color: #298FE0;
+    padding: 10px;
+}
+#forgot:hover, #signup:hover, #signin:hover {    
+    text-decoration: underline;
 }
 #form-help {
     padding: 10px 0;

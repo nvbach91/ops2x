@@ -1205,7 +1205,7 @@ App.showLoading = function () {
 
 // check for valid email syntax, allows guest as valid
 App.isValidEmail = function (email) {
-    if (["guest", "tester"].indexOf(email) >= 0) {
+    if (["guest"].indexOf(email) >= 0) {
         return true;
     }
     var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -1232,7 +1232,7 @@ App.renderSignup = function () {
                     <input id="phone" type="text" placeholder="Phone Number" pattern="\\d{9}" title="9 Digits Phone Number" required>\
                     <input type="submit" value="SIGN UP">\
                     <div id="form-help">\
-                        <a id="signin">Go back to sign in</a>\
+                        <div id="signin">Back to sign in</div>\
                     </div>\
                 </form>\
              </div>'
@@ -1305,8 +1305,8 @@ App.renderSignin = function () {
                     <input id="password" type="password" placeholder="PASSWORD">\
                     <input type="submit" value="SIGN IN">\
                     <div id="form-help">\
-                        <a id="signup">Don\'t have an account?</a>\
-                        <a id="forgot">Forgot your password?</a>\
+                        <div id="signup">Sign up</div>\
+                        <div id="forgot">Forgot your password?</div>\
                     </div>\
                 </form>\
              </div>'

@@ -3,8 +3,8 @@ var Schema = mongoose.Schema;
 
 var Settings = new Schema({
     userId: {type: Schema.ObjectId, index: {unique: true}},
-    tin: {type: String, unique: true},
-    vat: {type: String, unique: true},
+    tin: String,
+    vat: String,
     name: String,
     address: {
         street: String,
@@ -20,10 +20,7 @@ var Settings = new Schema({
     tax_rates: [Number],
     staff: [
         {
-            number: {
-                type: Number,
-                unique: true
-            },
+            number: Number,
             role: String,
             name: String,
             pin: String
