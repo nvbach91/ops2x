@@ -722,8 +722,8 @@ App.init = function () {
         return true;
     });
     /*$(window).on("beforeunload", function () {
-        return "You are about to close this application. Any unsaved work will be lost!";
-    });*/
+     return "You are about to close this application. Any unsaved work will be lost!";
+     });*/
 };
 
 // render web register view
@@ -1207,35 +1207,99 @@ App.showLoading = function () {
 };
 
 // check for valid email syntax, allows guest as valid
+App.emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
 App.isValidEmail = function (email) {
     if (["guest"].indexOf(email) >= 0) {
         return true;
     }
-    var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(email);
+    return App.emailRegex.test(email);
+};
+
+// render signin
+App.renderSignin = function () {
+    App.closeCurtain();
+    var signinDOM =
+            '<div class="center-box">\
+                <div class="form-header">Welcome to OPS</div>\
+                <form id="sign-in" action="" method="POST">\
+                    <div class="form-label">OPEN YOUR STORE</div>\
+                    <input id="username" type="text" placeholder="EMAIL">\
+                    <input id="password" type="password" placeholder="PASSWORD">\
+                    <input type="submit" value="SIGN IN">\
+                    <div id="form-help">\
+                        <div id="signup">Sign up</div>\
+                        <div id="forgot">Forgot your password?</div>\
+                    </div>\
+                </form>\
+                <div class="form-footer">Powered by EnterpriseApps</div>\
+             </div>'
+            ;
+    App.jAppContainer.html(signinDOM);
+    var form = $("#sign-in");
+    form.find("#forgot").click(function () {
+        App.renderForgot();
+    });
+    form.find("#signup").click(function () {
+        App.renderSignup();
+    });
+    form.submit(function (e) {
+        e.preventDefault();
+        var t = $(this);
+        var username = t.find("#username").val();
+        var password = t.find("#password").val();
+        if (!App.isValidEmail(username) || !password.length) {
+            App.showWarning("Please enter your email and password to sign in");
+        } else {
+            App.showLoading();
+            $.ajax({
+                type: "POST",
+                url: "/auth",
+                dataType: "json",
+                data: {
+                    username: username || " ",
+                    password: password || " "
+                }
+            }).done(function (resp) {
+                if (resp.isAuthenticated) {
+                    App.initWebRegister();
+                } else {
+                    alert("Wrong credentials");
+                }
+            }).fail(function (resp) {
+                App.closeCurtain();
+                var msg = "Incorrect username and/or password";
+                if (resp.status === 0) {
+                    msg = "Network error. Please check your internet connection";
+                }
+                App.showWarning(msg);
+            });
+        }
+
+        t.find("#password").val("");
+    });
 };
 
 // render signup
 App.renderSignup = function () {
     var signupDOM =
-            '<div class="center-box">\
+            '<div class="center-box scrollable">\
                 <div class="form-header">Welcome to OPS</div>\
                 <form id="sign-up" action="" method="POST">\
                     <div class="form-label">CREATE A NEW STORE</div>\
                     <input id="username" type="text" placeholder="EMAIL" required>\
-                    <input id="password" type="password" placeholder="PASSWORD" pattern=".{5,}" title="Password must be at least 5 characters long" required>\
-                    <input id="confirm" type="password" placeholder="CONFIRM PASSWORD" pattern=".{5,}" title="Password must be at least 5 characters long" required>\
-                    <input id="name" type="text" placeholder="Name" required>\
-                    <input id="tin" type="text" placeholder="Taxpayer Identification Number" pattern="\\d{4,10}" title="Invalid TIN. Example: 12345678" required>\
-                    <input id="vat" type="text" placeholder="Value Added Tax Number" pattern="CZ\\w{4,10}" title="Invalid VAT. Example: CZ0123456789" required>\
-                    <input id="street" type="text" placeholder="Street and Property Number" required>\
-                    <input id="city" type="text" placeholder="City" required>\
-                    <input id="zip" type="text" placeholder="ZIP Code" required>\
-                    <input id="country" type="text" placeholder="Country" required>\
-                    <input id="phone" type="text" placeholder="Phone Number" pattern="\\d{9}" title="9 Digits Phone Number" required>\
+                    <input id="password" type="password" placeholder="PASSWORD" pattern=".{5,25}" title="Password must be at least 5 characters long" required>\
+                    <input id="confirm" type="password" placeholder="CONFIRM PASSWORD" pattern=".{5,25}" title="Password must be at least 5 characters long" required>\
+                    <input id="name" type="text" placeholder="Name" pattern=".{3,100}" title="Your Best World Shop, Inc." required>\
+                    <input id="tin" type="text" placeholder="Taxpayer Identification Number" pattern="\\d{8}" title="Invalid TIN. Example: 12345678" required>\
+                    <input id="vat" type="text" placeholder="Value Added Tax Number" pattern="[A-Z]{2}\\d{8,10}" title="Invalid VAT. Example: CZ1234567890" required>\
+                    <input id="street" type="text" placeholder="Street and Property Number" pattern=".{5,100}" title="Example: Spálená 78/12" required>\
+                    <input id="city" type="text" placeholder="City" pattern=".{2,75}" title="Example: Prague" required>\
+                    <input id="zip" type="text" placeholder="ZIP Code" pattern="\\w{3,10}" title="Example: 18000" required>\
+                    <input id="country" type="text" placeholder="Country" pattern=".{3,75}" title="Example: Czech Republic" required>\
+                    <input id="phone" type="text" placeholder="Phone Number" pattern="\\+?(\\d{3})?\\d{9}" title="9 or +12 Digits Phone Number. Example: 777666555, +420777666555" required>\
                     <select id="currency">\
-                        <option data=\'{"code":"CZK","symbol":"Kč"}\' selected>CZK</option>\
-                        <option data=\'{"code":"SKK","symbol":"Sk"}\'>SKK</option>\
+                        <option data=\'{"code":"CZK","symbol":"Kč"}\' selected>CZK - Czech Koruna</option>\
                     </select>\
                     <input type="submit" value="SIGN UP">\
                     <div id="form-help">\
@@ -1302,67 +1366,59 @@ App.renderSignup = function () {
     });
 };
 
-// render login view
-App.renderSignin = function () {
-    App.closeCurtain();
-    var signinDOM =
+// render forgot
+App.renderForgot = function () {
+    var forgotDOM =
             '<div class="center-box">\
                 <div class="form-header">Welcome to OPS</div>\
-                <form id="sign-in" action="" method="POST">\
-                    <div class="form-label">OPEN YOUR STORE</div>\
-                    <input id="username" type="text" placeholder="EMAIL">\
-                    <input id="password" type="password" placeholder="PASSWORD">\
-                    <input type="submit" value="SIGN IN">\
+                <form id="reset-password" action="" method="POST">\
+                    <div class="form-label">RESET PASSWORD</div>\
+                    <input id="username" type="text" placeholder="EMAIL" required>\
+                    <input type="submit" value="SUBMIT">\
                     <div id="form-help">\
-                        <div id="signup">Sign up</div>\
-                        <div id="forgot">Forgot your password?</div>\
+                        <div id="signin">Back to sign in</div>\
                     </div>\
                 </form>\
                 <div class="form-footer">Powered by EnterpriseApps</div>\
              </div>'
             ;
-    App.jAppContainer.html(signinDOM);
-    var form = $("#sign-in");
-    form.find("#forgot").click(function () {
-        $(this).text("How unfortunate");
-    });
-    form.find("#signup").click(function () {
-        App.renderSignup();
+    App.jAppContainer.html(forgotDOM);
+
+    var form = $("#reset-password");
+    form.find("#signin").click(function () {
+        App.renderSignin();
     });
     form.submit(function (e) {
         e.preventDefault();
-        var t = $(this);
-        var username = t.find("#username").val();
-        var password = t.find("#password").val();
-        if (!App.isValidEmail(username) || !password.length) {
-            App.showWarning("Please enter your email and password to sign in");
-        } else {
-            App.showLoading();
-            $.ajax({
-                type: "POST",
-                url: "/auth",
-                dataType: "json",
-                data: {
-                    username: username || " ",
-                    password: password || " "
-                }
-            }).done(function (resp) {
-                if (resp.isAuthenticated) {
-                    App.initWebRegister();
-                } else {
-                    alert("Wrong credentials");
-                }
-            }).fail(function (resp) {
-                App.closeCurtain();
-                var msg = "Incorrect username and/or password";
-                if (resp.status === 0) {
-                    msg = "Network error. Please check your internet connection";
-                }
-                App.showWarning(msg);
-            });
+        var username = $("#username");
+        if (!App.isValidEmail(username.val())) {
+            App.showWarning("<strong>" + username.val() + "</strong> is not a valid emaill address!");
+            return false;
         }
-
-        t.find("#password").val("");
+        App.showLoading();
+        $.ajax({
+            type: "POST",
+            url: "/forgot",
+            dataType: "json",
+            data: {
+                email: username.val()
+            }
+        }).done(function (resp) {
+            if (resp.success) {
+                App.renderSignin();
+                App.showWarning("A reset link has been sent to your inbox at <strong>" + resp.msg + "</strong>");
+            } else {
+                App.closeCurtain();
+                App.showWarning("Unable to process your request<br><strong>" + resp.msg + "</strong><br>Please let us know at <a href='mailto:info.enterpriseapps@gmail.com'>info.enterpriseapps@gmail.com</a>");
+            }
+        }).fail(function (resp) {
+            var msg = "Request failed. " + resp.status;
+            if (resp.status === 0) {
+                msg = "Network error. Please check your internet connection";
+            }
+            App.closeCurtain();
+            App.showWarning(msg);
+        });
     });
 };
 

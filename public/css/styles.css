@@ -49,7 +49,11 @@ html, body, #app, #main, #curtain, #control-panel {
     justify-content: center;
     align-items: center;
 }
-#activation-success, #invalid-request {
+.center-box.scrollable {
+    padding-top: 10px;
+    height: auto;
+}
+#success, #invalid-request {
    text-align: center;
 }
 .form-header, .form-footer {

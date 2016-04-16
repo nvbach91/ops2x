@@ -12,22 +12,53 @@ var ObjectID = require('mongodb').ObjectID;
 var nodemailer = require('nodemailer');
 var transporter = nodemailer.createTransport(config.mail_transport);
 
+var emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
 function isValidUsername(username) {
-    var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(username);
+    return emailRegex.test(username);
 }
 ;
-
 function hash(password) {
     return crypto.createHash('sha256').update(password).digest('hex');
 }
 ;
-
+function isValidSignupRequest(request) {
+    var validator = {
+        'email': emailRegex,
+        'password': /^.{5,25}$/,
+        'name': /^.{3,100}$/,
+        'tin': /^\d{8}$/,
+        'vat': /^[A-Z]{2}\d{8,10}$/,
+        'street': /^.{5,100}$/,
+        'city': /^.{2,75}$/,
+        'zip': /^\w{3,10}$/,
+        'country': /^.{3,75}$/,
+        'phone': /^\+?(\d{3})?\d{9}$/,
+        'currency': /^\{"code":"(CZK)","symbol":"(Kč)"\}$/
+                //[ěščřžýáíéóúůďťňĎŇŤŠČŘŽÝÁÍÉÚŮ\w]{1,5}
+    };
+    var validKeys = Object.keys(validator);
+    var testKeys = Object.keys(request);
+    if (validKeys.length !== testKeys.length) {
+        return false;
+    }
+    for (var i = 0; i < validKeys.length; i++) {
+        if (validKeys[i] !== testKeys[i]) {
+            return false;
+        } else if (!validator[validKeys[i]].test(request[testKeys[i]])) {
+            return false;
+        }
+    }
+    return true;
+}
+;
 router.post('/signup', function (req, res) {
     var newEmail = req.body.email;
     Users.findOne({email: newEmail}, function (err, user) {
         if (user) {
-            res.json({success: false, msg: 'Account ' + newEmail + ' already registered'});
+            res.json({success: false, msg: 'Account ' + newEmail + ' is already registered'});
+        } else if (!isValidSignupRequest(req.body)) {
+            res.json({success: false, msg: 'Invalid request'});
         } else {
             var newUserId = new ObjectID();
             var newUser = new Users(generateNewUser(newUserId, newEmail, req.body.password));
@@ -53,7 +84,7 @@ router.post('/signup', function (req, res) {
                     if (error) {
                         return console.log(error);
                     }
-                    console.log('Message sent to ' + newEmail + ': ' + info.response);
+                    console.log('Sign Up Message sent to ' + newEmail + ': ' + info.response);
                     res.json({
                         success: true,
                         msg: newEmail
