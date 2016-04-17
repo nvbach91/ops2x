@@ -12,7 +12,7 @@ App.getAnimationTime = function () {
 };
 
 // binary search of ean code in array
-Array.prototype.binaryIndexOf = function (searchEAN) {
+Array.prototype.binaryIndexOf = function (sample, needle) {
     "use strict";
 
     var minIndex = 0;
@@ -24,10 +24,10 @@ Array.prototype.binaryIndexOf = function (searchEAN) {
         currentIndex = (minIndex + maxIndex) / 2 | 0;
         currentElement = this[currentIndex];
 
-        if (currentElement.ean < searchEAN) {
+        if (currentElement[sample] < needle) {
             minIndex = currentIndex + 1;
         }
-        else if (currentElement.ean > searchEAN) {
+        else if (currentElement[sample] > needle) {
             maxIndex = currentIndex - 1;
         }
         else {
@@ -83,6 +83,7 @@ App.getDate = function () {
     return day + " " + date + "/" + month + "/" + year + " " + hh + ":" + mm + ":" + ss;
 };
 
+// start counting time until sale is confirmed
 App.startReceiptTime = function () {
     clearInterval(App._receiptTimeInterval);
     App._receiptTimeInterval = setInterval(function () {
@@ -496,7 +497,7 @@ App.bindQuickSales = function (qs) {
     // bind quick sale buttons
     qs.find(".qs-item").click(function () {
         var t = $(this);
-        var price = t.find(".qs-price").text().replace(/[^\d\.]/g, "");
+        var price = t.find(".qs-price").text().replace(/[^\-\d\.]/g, "");
         var mult = App.getMultiplicationNumber();
         App.jPriceInput.val(price);
         var name = t.find("button").text();//
@@ -553,8 +554,8 @@ App.createWebRegisterDOM = function () {
                 <div id="logo"><div class="logo"></div></div>\
                 <div id="brand">EnterpriseApps</div>\
                 <div id="menu-top">\
-                    <div id="profile">' + App.settings.name + '</div>\
-                    <div id="sign-out">Sign out</div>\
+                    <div id="profile">' + (App.currentEmployee.name || 'LOGIN') + '</div>\
+                    <div id="logout">Log out</div>\
                 </div>\
              </nav>\
              <div id="control-panel">\
@@ -879,12 +880,12 @@ App.renderWebRegister = function () {
         var rh = $(
                 '<div class="receipt-header">\
                     <div class="preview">' + 'Receipt Preview' + '</div>\
-                    <div class="company-name">' + 'Your Convenient Store' + '</div>\
-                    <div class="address-1">' + 'Sheppherd Bush Rd 42' + '</div>\
-                    <div class="address-2">' + '4WE520 London' + '</div>\
+                    <div class="company-name">' + App.settings.name + '</div>\
+                    <div class="address-1">' + App.settings.address.street + '</div>\
+                    <div class="address-2">' + App.settings.address.zip + ' ' + App.settings.address.city + '</div>\
                     <div class="receipt-row">\
-                        <div class="tin">' + 'TIN: ' + '12345678' + '</div>\
-                        <div class="vat">' + 'VAT Reg No. ' + 'CZ1234567890' + '</div>\
+                        <div class="tin">' + 'TIN: ' + App.settings.tin + '</div>\
+                        <div class="vat">' + 'VAT: ' + App.settings.vat + '</div>\
                     </div>\
                 </div>');
         App.receiptNumber = $("<div>").attr("id", "receipt-number").appendTo(rh);
@@ -965,7 +966,7 @@ App.renderWebRegister = function () {
         App.receiptTime = $("<div>").attr("id", "receipt-time").text(App.getDate());
         App.startReceiptTime();
         $("<div>").addClass("receipt-row")
-                .append($("<div>").addClass("receipt-clerk").text("Checked: Joe Car"))
+                .append($("<div>").addClass("receipt-clerk").text("Checked: " + App.currentEmployee.name))
                 .append(App.receiptTime).appendTo(receipt);
         $("<div>").addClass("receipt-gratitude").text("Thank you for stopping by!").appendTo(receipt);
 
@@ -1105,7 +1106,7 @@ App.renderWebRegister = function () {
         var t = $(this);
         if (e.keyCode === 13) {
             var filter = t.val();
-            var i = articles.binaryIndexOf(filter);
+            var i = articles.binaryIndexOf('ean', filter);
             if (i >= 0) {
                 var item = articles[i];
                 var mult = App.getMultiplicationNumber();
@@ -1159,18 +1160,8 @@ App.renderWebRegister = function () {
         App.isInRegistrySession = true/*.text("1")*/;
     });
 
-    App.signout = $("#sign-out").click(function () {
-        App.showLoading();
-        $.ajax({
-            type: "GET",
-            url: "/logout"
-        }).done(function () {
-            App.renderSignin();
-        }).fail(function () {
-            //App.renderLogin();
-            App.closeCurtain();
-            App.showWarning("Unable to logout. Please check your connection");
-        });
+    $("#logout").click(function () {
+        App.renderDashBoard();
     });
     /*
      dropDown.html(createFoundItem(item.name, item.price));
@@ -1184,20 +1175,82 @@ App.renderWebRegister = function () {
      });*/
 };
 
+// render dashboard view
+App.renderDashBoard = function () {
+    App.closeCurtain();
+    var dashBoardDOM =
+            '<nav>\
+                <div id="logo"><div class="logo"></div></div>\
+                <div id="brand">EnterpriseApps</div>\
+                <div id="menu-top">\
+                    <div id="profile">' + App.settings.name + '</div>\
+                    <div id="sign-out">Sign out</div>\
+                </div>\
+             </nav>\
+             <div class="center-box">\
+                <form id="employee-login" action="">\
+                    <div class="form-label">EMPLOYEE LOGIN</div>\
+                    <input id="employee-number" type="text" pattern="\\d{1,4}" title="1-4 digits" placeholder="EMPLOYEE NUMBER">\
+                    <input id="employee-pin" type="password" placeholder="PIN">\
+                    <input type="submit" value="OK">\
+                </form>\
+             </div>';
+    App.jAppContainer.html(dashBoardDOM);
+
+    var form = $("#employee-login");
+    form.submit(function (e) {
+        e.preventDefault();
+        var employeeNumber = $(this).find("#employee-number");
+        var employeePIN = $(this).find("#employee-pin");
+        var loggedIn = false;
+        var nStaff = App.staff.length;
+        for (var i = 0; i < nStaff; i++) {
+            var employee = App.staff[i];
+            if (employee.number + '' === employeeNumber.val()) {
+                if (employee.pin === employeePIN.val()) {
+                    App.currentEmployee = employee;
+                    loggedIn = true;
+                    break;
+                }
+            }
+        }
+        if (!loggedIn) {
+            App.showWarning("Invalid Employee Number / PIN");
+        } else {
+            App.renderWebRegister();
+        }
+    });
+
+    $("#sign-out").click(function () {
+        App.showLoading();
+        $.ajax({
+            type: "GET",
+            url: "/signout"
+        }).done(function () {
+            App.renderSignin();
+        }).fail(function () {
+            //App.renderLogin();
+            App.closeCurtain();
+            App.showWarning("Unable to sign out. Please check your connection");
+        });
+    });
+};
+
 // get data for web register
-App.initWebRegister = function () {
+App.initDashBoard = function () {
     $.when(
             $.getJSON("/api/catalog", function (catalog) {
                 App.catalog = catalog;
             }),
             $.getJSON("/api/settings", function (settings) {
                 App.settings = settings;
+                App.staff = settings.staff;
             }),
             $.getJSON("/api/buttons", function (buttons) {
                 App.buttons = buttons;
             })
             ).then(function () {
-        App.renderWebRegister();
+        App.renderDashBoard();
     });
 };
 
@@ -1262,7 +1315,8 @@ App.renderSignin = function () {
                 }
             }).done(function (resp) {
                 if (resp.isAuthenticated) {
-                    App.initWebRegister();
+                    //App.initWebRegister();
+                    App.initDashBoard();
                 } else {
                     alert("Wrong credentials");
                 }
@@ -1288,8 +1342,8 @@ App.renderSignup = function () {
                 <form id="sign-up" action="" method="POST">\
                     <div class="form-label">CREATE A NEW STORE</div>\
                     <input id="username" type="text" placeholder="EMAIL" required>\
-                    <input id="password" type="password" placeholder="PASSWORD" pattern=".{5,25}" title="Password must be at least 5 characters long" required>\
-                    <input id="confirm" type="password" placeholder="CONFIRM PASSWORD" pattern=".{5,25}" title="Password must be at least 5 characters long" required>\
+                    <input id="password" type="password" placeholder="PASSWORD" pattern=".{8,128}" title="Password must be at least 8 characters long" required>\
+                    <input id="confirm" type="password" placeholder="CONFIRM PASSWORD" pattern=".{8,128}" title="Password must be at least 8 characters long" required>\
                     <input id="name" type="text" placeholder="Name" pattern=".{3,100}" title="Your Best World Shop, Inc." required>\
                     <input id="tin" type="text" placeholder="Taxpayer Identification Number" pattern="\\d{8}" title="Invalid TIN. Example: 12345678" required>\
                     <input id="vat" type="text" placeholder="Value Added Tax Number" pattern="[A-Z]{2}\\d{8,10}" title="Invalid VAT. Example: CZ1234567890" required>\
@@ -1450,87 +1504,21 @@ App.renderForgot = function () {
 }());
 
 App.createControlPanel = function () {
-    var cpContent = $(
-            '<div class="cp-item" id="sale-history">Sales History</div>\
-             <div class="cp-item" id="acc-settings">Account Settings</div>\
+    var cpContent = '<div class="cp-item" id="sale-history">Sales History</div>\
+             <div class="cp-item" id="close-register">Close register</div>';
+    if (App.currentEmployee.role === "Admin") {
+        cpContent +=
+                '<div class="cp-item" id="acc-settings">Account Settings</div>\
              <div class="cp-item" id="sta-settings">Staff Settings</div>\
              <div class="cp-item" id="pos-settings">Point of Sale Settings</div>\
              <div class="cp-item" id="plu-settings">Edit PLU Articles</div>\
              <div class="cp-item" id="sgs-settings">Edit Sale Groups</div>\
              <div class="cp-item" id="qss-settings">Edit Quick Sales</div>\
              <div class="cp-item" id="rec-settings">Edit Receipt</div>'
-            );
-    App.cpBody.append(cpContent);
+                ;
+    }
+    App.cpBody.append($(cpContent));
     App.bindControlPanel();
-};
-
-App.renderAccountSettings = function () {
-    var accDOM =
-            '<div class="center-box">\
-                <div class="form-header">Account Settings</div>\
-                <form id="change-password" action="" method="POST">\
-                    <div class="form-label">CHANGE YOUR PASSWORD</div>\
-                    <input id="old-password" type="password" pattern=".{5,}" title="Password must be at least 5 characters long" placeholder="OLD PASSWORD">\
-                    <input id="new-password" type="password" pattern=".{5,}" title="Password must be at least 5 characters long" placeholder="NEW PASSWORD">\
-                    <input id="con-password" type="password" pattern=".{5,}" title="Password must be at least 5 characters long" placeholder="CONFIRM PASSWORD">\
-                    <input type="submit" value="SUBMIT">\
-                </form>\
-             </div>';
-    App.cpBody.html(accDOM);
-
-    var goBack = $('<div id="go-back">Go back</div>').click(function () {
-        App.cpBody.html("");
-        App.createControlPanel();
-    });
-
-    App.cpBody.find(".center-box").prepend(goBack);
-    var minPasswordLength = 5;
-    App.cpBody.find("form#change-password").submit(function (e) {
-        e.preventDefault();
-        var t = $(this);
-        var oldPass = t.find("#old-password");
-        var newPass = t.find("#new-password");
-        var conPass = t.find("#con-password");
-        if (newPass.val().length < minPasswordLength
-                || conPass.val().length < minPasswordLength
-                || oldPass.val().length < minPasswordLength) {
-            App.showWarning("The minimum length for a password is " + minPasswordLength + " characters");
-            return false;
-        }
-        if (newPass.val() !== conPass.val()) {
-            App.showWarning("Passwords do not match");
-            return false;
-        }
-        App.showLoading();
-        $.ajax({
-            type: "POST",
-            url: "changepassword",
-            dataType: "json",
-            data: {
-                oldpassword: oldPass.val(),
-                newpassword: newPass.val()
-            }
-        }).done(function (resp) {
-            App.closeCurtain();
-            if (resp.passwordChanged === true) {
-                App.showWarning("Password was successfully changed");
-            } else {
-                App.showWarning("Incorrect password");
-            }
-        }).fail(function (resp) {
-            App.closeCurtain();
-            var msg = "The password is invalid";
-            if (resp.status === 0) {
-                msg = "Network error. Please check your internet connection";
-            }
-            App.showWarning(msg);
-        });
-        oldPass.val("");
-        newPass.val("");
-        conPass.val("");
-    }).click(function (e) {
-        e.stopPropagation();
-    });
 };
 
 App.bindControlPanel = function () {
@@ -1543,13 +1531,16 @@ App.bindControlPanel = function () {
                     t.text("Not yet available");
                 });
                 break;
+            case "close-register":
+                t.click(function () {
+                    t.text("Not yet available");
+                });
+                break;
             case "acc-settings":
                 t.click(App.renderAccountSettings);
                 break;
             case "sta-settings":
-                t.click(function () {
-                    t.text("Not yet available");
-                });
+                t.click(App.renderStaffSettings);
                 break;
             case "pos-settings":
                 t.click(function () {
@@ -1579,5 +1570,133 @@ App.bindControlPanel = function () {
             default:
 
         }
+    });
+};
+
+App.createGoBack = function () {
+    return $('<div id="go-back">Go back</div>').click(function () {
+        App.cpBody.html("");
+        App.createControlPanel();
+    });
+};
+
+App.renderAccountSettings = function () {
+    var accDOM =
+            '<div class="center-box">\
+                <div class="form-header">Account Settings</div>\
+                <form id="change-password" action="" method="POST">\
+                    <div class="form-label">CHANGE YOUR PASSWORD</div>\
+                    <input id="old-password" type="password" pattern=".{8,128}" title="Password must be at least 8 characters long" placeholder="OLD PASSWORD">\
+                    <input id="new-password" type="password" pattern=".{8,128}" title="Password must be at least 8 characters long" placeholder="NEW PASSWORD">\
+                    <input id="con-password" type="password" pattern=".{8,128}" title="Password must be at least 8 characters long" placeholder="CONFIRM PASSWORD">\
+                    <input type="submit" value="SUBMIT">\
+                </form>\
+             </div>';
+    App.cpBody.html(accDOM);
+
+    App.cpBody.find(".center-box").prepend(App.createGoBack());
+    App.cpBody.find("#change-password").submit(function (e) {
+        e.preventDefault();
+        var t = $(this);
+        var oldPass = t.find("#old-password");
+        var newPass = t.find("#new-password");
+        var conPass = t.find("#con-password");
+        if (newPass.val().length < 8
+                || conPass.val().length < 8
+                || oldPass.val().length < 8) {
+            App.showWarning("The minimum length for a password is " + 8 + " characters");
+            return false;
+        }
+        if (newPass.val() !== conPass.val()) {
+            App.showWarning("Passwords do not match");
+            return false;
+        }
+        App.showLoading();
+        $.ajax({
+            type: "POST",
+            url: "changepassword",
+            dataType: "json",
+            data: {
+                oldpassword: oldPass.val(),
+                newpassword: newPass.val()
+            }
+        }).done(function (resp) {
+            App.closeCurtain();
+            if (resp.passwordChanged === true) {
+                App.showWarning("Password was successfully changed");
+            } else {
+                App.showWarning(resp.msg);
+            }
+        }).fail(function (resp) {
+            App.closeCurtain();
+            var msg = "The password is invalid";
+            if (resp.status === 0) {
+                msg = "Network error. Please check your internet connection";
+            }
+            App.showWarning(msg);
+        });
+        oldPass.val("");
+        newPass.val("");
+        conPass.val("");
+    }).click(function (e) {
+        e.stopPropagation();
+    });
+};
+
+App.renderStaffSettings = function () {
+    var staffDOM =
+            '<div class="center-box scrollable">\
+                <div class="form-header">Staff Settings</div>\
+                <form id="staff-settings" action="" method="POST">\
+                    <div class="form-label">CREATE YOUR TEAM</div>\
+                    <div class="modifier">';
+    
+    for (var i = 0; i < App.staff.length; i++) {
+            var employee = App.staff[i];
+            staffDOM += '<div class="mod-item">\
+                            <div class="mi-header">' + employee.name + '</div>\
+                            <div class="mi-body hidden">\
+                                <div class="mi-row">\
+                                    <div class="mi-row-label">ROLE</div>\
+                                    <input class="" type="text" placeholder="ROLE" pattern="(Admin|Seller)" title="Type in either Admin or Seller" value="' + employee.role + '">\
+                                </div>\
+                                <div class="mi-row">\
+                                    <div class="mi-row-label">NUMBER</div>\
+                                    <input class="" type="text" placeholder="NUMBER" pattern="\\d{1,4}" title="1-4 digits" value="' + employee.number + '">\
+                                </div>\
+                                <div class="mi-row">\
+                                    <div class="mi-row-label">NAME</div>\
+                                    <input class="" type="text" placeholder="NAME" value="' + employee.name + '">\
+                                </div>\
+                                <div class="mi-row">\
+                                    <div class="mi-row-label">PIN</div>\
+                                    <input class="" type="text" placeholder="PIN" pattern="\\d{4}" title="4 digits" value="' + employee.pin + '">\
+                                </div>\
+                                <div class="mi-control">\
+                                    <button class="mi-save">Save</button>\
+                                    <button class="mi-remove">Remove</button>\
+                                </div>\
+                            </div>\
+                        </div>';
+    }                        
+       staffDOM += '</div>\
+                </form>\
+             </div>';
+    App.cpBody.html(staffDOM);
+    App.cpBody.find(".center-box").prepend(App.createGoBack());
+    
+    App.cpBody.find("#staff-settings").submit(function  (e){
+        e.preventDefault();
+    });
+    
+    App.cpBody.find(".mi-header").each(function () {
+        var t = $(this);
+        t.click(function () {
+            t.next(".mi-body").slideToggle(200);
+        });
+    });
+    
+    App.cpBody.find("button.mi-save").each(function () {
+        var t = $(this);
     });
 };

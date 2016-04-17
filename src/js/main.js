@@ -9,11 +9,11 @@ $(document).ready(function () {
     $.ajax({
         type: "POST",
         url: "/isAuthenticated"
-    }).done(function (data) {
-        if (!data.isAuthenticated) {
+    }).done(function (resp) {
+        if (!resp.isAuthenticated) {
             App.renderSignin();
         } else {
-            App.initWebRegister();
+            App.initDashBoard();
         }
     });
 });

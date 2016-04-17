@@ -1,7 +1,6 @@
 var config = require('../config');
-
+var utils = require('../utils');
 var router = require('express').Router();
-var crypto = require('crypto');
 var Users = require('../models/Users');
 var Buttons = require('../models/Buttons');
 var Settings = require('../models/Settings');
@@ -9,23 +8,11 @@ var Catalogs = require('../models/Catalogs');
 var Sales = require('../models/Sales');
 var ObjectID = require('mongodb').ObjectID;
 
-var nodemailer = require('nodemailer');
-var transporter = nodemailer.createTransport(config.mail_transport);
-
-var emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-
-function isValidUsername(username) {
-    return emailRegex.test(username);
-}
-;
-function hash(password) {
-    return crypto.createHash('sha256').update(password).digest('hex');
-}
-;
+// Check incoming request. Request must obey the same regex rules on the client
 function isValidSignupRequest(request) {
     var validator = {
-        'email': emailRegex,
-        'password': /^.{5,25}$/,
+        'email': utils.emailRegex,
+        'password': /^.{8,128}$/,
         'name': /^.{3,100}$/,
         'tin': /^\d{8}$/,
         'vat': /^[A-Z]{2}\d{8,10}$/,
@@ -53,8 +40,8 @@ function isValidSignupRequest(request) {
 }
 ;
 router.post('/signup', function (req, res) {
-    var newEmail = req.body.email;
-    Users.findOne({email: newEmail}, function (err, user) {
+    var newEmail = req.body.email.toLowerCase();
+    Users.findOne({email: {$regex: new RegExp('^' + newEmail + '$', 'i')}}, function (err, user) {
         if (user) {
             res.json({success: false, msg: 'Account ' + newEmail + ' is already registered'});
         } else if (!isValidSignupRequest(req.body)) {
@@ -80,7 +67,7 @@ router.post('/signup', function (req, res) {
                 return newSales.save();
             }).then(function (s) {
                 console.log('Sales    created: ' + s.userId);
-                transporter.sendMail(config.generateMail(newEmail, newUserId.valueOf()), function (error, info) {
+                utils.mailer.sendMail(config.generateSignupMail(newEmail, newUserId.valueOf()), function (error, info) {
                     if (error) {
                         return console.log(error);
                     }
@@ -128,8 +115,9 @@ function generateNewUser(newUserId, newEmail, password) {
     return {
         _id: newUserId,
         email: newEmail,
-        password: hash(password),
-        activated: false
+        password: utils.hash(password),
+        activated: false,
+        password_pending: "no"
     };
 }
 ;
