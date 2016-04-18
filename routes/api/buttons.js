@@ -1,5 +1,5 @@
 var router = require('express').Router();
-var Buttons = require('../models/Buttons');
+var Buttons = require('../../models/Buttons');
 
 router.get('/buttons', function (req, res) {
     var query = {userId: req.user._id};

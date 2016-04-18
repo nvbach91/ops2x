@@ -1,5 +1,5 @@
 var router = require('express').Router();
-var Catalogs = require('../models/Catalogs');
+var Catalogs = require('../../models/Catalogs');
 
 router.get('/catalog', function (req, res) {
     var query = {userId: req.user._id};

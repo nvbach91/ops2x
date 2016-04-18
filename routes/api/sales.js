@@ -1,5 +1,5 @@
 var router = require('express').Router();
-var Sales = require('../models/Sales');
+var Sales = require('../../models/Sales');
 
 router.get('/sales', function (req, res) {
     var query = {userId: req.user._id};

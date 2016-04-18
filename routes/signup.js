@@ -8,8 +8,8 @@ var Catalogs = require('../models/Catalogs');
 var Sales = require('../models/Sales');
 var ObjectID = require('mongodb').ObjectID;
 
-// Check incoming request. Request must obey the same regex rules on the client
-function isValidSignupRequest(request) {
+router.post('/signup', function (req, res) {
+    var newEmail = req.body.email.toLowerCase();
     var validator = {
         'email': utils.emailRegex,
         'password': /^.{8,128}$/,
@@ -24,27 +24,10 @@ function isValidSignupRequest(request) {
         'currency': /^\{"code":"(CZK)","symbol":"(Kč)"\}$/
                 //[ěščřžýáíéóúůďťňĎŇŤŠČŘŽÝÁÍÉÚŮ\w]{1,5}
     };
-    var validKeys = Object.keys(validator);
-    var testKeys = Object.keys(request);
-    if (validKeys.length !== testKeys.length) {
-        return false;
-    }
-    for (var i = 0; i < validKeys.length; i++) {
-        if (validKeys[i] !== testKeys[i]) {
-            return false;
-        } else if (!validator[validKeys[i]].test(request[testKeys[i]])) {
-            return false;
-        }
-    }
-    return true;
-}
-;
-router.post('/signup', function (req, res) {
-    var newEmail = req.body.email.toLowerCase();
     Users.findOne({email: {$regex: new RegExp('^' + newEmail + '$', 'i')}}, function (err, user) {
         if (user) {
             res.json({success: false, msg: 'Account ' + newEmail + ' is already registered'});
-        } else if (!isValidSignupRequest(req.body)) {
+        } else if (!utils.isValidRequest(validator, req.body)) {
             res.json({success: false, msg: 'Invalid request'});
         } else {
             var newUserId = new ObjectID();

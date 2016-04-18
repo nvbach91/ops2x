@@ -56,13 +56,6 @@ var auth = require('./routes/auth');
 var signout = require('./routes/signout');
 var forgot = require('./routes/forgot');
 var passwordreset = require('./routes/passwordreset');
-var settings = require('./routes/settings');
-var buttons = require('./routes/buttons');
-var catalog = require('./routes/catalog');
-var sales = require('./routes/sales');
-
-var changepassword = require('./routes/changepassword');
-
 app.use('/', index);
 app.use('/', signup);
 app.use('/', activate);
@@ -71,13 +64,23 @@ app.use('/', auth);
 app.use('/', signout);
 app.use('/', forgot);
 app.use('/', passwordreset);
+
+var settings = require('./routes/api/settings');
+var buttons = require('./routes/api/buttons');
+var catalog = require('./routes/api/catalog');
+var sales = require('./routes/api/sales');
 app.use('/api', ensureAuthenticated);
 app.use('/api', settings);
 app.use('/api', buttons);
 app.use('/api', catalog);
 app.use('/api', sales);
 
-app.use('/', changepassword);
+var changepassword = require('./routes/mod/changepassword');
+var staff = require('./routes/mod/staff');
+app.use('/mod', ensureAuthenticated);
+app.use('/mod', changepassword);
+app.use('/mod', staff);
+
 
 
 

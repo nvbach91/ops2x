@@ -16,7 +16,23 @@ var utils = {
     generateRandomString: function (length) {
         return crypto.randomBytes(length).toString('hex');
     },
-    mailer: nodemailer.createTransport(config.mail_transport)
+    mailer: nodemailer.createTransport(config.mail_transport),
+    // Check incoming request. Request must obey the same regex rules on the client
+    isValidRequest: function (validator, request) {
+        var validKeys = Object.keys(validator);
+        var testKeys = Object.keys(request);
+        if (validKeys.length !== testKeys.length) {
+            return false;
+        }
+        for (var i = 0; i < validKeys.length; i++) {
+            if (validKeys[i] !== testKeys[i]) {
+                return false;
+            } else if (!validator[validKeys[i]].test(request[testKeys[i]])) {
+                return false;
+            }
+        }
+        return true;
+    }
 };
 
 module.exports = utils;

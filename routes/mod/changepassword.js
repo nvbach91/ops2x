@@ -1,6 +1,6 @@
 var router = require('express').Router();
-var Users = require('../models/Users');
-var utils = require('../utils');
+var Users = require('../../models/Users');
+var utils = require('../../utils');
 
 router.post('/changepassword', function (req, res) {
     if (req.body.newpassword.length < 8 || req.body.newpassword.length > 128) {

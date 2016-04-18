@@ -1,5 +1,5 @@
 var router = require('express').Router();
-var Settings = require('../models/Settings');
+var Settings = require('../../models/Settings');
 
 router.get('/settings', function (req, res) {
     var query = {userId: req.user._id};

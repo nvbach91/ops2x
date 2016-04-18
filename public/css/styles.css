@@ -42,7 +42,7 @@ html, body, #app, #main, #curtain, #control-panel {
     min-height: 600px;
 }
 .center-box {
-    
+
     width: 100%;
     height: 100%;
     display: flex;
@@ -232,6 +232,25 @@ nav {
 #go-back:hover {
     background-color: #334C60;
 }
+.form-row {
+    min-height: 40px;
+    display: flex;
+}
+.adder {
+    height: 40px;
+    width: 40px;
+    background-color: #65C365;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 40px;
+    cursor: pointer;
+}
+.adder:before {
+    content: "+";
+}
+.adder:hover {
+    background-color: #334C60;
+}
 .mod-item {
     margin: 5px 0;
 }
@@ -245,6 +264,10 @@ nav {
     font-size: 16px;
     padding: 10px;
     cursor: pointer;
+    border-radius: 3px;
+}
+.mi-header:hover {
+    background-color: #334C60;
 }
 .mi-body {
     padding: 10px;
@@ -269,9 +292,22 @@ nav {
     width: 50%;
     padding: 10px;
     margin: 5px;
+    display: flex;
+}
+.mi-control span {
+    margin: auto;
 }
 .mi-remove {
     background-color: #BB5151;
+}
+.mi-control .fail {
+    background-color: #D85252;
+}
+.mi-control .success {    
+    background-color: #65C365;
+}
+.mi-control .processing {
+    
 }
 /********************************** MAIN CSS **********************************/
 #main {
@@ -293,6 +329,7 @@ nav {
     background-color: #903030;
     margin-bottom: 25px;
     line-height: 50px;
+    min-height: 50px;
     font-size: 18px;
 }
 #cp-header > .logo {
@@ -458,6 +495,12 @@ button:active {
     -webkit-filter: grayscale(.7);
     -moz-filter: grayscale(.7);
     filter: grayscale(.7);
+}
+button:disabled {
+    -webkit-filter: grayscale(1);
+    -moz-filter: grayscale(1);
+    filter: grayscale(1);    
+    cursor: default;
 }
 .sg, .qs-item button {
     font-size: 14px;
@@ -1531,7 +1574,7 @@ div#taxes-label {
         transition: transform .2s ease;
     }
     button, form [type="submit"], #tab-navs .tab-nav, .cp-item,
-    #cp-header > .close, #go-back {
+    #cp-header > .close, #go-back, .adder, .mi-header {
         transition: background-color .2s ease;
     }
     button#park-sale, button#discard-sale {
@@ -1632,7 +1675,7 @@ div#taxes-label {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
-#loading {
+.loading, .mi-loader.loading {
     margin: auto;
     height: 59px;    
     width: 59px;
@@ -1642,4 +1685,10 @@ div#taxes-label {
     border-left: 4px solid #E4644B;
     border-radius: 50%;
     animation: spin 1s infinite linear;
+}
+
+.mi-loader.loading {    
+    height: 15px;    
+    width: 15px;
+    margin: 0;
 }

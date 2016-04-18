@@ -705,7 +705,7 @@ App.bindKeyboard = function () {
 // initializes some global variables and functions
 App.init = function () {
     App.jAppContainer = $("#app");
-    App.loadingScreen = $('<div id="loading"></div>');
+    App.loadingScreen = $('<div class="loading"></div>');
     App.curtain = null;
     App.justUsedScanner = false;
     App._timeBetweenConsecutiveScannings = 2000;
@@ -1614,7 +1614,7 @@ App.renderAccountSettings = function () {
         App.showLoading();
         $.ajax({
             type: "POST",
-            url: "changepassword",
+            url: "/mod/changepassword",
             dataType: "json",
             data: {
                 oldpassword: oldPass.val(),
@@ -1648,55 +1648,208 @@ App.renderStaffSettings = function () {
             '<div class="center-box scrollable">\
                 <div class="form-header">Staff Settings</div>\
                 <form id="staff-settings" action="" method="POST">\
-                    <div class="form-label">CREATE YOUR TEAM</div>\
+                    <div class="form-row">\
+                        <div class="form-label">MANAGE YOUR TEAM</div>\
+                        <div class="adder"></div>\
+                    </div>\
                     <div class="modifier">';
-    
+
     for (var i = 0; i < App.staff.length; i++) {
-            var employee = App.staff[i];
-            staffDOM += '<div class="mod-item">\
+        var employee = App.staff[i];
+        //var isFirstAdmin = employee.number === 0;
+        staffDOM += App.generateModItemDOM(employee.name, ["number"], employee);
+                    /*'<div class="mod-item">\
                             <div class="mi-header">' + employee.name + '</div>\
                             <div class="mi-body hidden">\
                                 <div class="mi-row">\
                                     <div class="mi-row-label">ROLE</div>\
-                                    <input class="" type="text" placeholder="ROLE" pattern="(Admin|Seller)" title="Type in either Admin or Seller" value="' + employee.role + '">\
+                                    <input class="" type="text" placeholder="ROLE" pattern="(Admin|Seller)" title="Type in either Admin or Seller" value="' + employee.role + '"' + (isFirstAdmin ? 'disabled' : '') + '>\
                                 </div>\
                                 <div class="mi-row">\
                                     <div class="mi-row-label">NUMBER</div>\
-                                    <input class="" type="text" placeholder="NUMBER" pattern="\\d{1,4}" title="1-4 digits" value="' + employee.number + '">\
+                                    <input class="" type="text" placeholder="NUMBER" maxlength="4" pattern="\\d{1,4}" title="1-4 digits" value="' + employee.number + '" disabled>\
                                 </div>\
                                 <div class="mi-row">\
                                     <div class="mi-row-label">NAME</div>\
-                                    <input class="" type="text" placeholder="NAME" value="' + employee.name + '">\
+                                    <input class="" type="text"  placeholder="NAME" maxlength="20" pattern=".{3,20}" title="3-20 letters" value="' + employee.name + '">\
                                 </div>\
                                 <div class="mi-row">\
                                     <div class="mi-row-label">PIN</div>\
-                                    <input class="" type="text" placeholder="PIN" pattern="\\d{4}" title="4 digits" value="' + employee.pin + '">\
+                                    <input class="" type="number" placeholder="PIN" maxlength="4" pattern="\\d{4}" title="4 digits" value="' + employee.pin + '">\
                                 </div>\
                                 <div class="mi-control">\
-                                    <button class="mi-save">Save</button>\
-                                    <button class="mi-remove">Remove</button>\
+                                    <button class="mi-save">\
+                                        <span>Save</span>\
+                                        <div class="mi-loader"></div>\
+                                    </button>\
+                                    <button class="mi-remove"' + (isFirstAdmin ? 'disabled' : '') + '>\
+                                        <span>Remove</span>\
+                                        <div class="mi-loader"></div>\
+                                    </button>\
                                 </div>\
                             </div>\
-                        </div>';
-    }                        
-       staffDOM += '</div>\
+                        </div>'*/;
+    }
+    staffDOM += '</div>\
                 </form>\
              </div>';
     App.cpBody.html(staffDOM);
     App.cpBody.find(".center-box").prepend(App.createGoBack());
-    
-    App.cpBody.find("#staff-settings").submit(function  (e){
+
+    var form = App.cpBody.find("#staff-settings").submit(function (e) {
         e.preventDefault();
     });
-    
-    App.cpBody.find(".mi-header").each(function () {
+
+    var modifier = form.find(".modifier");
+
+    modifier.find(".mi-header").click(function () {
         var t = $(this);
-        t.click(function () {
-            t.next(".mi-body").slideToggle(200);
+        t.next(".mi-body").slideToggle(200);
+    });
+    
+    var modifyUrl = "/mod/staff";
+    form.find(".adder").click(function () {
+        var lastNumber = App.findMaxEmployeeNumber(modifier);
+        var modItem = $(App.generateModItemDOM("New employee", ["number"], {
+            number: lastNumber + 1,
+            role: "Seller",
+            name: "New employee",
+            pin: "0000"
+        }));
+        modItem.find(".mi-header").click(function () {
+            $(this).next(".mi-body").slideToggle(200);
         });
+        modItem.find("button.mi-save").click(function () {
+            App.bindMiSaveButton(modifyUrl, this);
+        });
+        modifier.append(modItem);
     });
+    modifier.find("button.mi-save").click(function () {
+        App.bindMiSaveButton(modifyUrl, this);
+    });
+
+    modifier.find("button.mi-remove").click(function () {
+        App.bindMiRemoveButton(modifyUrl, this);
+    });
+};
+
+App.bindMiSaveButton = function (url, b) {
+    var button = $(b);
+    var miBody = button.parents().eq(1);
+    var data = App.getMiEmployeeData("save", miBody);
+    App.requestModifyItem(url, data, button);
+};
+
+App.bindMiRemoveButton = function (url, b) {
+    var button = $(b);
+    var miBody = button.parents().eq(1);
+    var data = App.getMiEmployeeData("remove", miBody);
+    App.requestModifyItem(url, data, button);
+};
+
+App.getMiEmployeeData = function (requestType, miBody) {
+    return {
+        requestType: requestType,
+        number: miBody.find("input[placeholder='NUMBER']").val(),
+        role: miBody.find("input[placeholder='ROLE']").val(),
+        name: miBody.find("input[placeholder='NAME']").val(),
+        pin: miBody.find("input[placeholder='PIN']").val()
+    };
+};
+
+App.requestModifyItem = function (url, data, button) {   
+    var requestPerformingMsg = data.requestType === "save" ? "Saving" : "Removing";
+    var requestSuccessMsg = data.requestType === "save" ? "Saved" : "Removed";
+    var requestFailMsg = data.requestType === "save" ? "Save failed" : "Remove failed";
+    var loader = button.find(".mi-loader");
+    var span = button.find("span");    
+    loader.addClass("loading");
+    button.removeClass("fail success");
+    span.text(requestPerformingMsg);
+    $.ajax({
+        type: "POST",
+        url: url,
+        dataType: "json",
+        data: data
+    }).done(function (resp) {
+        if (resp.success) {
+            loader.removeClass("loading");
+            button.addClass("success");
+            span.text(requestSuccessMsg);
+            App.staff = resp.msg;
+            if(data.requestType === "remove") {
+                button.parents().eq(2).slideUp(200, function(){
+                    $(this).remove();
+                });
+            }
+        } else {
+            loader.removeClass("loading");
+            button.addClass("fail");
+            span.text(requestFailMsg + ". Reason: " + resp.msg);
+        }
+    }).fail(function (resp) {
+        loader.removeClass("loading");
+        button.addClass("fail");
+        span.text(requestFailMsg + ". Status:" + resp.status);
+        if (resp.status === 0) {
+            App.closeCurtain();
+            App.showWarning("Network error. Please check your internet connection");
+        }
+    });
+};
+
+App.generateModItemDOM = function (header, disabledFields, item) {
+    // disable role field and remove button of the first admin user
+    var isFirstAdmin = (item.number === 0 && item.role === "Admin") ? true : false;
+    var keys = Object.keys(item);
+    var dom = '<div class="mod-item">\
+                    <div class="mi-header">' + header + '</div>\
+                    <div class="mi-body hidden" style="display: none;">';
+    for (var i = 0; i < keys.length; i++) {
+        if(keys[i] !== "_id") {
+                var fieldDisabled = disabledFields.indexOf(keys[i]) >= 0;
+                var roleDisabled = isFirstAdmin && (keys[i] === "role");
+                dom += '<div class="mi-row">\
+                            <div class="mi-row-label">' + keys[i].toUpperCase() + '</div>\
+                            <input class="" type="text" placeholder="' + keys[i].toUpperCase() + '" value="' + item[keys[i]] + '" ' + ((fieldDisabled || roleDisabled)? 'disabled' : '') + '>\
+                        </div>';
+                    /* '<div class="mi-row">\
+                            <div class="mi-row-label">NUMBER</div>\
+                            <input class="" type="text" placeholder="NUMBER" maxlength="4" pattern="\d{1,4}" title="1-4 digits" value="0" disabled>\
+                        </div>\
+                        <div class="mi-row">\
+                            <div class="mi-row-label">NAME</div>\
+                            <input class="" type="text" placeholder="NAME" maxlength="20" pattern=".{3,20}" title="3-20 letters" value="Admixxc">\
+                        </div>\
+                        <div class="mi-row">\
+                            <div class="mi-row-label">PIN</div>\
+                            <input class="" type="number" placeholder="PIN" maxlength="4" pattern="\d{4}" title="4 digits" value="0000">\
+                        </div>';*/
+        }
+    }    
+                dom += '<div class="mi-control">\
+                            <button class="mi-save">\
+                                <span>Save</span>\
+                                <div class="mi-loader"></div>\
+                            </button>\
+                            <button class="mi-remove" ' + (isFirstAdmin ? 'disabled' : '') + '>\
+                                <span>Remove</span>\
+                                <div class="mi-loader"></div>\
+                            </button>\
+                        </div>\
+                    </div>\
+                </div>';
     
-    App.cpBody.find("button.mi-save").each(function () {
-        var t = $(this);
+    return dom;
+};
+
+App.findMaxEmployeeNumber = function (modifier) {
+    var lastMax = 0;
+    modifier.find("input[placeholder='NUMBER']").each(function(){
+        var thisNumber = parseInt($(this).val());
+        if (lastMax < thisNumber){
+            lastMax = thisNumber;
+        }
     });
+    return lastMax;
 };
