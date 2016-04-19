@@ -1257,6 +1257,8 @@ App.renderDashBoard = function () {
             App.showWarning("Unable to sign out. Please check your connection");
         });
     });
+    
+    $("#employee-number").focus();
 };
 
 // get data for web register
@@ -1567,9 +1569,7 @@ App.bindControlPanel = function () {
                 t.click(App.renderStaffSettings);
                 break;
             case "pos-settings":
-                t.click(function () {
-                    t.text("Not yet available");
-                });
+                t.click(App.renderPOSSettings);
                 break;
             case "plu-settings":
                 t.click(function () {
@@ -1704,6 +1704,9 @@ App.requestModifyItem = function (url, data, button) {
                 case "/mod/receipt" :
                     App.receipt = resp.msg;
                     break;
+                case "/mod/pos" :
+                    App.settings = resp.msg;
+                    break;
                 default:
             }
             if (data.requestType === "remove") {
@@ -1728,10 +1731,14 @@ App.requestModifyItem = function (url, data, button) {
 };
 
 App.generateModItemDOM = function (type, item) {
-    var disabledFields = ["number"];
+    var disabledFields = [];
     switch (type) {
+        case "staff":
+            disabledFields = ["number"];
+            break;
         case "receipt":
-            disabledFields = [];
+            break;
+        case "pos":
             break;
         default:
     }
@@ -1739,8 +1746,9 @@ App.generateModItemDOM = function (type, item) {
     // disable role field and remove button of the first admin user
     var isFirstAdmin = item.number === 0 && item.role === "Admin";
     var isReceipt = type === "receipt";
+    var isPOS = type === "pos";
     var info = isReceipt ? 'Tip: Use \'&lt;br&gt;\' to add new lines' : '';
-    var isHiddenBody = !isReceipt;
+    var isHiddenBody = type === "staff";
     var keys = Object.keys(item);
     var dom = '<div class="mod-item">\
                     <div class="mi-header">' + (item.name ? item.name : type.toUpperCase()) + '</div>\
@@ -1760,13 +1768,19 @@ App.generateModItemDOM = function (type, item) {
                 }
                 dom += '<div class="mi-row">\
                             <div class="mi-row-label">' + keys[i].toUpperCase() + '</div>';
+                if(keys[i] === "currency") { 
+                dom +=     '<select id="currency">\
+                                <option data=\'{"code":"CZK","symbol":"Kč"}\' selected>CZK - Czech Koruna</option>\
+                            </select>';   
+                } else {
                 dom +=     '<input class="" \
                                    type="text" \
                                    placeholder="' + keys[i].toUpperCase() + '" \
                                    value="' + item[keys[i]] + '"'
                                    + ((fieldDisabled || roleDisabled) ? ' disabled' : '')
                                    + (maxLength ? ' maxLength="' + maxLength + '"' : '') 
-                                   + '>';                
+                                   + '>';   
+                }
                 dom += '</div>';
         }
     }    
@@ -1775,7 +1789,7 @@ App.generateModItemDOM = function (type, item) {
                                 <span>Save</span>\
                                 <div class="mi-loader"></div>\
                             </button>\
-                            <button class="mi-remove" ' + ((isFirstAdmin || isReceipt) ? 'disabled' : '') + '>\
+                            <button class="mi-remove" ' + ((isFirstAdmin || isReceipt || isPOS) ? 'disabled' : '') + '>\
                                 <span>Remove</span>\
                                 <div class="mi-loader"></div>\
                             </button>\
@@ -1784,32 +1798,6 @@ App.generateModItemDOM = function (type, item) {
                 </div>';
     
     return dom;
-};
-
-//--------------------------- STAFF SETTINGS ---------------------------------//
-App.renderStaffSettings = function () {
-    var staffDOM =
-               '<div class="form-header">Staff Settings</div>\
-                <form id="staff-settings" action="" method="POST">\
-                    <div class="form-row">\
-                        <div class="form-label">MANAGE YOUR TEAM</div>\
-                        <div class="adder"></div>\
-                    </div>\
-                    <div class="modifier">';
-    var staff = App.staff;
-    for (var i = 0; i < staff.length; i++) {
-        var employee = staff[i];
-        staffDOM += App.generateModItemDOM("staff", employee);
-    }
-    staffDOM += '</div>\
-                </form>';
-    App.cpBody.html(App.createCenterBox(true, staffDOM));
-    App.cpBody.find(".center-box").prepend(App.createGoBack());
-
-    var form = App.cpBody.find("#staff-settings");     
-    var modifyUrl = "/mod/staff";
-        
-    App.bindModSettings(form, modifyUrl);
 };
 
 App.bindModSettings = function (form, modifyUrl) {  
@@ -1870,7 +1858,41 @@ App.bindModSettings = function (form, modifyUrl) {
                 App.requestModifyItem(modifyUrl, data, t);
             });
             break;
+        case "/mod/pos" :            
+        modifier.find("button.mi-save").click(function () {
+            var t = $(this);
+            var data = App.getMiPOSData("save", t);
+            App.requestModifyItem(modifyUrl, data, t);
+        });
+        break;
+        default:
     }
+};
+
+//--------------------------- STAFF SETTINGS ---------------------------------//
+App.renderStaffSettings = function () {
+    var staffDOM =
+               '<div class="form-header">Staff Settings</div>\
+                <form id="staff-settings" action="" method="POST">\
+                    <div class="form-row">\
+                        <div class="form-label">MANAGE YOUR TEAM</div>\
+                        <div class="adder"></div>\
+                    </div>\
+                    <div class="modifier">';
+    var staff = App.staff;
+    for (var i = 0; i < staff.length; i++) {
+        var employee = staff[i];
+        staffDOM += App.generateModItemDOM("staff", employee);
+    }
+    staffDOM += '</div>\
+                </form>';
+    App.cpBody.html(App.createCenterBox(true, staffDOM));
+    App.cpBody.find(".center-box").prepend(App.createGoBack());
+
+    var form = App.cpBody.find("#staff-settings");     
+    var modifyUrl = "/mod/staff";
+        
+    App.bindModSettings(form, modifyUrl);
 };
 
 App.getMiEmployeeData = function (requestType, button) {
@@ -1881,16 +1903,6 @@ App.getMiEmployeeData = function (requestType, button) {
         role: miBody.find("input[placeholder='ROLE']").val(),
         name: miBody.find("input[placeholder='NAME']").val(),
         pin: miBody.find("input[placeholder='PIN']").val()
-    };
-};
-
-
-App.getMiReceiptData = function (requestType, button) {
-    var miBody = button.parents().eq(1);
-    return {
-        requestType: requestType,
-        header: miBody.find("input[placeholder='HEADER']").val(),
-        footer: miBody.find("input[placeholder='FOOTER']").val()
     };
 };
 
@@ -1928,4 +1940,61 @@ App.renderReceiptSettings = function () {
     var modifyUrl = "/mod/receipt";
     
     App.bindModSettings(form, modifyUrl);
+};
+
+App.getMiReceiptData = function (requestType, button) {
+    var miBody = button.parents().eq(1);
+    return {
+        requestType: requestType,
+        header: miBody.find("input[placeholder='HEADER']").val(),
+        footer: miBody.find("input[placeholder='FOOTER']").val()
+    };
+};
+
+//--------------------------- RECEIPT SETTINGS ---------------------------------//
+App.renderPOSSettings = function () {
+    var receiptDOM =
+            App.createCenterBox(true,
+                    '<div class="form-header">Point of Sale Settings</div>\
+                    <form id="poss-settings" action="" method="POST">\
+                        <div class="form-row">\
+                            <div class="form-label">Configure your Cash Register</div>\
+                        </div>\
+                        <div class="modifier">'
+                    + App.generateModItemDOM("pos", {
+                        name: App.settings.name,
+                        tin: App.settings.tin,
+                        vat: App.settings.vat,
+                        street: App.settings.address.street,
+                        city: App.settings.address.city,
+                        zip: App.settings.address.zip,
+                        country: App.settings.address.country,
+                        phone: App.settings.phone,
+                        currency: App.settings.currency /*ATTENTION!!!*/
+                    })
+                    + '</div>\
+                    </form>');
+    App.cpBody.html(receiptDOM);
+    App.cpBody.find(".center-box").prepend(App.createGoBack());
+    
+    var form = App.cpBody.find("#poss-settings");
+    var modifyUrl = "/mod/pos";
+    
+    App.bindModSettings(form, modifyUrl);
+};
+
+App.getMiPOSData = function (requestType, button) {
+    var miBody = button.parents().eq(1);
+    return {
+        requestType: requestType,
+        name    : miBody.find("input[placeholder='NAME']").val(),
+        tin     : miBody.find("input[placeholder='TIN']").val(),
+        vat     : miBody.find("input[placeholder='VAT']").val(),
+        street  : miBody.find("input[placeholder='STREET']").val(),
+        city    : miBody.find("input[placeholder='CITY']").val(),
+        zip     : miBody.find("input[placeholder='ZIP']").val(),
+        country : miBody.find("input[placeholder='COUNTRY']").val(),
+        phone   : miBody.find("input[placeholder='PHONE']").val(),
+        currency: miBody.find("select").find(":selected").attr("data")
+    };
 };

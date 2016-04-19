@@ -264,6 +264,11 @@ nav {
     width: 100%;
     text-indent: 0;
 }
+.mod-item select {
+    padding: 0;
+    text-indent: 0;
+    width: 100%;
+}
 .mi-header {
     background-color: #BB5151;
     font-size: 16px;
