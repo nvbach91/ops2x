@@ -58,7 +58,6 @@ html, body, #app, #main, #curtain, #control-panel {
     text-align: center;
 }
 .form-header, .form-footer {
-    min-height: 63px;
     width: 100%;
     max-width: 640px;
     background-color: #334C60;
@@ -68,6 +67,9 @@ html, body, #app, #main, #curtain, #control-panel {
     background-position: 98%;
     background-repeat: no-repeat;
     background-size: 50px;
+}
+.form-header {
+    min-height: 63px;
 }
 .form-footer {
     font-size: 12px;
@@ -102,6 +104,9 @@ form#staff-settings {
 }
 form#sign-up input {
     padding: 5px 20px;
+}
+form#sign-up input[type='submit'] {
+    padding: 20px;
 }
 form #username, form #employee-number {
     background-image: url("../img/ico/user.svg");
@@ -274,6 +279,11 @@ nav {
 }
 .mi-body.hidden {
     display: none;
+}
+.mi-info {
+    color: #353535;
+    font-size: 14px;
+    text-align: right;
 }
 .mi-row {
     display: flex;
@@ -972,7 +982,7 @@ button.db-close:before, button.pb-close:before, button.wb-close:before {
     font-size: 16px;
     font-weight: bold;
 }
-.company-name, .address-1, .address-2, .tin, .vat, #receipt-number {
+.company-name, .address-1, .address-2, .tin, .vat, #receipt-number, .receipt-custom-header {
     display: none;
 }
 #receipt-number {
@@ -1054,6 +1064,13 @@ div#taxes-label {
     display: flex;
     justify-content: space-between;
     font-size: 12px;
+}
+.receipt-clerk, #receipt-time {
+    font-size: 12px;
+    text-align: right;
+}
+#receipt-time {    
+    text-align: right;
 }
 .receipt-gratitude {
     display: none;
@@ -1609,7 +1626,7 @@ div#taxes-label {
         flex-direction: column;
         background-color: transparent;
     }
-    .company-name, .address-1, .address-2, .tin, .vat, #receipt-number {
+    .company-name, .address-1, .address-2, .tin, .vat, #receipt-number, .receipt-custom-header {
         display: block;
     }
     .preview {

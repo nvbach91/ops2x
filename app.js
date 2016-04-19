@@ -77,9 +77,11 @@ app.use('/api', sales);
 
 var changepassword = require('./routes/mod/changepassword');
 var staff = require('./routes/mod/staff');
+var receipt = require('./routes/mod/receipt');
 app.use('/mod', ensureAuthenticated);
 app.use('/mod', changepassword);
 app.use('/mod', staff);
+app.use('/mod', receipt);
 
 
 

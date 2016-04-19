@@ -56,7 +56,7 @@ Number.prototype.formatMoney = function (c, d, t) {
     return s + (j ? i.substr(0, j) + t : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) + (c ? d + Math.abs(n - i).toFixed(c).slice(2) : "");
 };
 
-App.parseTime = function (s) {
+App.correctTime = function (s) {
     return s < 10 ? "0" + s : s;
 };
 
@@ -70,17 +70,27 @@ App.week = [
     {short: "Sun", long: "Sunday"}
 ];
 
-App.getDate = function () {
+App.createDateObject = function () {
     var now = new Date();
-    var day = App.week[now.getDay()].short;
-    var date = App.parseTime(now.getDate());
-    var month = App.parseTime(now.getMonth() + 1);
-    var year = App.parseTime(now.getFullYear());
-    var hh = App.parseTime(now.getHours());
-    var mm = App.parseTime(now.getMinutes());
-    var ss = App.parseTime(now.getSeconds());
+    return {
+        day: App.week[now.getDay()].short,
+        date: App.correctTime(now.getDate()),
+        month: App.correctTime(now.getMonth() + 1),
+        year: App.correctTime(now.getFullYear()),
+        hh: App.correctTime(now.getHours()),
+        mm: App.correctTime(now.getMinutes()),
+        ss: App.correctTime(now.getSeconds())
+    };
+};
 
-    return day + " " + date + "/" + month + "/" + year + " " + hh + ":" + mm + ":" + ss;
+App.getDate = function () {
+    var d = App.createDateObject();
+    return d.day + " " + d.date + "/" + d.month + "/" + d.year + " " + d.hh + ":" + d.mm + ":" + d.ss;
+};
+
+App.getDatePrefix = function () {
+    var d = App.createDateObject();
+    return d.year + "" + d.month + "" + d.date;
 };
 
 // start counting time until sale is confirmed
@@ -714,10 +724,12 @@ App.init = function () {
         if (e.keyCode === 27) {
             App.closeCurtain();
         } else if (e.keyCode === 13) {
-            if (!App.curtain && App.jPriceInput && !App.justUsedScanner) {
-                App.jPriceInput.focus();
-            } else if (App.jCashInput) {
-                App.jCashInput.focus();
+            if (App.jControlPanel && !App.jControlPanel.hasClass("visible")) {
+                if (!App.curtain && App.jPriceInput && !App.justUsedScanner) {
+                    App.jPriceInput.focus();
+                } else if (App.jCashInput) {
+                    App.jCashInput.focus();
+                }
             }
         }
         return true;
@@ -877,7 +889,7 @@ App.renderWebRegister = function () {
         var receipt = $("<div>").addClass("receipt");
         /* var receiptHeader = $("<div>").addClass("receipt-header");
          $("<div>").addClass().text("Receipt Preview").appendTo(receipt);*/
-        var rh = $(
+        var receiptHeader = $(
                 '<div class="receipt-header">\
                     <div class="preview">' + 'Receipt Preview' + '</div>\
                     <div class="company-name">' + App.settings.name + '</div>\
@@ -888,9 +900,9 @@ App.renderWebRegister = function () {
                         <div class="vat">' + 'VAT: ' + App.settings.vat + '</div>\
                     </div>\
                 </div>');
-        App.receiptNumber = $("<div>").attr("id", "receipt-number").appendTo(rh);
-        App.receiptNumber.text("Receipt No. " + 123);
-        receipt.append(rh);
+        $("<div>").addClass("receipt-custom-header").html(App.receipt.header).appendTo(receiptHeader);
+        $("<div>").attr("id", "receipt-number").text("Receipt #" + App.getDatePrefix() + 0).appendTo(receiptHeader);
+        receipt.append(receiptHeader);
         var receiptBody = $("<ul>").addClass("receipt-body");
         var taxValues = {};
         var nTrs = App.settings.tax_rates.length;
@@ -963,12 +975,17 @@ App.renderWebRegister = function () {
             }
         }
         receiptSummary.appendTo(receipt);
-        App.receiptTime = $("<div>").attr("id", "receipt-time").text(App.getDate());
+        /*App.receiptTime = $("<div>").attr("id", "receipt-time").text(App.getDate());
         App.startReceiptTime();
         $("<div>").addClass("receipt-row")
                 .append($("<div>").addClass("receipt-clerk").text("Checked: " + App.currentEmployee.name))
-                .append(App.receiptTime).appendTo(receipt);
-        $("<div>").addClass("receipt-gratitude").text("Thank you for stopping by!").appendTo(receipt);
+                .append(App.receiptTime).appendTo(receipt);*/
+        
+        $("<div>").addClass("receipt-clerk").text("Checked: " + App.currentEmployee.name).appendTo(receipt);
+        App.receiptTime = $("<div>").attr("id", "receipt-time").text(App.getDate()).appendTo(receipt);        
+        App.startReceiptTime();
+        
+        $("<div>").addClass("receipt-gratitude").text(App.receipt.footer).appendTo(receipt);
 
         //creating receipt footer
         $("<div>").addClass("receipt-footer").text("EnterpriseApps").appendTo(receipt);
@@ -1175,6 +1192,12 @@ App.renderWebRegister = function () {
      });*/
 };
 
+App.createCenterBox = function (scrollable, content) {
+    return '<div class="center-box' + (scrollable ? ' scrollable' : '') + '">'
+            + content
+            + '</div>';
+};
+
 // render dashboard view
 App.renderDashBoard = function () {
     App.closeCurtain();
@@ -1186,15 +1209,15 @@ App.renderDashBoard = function () {
                     <div id="profile">' + App.settings.name + '</div>\
                     <div id="sign-out">Sign out</div>\
                 </div>\
-             </nav>\
-             <div class="center-box">\
+             </nav>'
+            + App.createCenterBox(false,
+                '<div class="form-header">Open Cash Register</div>\
                 <form id="employee-login" action="">\
                     <div class="form-label">EMPLOYEE LOGIN</div>\
                     <input id="employee-number" type="text" pattern="\\d{1,4}" title="1-4 digits" placeholder="EMPLOYEE NUMBER">\
                     <input id="employee-pin" type="password" placeholder="PIN">\
                     <input type="submit" value="OK">\
-                </form>\
-             </div>';
+                </form>');
     App.jAppContainer.html(dashBoardDOM);
 
     var form = $("#employee-login");
@@ -1245,6 +1268,7 @@ App.initDashBoard = function () {
             $.getJSON("/api/settings", function (settings) {
                 App.settings = settings;
                 App.staff = settings.staff;
+                App.receipt = settings.receipt;
             }),
             $.getJSON("/api/buttons", function (buttons) {
                 App.buttons = buttons;
@@ -1272,9 +1296,9 @@ App.isValidEmail = function (email) {
 // render signin
 App.renderSignin = function () {
     App.closeCurtain();
-    var signinDOM =
-            '<div class="center-box">\
-                <div class="form-header">Welcome to OPS</div>\
+    var signinDOM = 
+            App.createCenterBox(false,
+               '<div class="form-header">Welcome to OPS</div>\
                 <form id="sign-in" action="" method="POST">\
                     <div class="form-label">OPEN YOUR STORE</div>\
                     <input id="username" type="text" placeholder="EMAIL">\
@@ -1285,9 +1309,7 @@ App.renderSignin = function () {
                         <div id="forgot">Forgot your password?</div>\
                     </div>\
                 </form>\
-                <div class="form-footer">Powered by EnterpriseApps</div>\
-             </div>'
-            ;
+                <div class="form-footer">Powered by EnterpriseApps</div>');
     App.jAppContainer.html(signinDOM);
     var form = $("#sign-in");
     form.find("#forgot").click(function () {
@@ -1337,8 +1359,8 @@ App.renderSignin = function () {
 // render signup
 App.renderSignup = function () {
     var signupDOM =
-            '<div class="center-box scrollable">\
-                <div class="form-header">Welcome to OPS</div>\
+            App.createCenterBox(true,
+               '<div class="form-header">Welcome to OPS</div>\
                 <form id="sign-up" action="" method="POST">\
                     <div class="form-label">CREATE A NEW STORE</div>\
                     <input id="username" type="text" placeholder="EMAIL" required>\
@@ -1360,9 +1382,7 @@ App.renderSignup = function () {
                         <div id="signin">Back to sign in</div>\
                     </div>\
                 </form>\
-                <div class="form-footer">Powered by EnterpriseApps</div>\
-             </div>'
-            ;
+                <div class="form-footer">Powered by EnterpriseApps</div>');
     App.jAppContainer.html(signupDOM);
 
     var form = $("#sign-up");
@@ -1404,10 +1424,14 @@ App.renderSignup = function () {
         }).done(function (resp) {
             if (resp.success) {
                 App.renderSignin();
-                App.showWarning("Thank you for creating an account<br>Please check your inbox at <strong>" + resp.msg + "</strong> to complete the registration");
+                App.showWarning("Thank you for creating an account<br>Please check your inbox at <strong>" 
+                        + resp.msg 
+                        + "</strong> to complete the registration");
             } else {
                 App.closeCurtain();
-                App.showWarning("Unable to create account<br><strong>" + resp.msg + "</strong><br>Please let us know at <a href='mailto:info.enterpriseapps@gmail.com'>info.enterpriseapps@gmail.com</a>");
+                App.showWarning("Unable to create account<br><strong>" 
+                        + resp.msg 
+                        + "</strong><br>Please let us know at <a href='mailto:info.enterpriseapps@gmail.com'>info.enterpriseapps@gmail.com</a>");
             }
         }).fail(function (resp) {
             App.closeCurtain();
@@ -1423,8 +1447,8 @@ App.renderSignup = function () {
 // render forgot
 App.renderForgot = function () {
     var forgotDOM =
-            '<div class="center-box">\
-                <div class="form-header">Welcome to OPS</div>\
+            App.createCenterBox(false,
+               '<div class="form-header">Welcome to OPS</div>\
                 <form id="reset-password" action="" method="POST">\
                     <div class="form-label">RESET PASSWORD</div>\
                     <input id="username" type="text" placeholder="EMAIL" required>\
@@ -1433,9 +1457,7 @@ App.renderForgot = function () {
                         <div id="signin">Back to sign in</div>\
                     </div>\
                 </form>\
-                <div class="form-footer">Powered by EnterpriseApps</div>\
-             </div>'
-            ;
+                <div class="form-footer">Powered by EnterpriseApps</div>');
     App.jAppContainer.html(forgotDOM);
 
     var form = $("#reset-password");
@@ -1463,7 +1485,9 @@ App.renderForgot = function () {
                 App.showWarning("A reset link has been sent to your inbox at <strong>" + resp.msg + "</strong>");
             } else {
                 App.closeCurtain();
-                App.showWarning("Unable to process your request<br><strong>" + resp.msg + "</strong><br>Please let us know at <a href='mailto:info.enterpriseapps@gmail.com'>info.enterpriseapps@gmail.com</a>");
+                App.showWarning("Unable to process your request<br><strong>" 
+                        + resp.msg 
+                        + "</strong><br>Please let us know at <a href='mailto:info.enterpriseapps@gmail.com'>info.enterpriseapps@gmail.com</a>");
             }
         }).fail(function (resp) {
             var msg = "Request failed. " + resp.status;
@@ -1503,19 +1527,19 @@ App.renderForgot = function () {
 
 }());
 
+//--------------------------- CONTROL PANEL ----------------------------------//
 App.createControlPanel = function () {
     var cpContent = '<div class="cp-item" id="sale-history">Sales History</div>\
-             <div class="cp-item" id="close-register">Close register</div>';
+                    <div class="cp-item" id="close-register">Close Register</div>';
     if (App.currentEmployee.role === "Admin") {
         cpContent +=
                 '<div class="cp-item" id="acc-settings">Account Settings</div>\
-             <div class="cp-item" id="sta-settings">Staff Settings</div>\
-             <div class="cp-item" id="pos-settings">Point of Sale Settings</div>\
-             <div class="cp-item" id="plu-settings">Edit PLU Articles</div>\
-             <div class="cp-item" id="sgs-settings">Edit Sale Groups</div>\
-             <div class="cp-item" id="qss-settings">Edit Quick Sales</div>\
-             <div class="cp-item" id="rec-settings">Edit Receipt</div>'
-                ;
+                <div class="cp-item" id="sta-settings">Staff Settings</div>\
+                <div class="cp-item" id="pos-settings">Point of Sale Settings</div>\
+                <div class="cp-item" id="plu-settings">Edit PLU Articles</div>\
+                <div class="cp-item" id="sgs-settings">Edit Sale Groups</div>\
+                <div class="cp-item" id="qss-settings">Edit Quick Sales</div>\
+                <div class="cp-item" id="rec-settings">Edit Receipt</div>';
     }
     App.cpBody.append($(cpContent));
     App.bindControlPanel();
@@ -1563,9 +1587,7 @@ App.bindControlPanel = function () {
                 });
                 break;
             case "rec-settings":
-                t.click(function () {
-                    t.text("Not yet available");
-                });
+                t.click(App.renderReceiptSettings);
                 break;
             default:
 
@@ -1580,18 +1602,18 @@ App.createGoBack = function () {
     });
 };
 
+//--------------------------- ACCOUNT SETTINGS -------------------------------//
 App.renderAccountSettings = function () {
     var accDOM =
-            '<div class="center-box">\
-                <div class="form-header">Account Settings</div>\
+            App.createCenterBox(false, 
+               '<div class="form-header">Account Settings</div>\
                 <form id="change-password" action="" method="POST">\
                     <div class="form-label">CHANGE YOUR PASSWORD</div>\
                     <input id="old-password" type="password" pattern=".{8,128}" title="Password must be at least 8 characters long" placeholder="OLD PASSWORD">\
                     <input id="new-password" type="password" pattern=".{8,128}" title="Password must be at least 8 characters long" placeholder="NEW PASSWORD">\
                     <input id="con-password" type="password" pattern=".{8,128}" title="Password must be at least 8 characters long" placeholder="CONFIRM PASSWORD">\
                     <input type="submit" value="SUBMIT">\
-                </form>\
-             </div>';
+                </form>');
     App.cpBody.html(accDOM);
 
     App.cpBody.find(".center-box").prepend(App.createGoBack());
@@ -1643,118 +1665,17 @@ App.renderAccountSettings = function () {
     });
 };
 
-App.renderStaffSettings = function () {
-    var staffDOM =
-            '<div class="center-box scrollable">\
-                <div class="form-header">Staff Settings</div>\
-                <form id="staff-settings" action="" method="POST">\
-                    <div class="form-row">\
-                        <div class="form-label">MANAGE YOUR TEAM</div>\
-                        <div class="adder"></div>\
-                    </div>\
-                    <div class="modifier">';
-
-    for (var i = 0; i < App.staff.length; i++) {
-        var employee = App.staff[i];
-        //var isFirstAdmin = employee.number === 0;
-        staffDOM += App.generateModItemDOM(employee.name, ["number"], employee);
-                    /*'<div class="mod-item">\
-                            <div class="mi-header">' + employee.name + '</div>\
-                            <div class="mi-body hidden">\
-                                <div class="mi-row">\
-                                    <div class="mi-row-label">ROLE</div>\
-                                    <input class="" type="text" placeholder="ROLE" pattern="(Admin|Seller)" title="Type in either Admin or Seller" value="' + employee.role + '"' + (isFirstAdmin ? 'disabled' : '') + '>\
-                                </div>\
-                                <div class="mi-row">\
-                                    <div class="mi-row-label">NUMBER</div>\
-                                    <input class="" type="text" placeholder="NUMBER" maxlength="4" pattern="\\d{1,4}" title="1-4 digits" value="' + employee.number + '" disabled>\
-                                </div>\
-                                <div class="mi-row">\
-                                    <div class="mi-row-label">NAME</div>\
-                                    <input class="" type="text"  placeholder="NAME" maxlength="20" pattern=".{3,20}" title="3-20 letters" value="' + employee.name + '">\
-                                </div>\
-                                <div class="mi-row">\
-                                    <div class="mi-row-label">PIN</div>\
-                                    <input class="" type="number" placeholder="PIN" maxlength="4" pattern="\\d{4}" title="4 digits" value="' + employee.pin + '">\
-                                </div>\
-                                <div class="mi-control">\
-                                    <button class="mi-save">\
-                                        <span>Save</span>\
-                                        <div class="mi-loader"></div>\
-                                    </button>\
-                                    <button class="mi-remove"' + (isFirstAdmin ? 'disabled' : '') + '>\
-                                        <span>Remove</span>\
-                                        <div class="mi-loader"></div>\
-                                    </button>\
-                                </div>\
-                            </div>\
-                        </div>'*/;
-    }
-    staffDOM += '</div>\
-                </form>\
-             </div>';
-    App.cpBody.html(staffDOM);
-    App.cpBody.find(".center-box").prepend(App.createGoBack());
-
-    var form = App.cpBody.find("#staff-settings").submit(function (e) {
-        e.preventDefault();
-    });
-
-    var modifier = form.find(".modifier");
-
-    modifier.find(".mi-header").click(function () {
+//--------------------- GENERAL MODIFICATION REQUESTS-------------------------//
+App.resetRequestButtons = function (modItem) {
+    modItem.find("button").each(function () {
         var t = $(this);
-        t.next(".mi-body").slideToggle(200);
+        t.removeClass("fail success");
+        if (t.hasClass("mi-save")) {
+            t.find("span").text("Save");
+        } else if (t.hasClass("mi-remove")) {
+            t.find("span").text("Remove");
+        }
     });
-    
-    var modifyUrl = "/mod/staff";
-    form.find(".adder").click(function () {
-        var lastNumber = App.findMaxEmployeeNumber(modifier);
-        var modItem = $(App.generateModItemDOM("New employee", ["number"], {
-            number: lastNumber + 1,
-            role: "Seller",
-            name: "New employee",
-            pin: "0000"
-        }));
-        modItem.find(".mi-header").click(function () {
-            $(this).next(".mi-body").slideToggle(200);
-        });
-        modItem.find("button.mi-save").click(function () {
-            App.bindMiSaveButton(modifyUrl, this);
-        });
-        modifier.append(modItem);
-    });
-    modifier.find("button.mi-save").click(function () {
-        App.bindMiSaveButton(modifyUrl, this);
-    });
-
-    modifier.find("button.mi-remove").click(function () {
-        App.bindMiRemoveButton(modifyUrl, this);
-    });
-};
-
-App.bindMiSaveButton = function (url, b) {
-    var button = $(b);
-    var miBody = button.parents().eq(1);
-    var data = App.getMiEmployeeData("save", miBody);
-    App.requestModifyItem(url, data, button);
-};
-
-App.bindMiRemoveButton = function (url, b) {
-    var button = $(b);
-    var miBody = button.parents().eq(1);
-    var data = App.getMiEmployeeData("remove", miBody);
-    App.requestModifyItem(url, data, button);
-};
-
-App.getMiEmployeeData = function (requestType, miBody) {
-    return {
-        requestType: requestType,
-        number: miBody.find("input[placeholder='NUMBER']").val(),
-        role: miBody.find("input[placeholder='ROLE']").val(),
-        name: miBody.find("input[placeholder='NAME']").val(),
-        pin: miBody.find("input[placeholder='PIN']").val()
-    };
 };
 
 App.requestModifyItem = function (url, data, button) {   
@@ -1776,9 +1697,17 @@ App.requestModifyItem = function (url, data, button) {
             loader.removeClass("loading");
             button.addClass("success");
             span.text(requestSuccessMsg);
-            App.staff = resp.msg;
-            if(data.requestType === "remove") {
-                button.parents().eq(2).slideUp(200, function(){
+            switch (url) {
+                case "/mod/staff":
+                    App.staff = resp.msg;
+                    break;
+                case "/mod/receipt" :
+                    App.receipt = resp.msg;
+                    break;
+                default:
+            }
+            if (data.requestType === "remove") {
+                button.parents().eq(2).slideUp(App.getAnimationTime(), function () {
                     $(this).remove();
                 });
             }
@@ -1790,7 +1719,7 @@ App.requestModifyItem = function (url, data, button) {
     }).fail(function (resp) {
         loader.removeClass("loading");
         button.addClass("fail");
-        span.text(requestFailMsg + ". Status:" + resp.status);
+        span.text(requestFailMsg + ". Status: " + resp.status);
         if (resp.status === 0) {
             App.closeCurtain();
             App.showWarning("Network error. Please check your internet connection");
@@ -1798,33 +1727,47 @@ App.requestModifyItem = function (url, data, button) {
     });
 };
 
-App.generateModItemDOM = function (header, disabledFields, item) {
+App.generateModItemDOM = function (type, item) {
+    var disabledFields = ["number"];
+    switch (type) {
+        case "receipt":
+            disabledFields = [];
+            break;
+        default:
+    }
+
     // disable role field and remove button of the first admin user
-    var isFirstAdmin = (item.number === 0 && item.role === "Admin") ? true : false;
+    var isFirstAdmin = item.number === 0 && item.role === "Admin";
+    var isReceipt = type === "receipt";
+    var info = isReceipt ? 'Tip: Use \'&lt;br&gt;\' to add new lines' : '';
+    var isHiddenBody = !isReceipt;
     var keys = Object.keys(item);
     var dom = '<div class="mod-item">\
-                    <div class="mi-header">' + header + '</div>\
-                    <div class="mi-body hidden" style="display: none;">';
+                    <div class="mi-header">' + (item.name ? item.name : type.toUpperCase()) + '</div>\
+                    <div class="mi-body'+ (isHiddenBody ? ' hidden': '') + '">'
+                  +'<div class="mi-info">' + info + '</div>';
     for (var i = 0; i < keys.length; i++) {
         if(keys[i] !== "_id") {
                 var fieldDisabled = disabledFields.indexOf(keys[i]) >= 0;
                 var roleDisabled = isFirstAdmin && (keys[i] === "role");
+                var maxLength = 0;
+                switch (keys[i]) {
+                    case "pin":
+                        maxLength = 4;
+                        break;
+                    default:
+                        maxLength = 0;
+                }
                 dom += '<div class="mi-row">\
-                            <div class="mi-row-label">' + keys[i].toUpperCase() + '</div>\
-                            <input class="" type="text" placeholder="' + keys[i].toUpperCase() + '" value="' + item[keys[i]] + '" ' + ((fieldDisabled || roleDisabled)? 'disabled' : '') + '>\
-                        </div>';
-                    /* '<div class="mi-row">\
-                            <div class="mi-row-label">NUMBER</div>\
-                            <input class="" type="text" placeholder="NUMBER" maxlength="4" pattern="\d{1,4}" title="1-4 digits" value="0" disabled>\
-                        </div>\
-                        <div class="mi-row">\
-                            <div class="mi-row-label">NAME</div>\
-                            <input class="" type="text" placeholder="NAME" maxlength="20" pattern=".{3,20}" title="3-20 letters" value="Admixxc">\
-                        </div>\
-                        <div class="mi-row">\
-                            <div class="mi-row-label">PIN</div>\
-                            <input class="" type="number" placeholder="PIN" maxlength="4" pattern="\d{4}" title="4 digits" value="0000">\
-                        </div>';*/
+                            <div class="mi-row-label">' + keys[i].toUpperCase() + '</div>';
+                dom +=     '<input class="" \
+                                   type="text" \
+                                   placeholder="' + keys[i].toUpperCase() + '" \
+                                   value="' + item[keys[i]] + '"'
+                                   + ((fieldDisabled || roleDisabled) ? ' disabled' : '')
+                                   + (maxLength ? ' maxLength="' + maxLength + '"' : '') 
+                                   + '>';                
+                dom += '</div>';
         }
     }    
                 dom += '<div class="mi-control">\
@@ -1832,7 +1775,7 @@ App.generateModItemDOM = function (header, disabledFields, item) {
                                 <span>Save</span>\
                                 <div class="mi-loader"></div>\
                             </button>\
-                            <button class="mi-remove" ' + (isFirstAdmin ? 'disabled' : '') + '>\
+                            <button class="mi-remove" ' + ((isFirstAdmin || isReceipt) ? 'disabled' : '') + '>\
                                 <span>Remove</span>\
                                 <div class="mi-loader"></div>\
                             </button>\
@@ -1841,6 +1784,114 @@ App.generateModItemDOM = function (header, disabledFields, item) {
                 </div>';
     
     return dom;
+};
+
+//--------------------------- STAFF SETTINGS ---------------------------------//
+App.renderStaffSettings = function () {
+    var staffDOM =
+               '<div class="form-header">Staff Settings</div>\
+                <form id="staff-settings" action="" method="POST">\
+                    <div class="form-row">\
+                        <div class="form-label">MANAGE YOUR TEAM</div>\
+                        <div class="adder"></div>\
+                    </div>\
+                    <div class="modifier">';
+    var staff = App.staff;
+    for (var i = 0; i < staff.length; i++) {
+        var employee = staff[i];
+        staffDOM += App.generateModItemDOM("staff", employee);
+    }
+    staffDOM += '</div>\
+                </form>';
+    App.cpBody.html(App.createCenterBox(true, staffDOM));
+    App.cpBody.find(".center-box").prepend(App.createGoBack());
+
+    var form = App.cpBody.find("#staff-settings");     
+    var modifyUrl = "/mod/staff";
+        
+    App.bindModSettings(form, modifyUrl);
+};
+
+App.bindModSettings = function (form, modifyUrl) {  
+    form.submit(function (e) {
+        e.preventDefault();
+    });       
+    var modifier = form.find(".modifier");
+    modifier.find(".mi-header").click(function () {
+        var t = $(this);
+        t.next(".mi-body").slideToggle(200);
+    });    
+    modifier.find("input").change(function () {
+        App.resetRequestButtons($(this).parents().eq(1));
+    });
+    switch (modifyUrl) {
+        case "/mod/staff" :
+            form.find(".adder").click(function () {
+                var lastNumber = App.findMaxEmployeeNumber(modifier);
+                var modItem = $(App.generateModItemDOM("staff", {
+                    role: "Seller",
+                    number: lastNumber + 1,
+                    name: "New employee",
+                    pin: "0000"
+                }));
+                modItem.find("input").change(function () {
+                    App.resetRequestButtons(modItem);
+                });
+                modItem.find(".mi-header").click(function () {
+                    $(this).next(".mi-body").slideToggle(200);
+                });
+                modItem.find("button.mi-save").click(function () {
+                    var t = $(this);
+                    var data = App.getMiEmployeeData("save", t);
+                    App.requestModifyItem(modifyUrl, data, t);
+                }).click();
+                modItem.find("button.mi-remove").click(function () {
+                    var t = $(this);
+                    var data = App.getMiEmployeeData("remove", t);
+                    App.requestModifyItem(modifyUrl, data, t);
+                });
+                modItem.hide().appendTo(modifier).slideDown(App.getAnimationTime());
+            });
+            modifier.find("button.mi-save").click(function () {
+                var t = $(this);
+                var data = App.getMiEmployeeData("save", t);
+                App.requestModifyItem(modifyUrl, data, t);
+            });
+            modifier.find("button.mi-remove").click(function () {
+                var t = $(this);
+                var data = App.getMiEmployeeData("remove", t);
+                App.requestModifyItem(modifyUrl, data, t);
+            });
+            break;
+        case "/mod/receipt" :            
+            modifier.find("button.mi-save").click(function () {
+                var t = $(this);
+                var data = App.getMiReceiptData("save", t);
+                App.requestModifyItem(modifyUrl, data, t);
+            });
+            break;
+    }
+};
+
+App.getMiEmployeeData = function (requestType, button) {
+    var miBody = button.parents().eq(1);
+    return {
+        requestType: requestType,
+        number: miBody.find("input[placeholder='NUMBER']").val(),
+        role: miBody.find("input[placeholder='ROLE']").val(),
+        name: miBody.find("input[placeholder='NAME']").val(),
+        pin: miBody.find("input[placeholder='PIN']").val()
+    };
+};
+
+
+App.getMiReceiptData = function (requestType, button) {
+    var miBody = button.parents().eq(1);
+    return {
+        requestType: requestType,
+        header: miBody.find("input[placeholder='HEADER']").val(),
+        footer: miBody.find("input[placeholder='FOOTER']").val()
+    };
 };
 
 App.findMaxEmployeeNumber = function (modifier) {
@@ -1852,4 +1903,29 @@ App.findMaxEmployeeNumber = function (modifier) {
         }
     });
     return lastMax;
+};
+
+//--------------------------- RECEIPT SETTINGS ---------------------------------//
+App.renderReceiptSettings = function () {
+    var receiptDOM =
+            App.createCenterBox(true,
+                   '<div class="form-header">Receipt Settings</div>\
+                    <form id="receipt-settings" action="" method="POST">\
+                        <div class="form-row">\
+                            <div class="form-label">EDIT YOU RECEIPT</div>\
+                        </div>\
+                        <div class="modifier">'
+                      + App.generateModItemDOM("receipt", {
+                          header: App.receipt.header,
+                          footer: App.receipt.footer
+                      })  
+                      + '</div>\
+                    </form>');
+    App.cpBody.html(receiptDOM);    
+    App.cpBody.find(".center-box").prepend(App.createGoBack());
+    
+    var form = App.cpBody.find("#receipt-settings");
+    var modifyUrl = "/mod/receipt";
+    
+    App.bindModSettings(form, modifyUrl);
 };

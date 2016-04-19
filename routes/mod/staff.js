@@ -7,14 +7,14 @@ router.post('/staff', function (req, res) {
         requestType: /^(save|remove)$/,
         number: /^\d{1,4}$/,
         role: /^(Admin|Seller)$/,
-        name: /^.{3,20}$/,
+        name: /^.{3,50}$/,
         pin: /^\d{4}$/
     };
     if (!utils.isValidRequest(validator, req.body)) {
         res.json({success: false, msg: 'Invalid request. Role can be either Admin or Seller. Name must have at least 3 characters. PIN must have 4 digits'});
     } else {
         var query = {userId: req.user._id};
-        Settings.findOne(query).select('staff').then(function (settings) {
+        Settings.findOne(query).select('staff').exec().then(function (settings) {
             var staff = settings.staff;            
             /*var lastMaxStaffNumber = 0;
             for (var i = 0; i < staff.length; i++) {

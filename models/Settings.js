@@ -20,12 +20,16 @@ var Settings = new Schema({
     tax_rates: [Number],
     staff: [
         {
-            number: Number,
             role: String,
+            number: Number,
             name: String,
             pin: String
         }
-    ]
+    ],
+    receipt: {
+        header: String,
+        footer: String
+    }
 });
 
 module.exports = mongoose.model('settings', Settings);

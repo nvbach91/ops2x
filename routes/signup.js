@@ -126,12 +126,16 @@ function generateDefaultSettings(newUserId, request) {
         ],
         staff: [
             {
-                number: 0,
                 role: "Admin",
+                number: 0,
                 name: "Admin",
                 pin: "0000"
             }
-        ]
+        ],
+        receipt: {
+            header: "Your receipt",
+            footer: "Thank you for stopping by!"
+        }
     };
 }
 ;
