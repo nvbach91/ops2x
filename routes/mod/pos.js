@@ -16,7 +16,6 @@ router.post('/pos', function (req, res) {
         currency:       /^\{"code":"(CZK)","symbol":"(Kč)"\}$/
     };
     if (!utils.isValidRequest(validator, req.body)) {
-        console.log(req.body);
         res.json({success: false, msg: 'Invalid request. Request format is not accepted'});
     } else {
         var query = {userId: req.user._id};
@@ -35,7 +34,18 @@ router.post('/pos', function (req, res) {
             settings.currency = JSON.parse(req.body.currency);
             return settings.save();
         }).then(function (settings) {
-            res.json({success: true, msg: settings});
+            var ret = {
+                name: settings.name,
+                tin: settings.tin,
+                vat: settings.vat,
+                address: settings.address,
+                phone: settings.phone,
+                currency: settings.currency,
+                tax_rates: settings.tax_rates,
+                receipt: settings.receipt,
+                staff: settings.staff
+            };
+            res.json({success: true, msg: ret});
         }).catch(function (err) {
             res.json({success: false, msg: err});
         });

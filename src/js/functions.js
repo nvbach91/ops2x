@@ -12,7 +12,7 @@ App.getAnimationTime = function () {
 };
 
 // binary search of ean code in array
-Array.prototype.binaryIndexOf = function (sample, needle) {
+Array.prototype.binaryIndexOf = function (field, needle) {
     "use strict";
 
     var minIndex = 0;
@@ -24,10 +24,10 @@ Array.prototype.binaryIndexOf = function (sample, needle) {
         currentIndex = (minIndex + maxIndex) / 2 | 0;
         currentElement = this[currentIndex];
 
-        if (currentElement[sample] < needle) {
+        if (currentElement[field] < needle) {
             minIndex = currentIndex + 1;
         }
-        else if (currentElement[sample] > needle) {
+        else if (currentElement[field] > needle) {
             maxIndex = currentIndex - 1;
         }
         else {
@@ -99,6 +99,10 @@ App.startReceiptTime = function () {
     App._receiptTimeInterval = setInterval(function () {
         App.receiptTime.text(App.getDate());
     }, 500);
+};
+
+App.sortByEAN = function (a, b) {
+    return a.ean < b.ean ? -1 : 1;
 };
 
 // plays beep sound
@@ -425,11 +429,11 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
                 $("<div>").addClass("db-name").text("Name: " + name).appendTo(lbInfo);
                 $("<div>").addClass("db-price").text("Price: " + price + " " + App.settings.currency.symbol).appendTo(lbInfo);
                 $("<div>").addClass("db-group").text("Group: " + group).appendTo(lbInfo);
-                $("<div>").addClass("db-tax").text("Tax: " + tax).appendTo(lbInfo);
+                $("<div>").addClass("db-tax").text("Tax: " + tax + "%").appendTo(lbInfo);
                 $("<div>").addClass("db-tags").text("Tags: " + tags).appendTo(lbInfo);
                 $("<div>").addClass("db-desc").text("Description: " + desc).appendTo(lbInfo);
                 lbInfo.appendTo(lbBody);
-                $("<div>").addClass("db-img").appendTo(lbBody);
+                //$("<div>").addClass("db-img").appendTo(lbBody);
 
                 lbBody.appendTo(detailsBox);
 
@@ -1111,19 +1115,17 @@ App.renderWebRegister = function () {
 
     //populating articles for scanning    
     var articles = App.catalog.articles;
-    var nArticles = articles.length;
-    for (var i = 0; i < nArticles; i++) {
+    App.nArticles = articles.length;
+    for (var i = 0; i < App.nArticles; i++) {
         articles[i].id = i;
     }
-    articles.sort(function (a, b) {
-        return a.ean < b.ean ? -1 : 1;
-    });
+    articles.sort(App.sortByEAN);
     App.jSearchBox = App.jLiveSearch.find("#search");
     App.jSearchBox.keyup(function (e) {
         var t = $(this);
         if (e.keyCode === 13) {
-            var filter = t.val();
-            var i = articles.binaryIndexOf('ean', filter);
+            var needle = t.val();
+            var i = articles.binaryIndexOf("ean", needle);
             if (i >= 0) {
                 var item = articles[i];
                 var mult = App.getMultiplicationNumber();
@@ -1572,9 +1574,7 @@ App.bindControlPanel = function () {
                 t.click(App.renderPOSSettings);
                 break;
             case "plu-settings":
-                t.click(function () {
-                    t.text("Not yet available");
-                });
+                t.click(App.renderPLUSettings);
                 break;
             case "sgs-settings":
                 t.click(function () {
@@ -1679,14 +1679,15 @@ App.resetRequestButtons = function (modItem) {
 };
 
 App.requestModifyItem = function (url, data, button) {   
-    var requestPerformingMsg = data.requestType === "save" ? "Saving" : "Removing";
-    var requestSuccessMsg = data.requestType === "save" ? "Saved" : "Removed";
-    var requestFailMsg = data.requestType === "save" ? "Save failed" : "Remove failed";
+    var isSaveRequestType = data.requestType === "save";
+    var requestPerformingMsg = isSaveRequestType ? "Saving" : "Removing";
+    var requestSuccessMsg = isSaveRequestType ? "Saved" : "Removed";
+    var requestFailMsg = isSaveRequestType ? "Save failed" : "Remove failed";
     var loader = button.find(".mi-loader");
     var span = button.find("span");    
     loader.addClass("loading");
     button.removeClass("fail success");
-    span.text(requestPerformingMsg);
+    span.html(requestPerformingMsg);
     $.ajax({
         type: "POST",
         url: url,
@@ -1696,7 +1697,7 @@ App.requestModifyItem = function (url, data, button) {
         if (resp.success) {
             loader.removeClass("loading");
             button.addClass("success");
-            span.text(requestSuccessMsg);
+            span.html(requestSuccessMsg);
             switch (url) {
                 case "/mod/staff":
                     App.staff = resp.msg;
@@ -1707,9 +1708,32 @@ App.requestModifyItem = function (url, data, button) {
                 case "/mod/pos" :
                     App.settings = resp.msg;
                     break;
+                case "/mod/plu" :              
+                    var updatedArticle = resp.msg;      
+                    var articles = App.catalog.articles;
+                    var articleIndex = articles.binaryIndexOf("ean", resp.msg.ean);
+                    if (isSaveRequestType) {
+                        if (articleIndex >= 0) {
+                            updatedArticle.id = articles[articleIndex].id;
+                            articles[articleIndex] = updatedArticle;
+                        } else {
+                            updatedArticle.id = App.nArticles;
+                            App.nArticles++;
+                            articles.push(updatedArticle);
+                            articles.sort(App.sortByEAN);
+                            var modItem = button.parents().eq(2);
+                            modItem.find("input[placeholder='EAN']").prop("disabled", true);
+                            modItem.find(".mi-header").removeClass("new-item");
+                        }
+                    } else {
+                        if (articleIndex >= 0) {
+                            articles.splice(articleIndex, 1);
+                        }
+                    }
+                    break;
                 default:
             }
-            if (data.requestType === "remove") {
+            if (!isSaveRequestType) {
                 button.parents().eq(2).slideUp(App.getAnimationTime(), function () {
                     $(this).remove();
                 });
@@ -1717,12 +1741,12 @@ App.requestModifyItem = function (url, data, button) {
         } else {
             loader.removeClass("loading");
             button.addClass("fail");
-            span.text(requestFailMsg + ". Reason: " + resp.msg);
+            span.html(requestFailMsg + "<br>Reason: " + resp.msg);
         }
     }).fail(function (resp) {
         loader.removeClass("loading");
         button.addClass("fail");
-        span.text(requestFailMsg + ". Status: " + resp.status);
+        span.html(requestFailMsg + "<br>Status: " + resp.status);
         if (resp.status === 0) {
             App.closeCurtain();
             App.showWarning("Network error. Please check your internet connection");
@@ -1730,32 +1754,43 @@ App.requestModifyItem = function (url, data, button) {
     });
 };
 
-App.generateModItemDOM = function (type, item) {
+App.generateModItemFormDOM = function (type, item) {
     var disabledFields = [];
+    var info = "";
+    var isNewItem = "";
     switch (type) {
         case "staff":
             disabledFields = ["number"];
             break;
         case "receipt":
+            info = "Tip: Use '&lt;br&gt;' to add new lines";
             break;
         case "pos":
+            break;
+        case "plu":
+            disabledFields = ["ean"];
+            break;
+        case "newplu":
+            isNewItem = " new-item";
             break;
         default:
     }
 
     // disable role field and remove button of the first admin user
-    var isFirstAdmin = item.number === 0 && item.role === "Admin";
+    var isFirstAdmin = item.number && (item.number.value === 0) && item.role && (item.role.value === "Admin");
     var isReceipt = type === "receipt";
     var isPOS = type === "pos";
-    var info = isReceipt ? 'Tip: Use \'&lt;br&gt;\' to add new lines' : '';
-    var isHiddenBody = type === "staff";
+    var isHiddenBody = ["staff"].indexOf(type) >= 0;
+    var header = item.name ? item.name.value : type.toUpperCase();
+    header = item.ean ? item.ean.value : header;
+
     var keys = Object.keys(item);
-    var dom = '<div class="mod-item">\
-                    <div class="mi-header">' + (item.name ? item.name : type.toUpperCase()) + '</div>\
+    var dom = '<form class="mod-item" action method="POST">\
+                    <div class="mi-header' + isNewItem + '">' + header + '</div>\
                     <div class="mi-body'+ (isHiddenBody ? ' hidden': '') + '">'
                   +'<div class="mi-info">' + info + '</div>';
     for (var i = 0; i < keys.length; i++) {
-        if(keys[i] !== "_id") {
+        if(["_id", "id"].indexOf(keys[i]) < 0 ) {
                 var fieldDisabled = disabledFields.indexOf(keys[i]) >= 0;
                 var roleDisabled = isFirstAdmin && (keys[i] === "role");
                 var maxLength = 0;
@@ -1769,17 +1804,31 @@ App.generateModItemDOM = function (type, item) {
                 dom += '<div class="mi-row">\
                             <div class="mi-row-label">' + keys[i].toUpperCase() + '</div>';
                 if(keys[i] === "currency") { 
+                // ATTENTION!!!
                 dom +=     '<select id="currency">\
                                 <option data=\'{"code":"CZK","symbol":"Kč"}\' selected>CZK - Czech Koruna</option>\
                             </select>';   
+                                            
+                } else if(keys[i] === "tax") {
+                // ATTENTION!!!    
+                dom +=     '<select id="tax_rates">';
+                var taxRates = App.settings.tax_rates;
+                for (var j = 0; j < taxRates.length; j++){
+                    dom +=     '<option' + (taxRates[j] === item[keys[i]].value ? ' selected' : '') + '>' + taxRates[j] + '</option>';    
+                }
+                dom +=     '</select>';
+                
                 } else {
+                var validator = item[keys[i]].valid.toString().replace(/[\/^$]/g, "");
                 dom +=     '<input class="" \
                                    type="text" \
+                                   pattern="' + validator + '" \
+                                   title="' + item[keys[i]].title + '" \
                                    placeholder="' + keys[i].toUpperCase() + '" \
-                                   value="' + item[keys[i]] + '"'
+                                   value="' + item[keys[i]].value + '"'
                                    + ((fieldDisabled || roleDisabled) ? ' disabled' : '')
                                    + (maxLength ? ' maxLength="' + maxLength + '"' : '') 
-                                   + '>';   
+                                   + ' required>';   
                 }
                 dom += '</div>';
         }
@@ -1789,22 +1838,25 @@ App.generateModItemDOM = function (type, item) {
                                 <span>Save</span>\
                                 <div class="mi-loader"></div>\
                             </button>\
-                            <button class="mi-remove" ' + ((isFirstAdmin || isReceipt || isPOS) ? 'disabled' : '') + '>\
+                            <button class="mi-remove" ' + ((isFirstAdmin || isReceipt || isPOS || isNewItem) ? 'disabled' : '') + '>\
                                 <span>Remove</span>\
                                 <div class="mi-loader"></div>\
                             </button>\
                         </div>\
                     </div>\
-                </div>';
+                </form>';
     
     return dom;
 };
 
-App.bindModSettings = function (form, modifyUrl) {  
-    form.submit(function (e) {
+App.bindModSettings = function (modFormContainer, modifyUrl) {  
+    var submitted = null;
+    modFormContainer.find("form.mod-item").submit(function (e) {
         e.preventDefault();
+        var data = submitted.dataFunction(submitted.requestType, submitted.button);
+        App.requestModifyItem(modifyUrl, data, submitted.button);
     });       
-    var modifier = form.find(".modifier");
+    var modifier = modFormContainer.find(".modifier");
     modifier.find(".mi-header").click(function () {
         var t = $(this);
         t.next(".mi-body").slideToggle(200);
@@ -1814,14 +1866,19 @@ App.bindModSettings = function (form, modifyUrl) {
     });
     switch (modifyUrl) {
         case "/mod/staff" :
-            form.find(".adder").click(function () {
+            modFormContainer.find(".adder").click(function () {
                 var lastNumber = App.findMaxEmployeeNumber(modifier);
-                var modItem = $(App.generateModItemDOM("staff", {
-                    role: "Seller",
-                    number: lastNumber + 1,
-                    name: "New employee",
-                    pin: "0000"
+                var modItem = $(App.generateModItemFormDOM("staff", {
+                    role: {title: "Admin or Seller", valid : /^(Admin|Seller)$/, value: "Seller"},
+                    number: {title: "1-4 digits", valid : /^\d{1,4}$/, value: lastNumber + 1},
+                    name: {title: "3 or more characters", valid : /^.{3,50}$/, value: "New employee"},
+                    pin: {title: "4 digits", valid : /^\d{4}$/, value: "0000"}
                 }));
+                modItem.submit(function (e) {
+                    e.preventDefault();
+                    var data = submitted.dataFunction(submitted.requestType, submitted.button);
+                    App.requestModifyItem(modifyUrl, data, submitted.button);
+                });
                 modItem.find("input").change(function () {
                     App.resetRequestButtons(modItem);
                 });
@@ -1829,42 +1886,30 @@ App.bindModSettings = function (form, modifyUrl) {
                     $(this).next(".mi-body").slideToggle(200);
                 });
                 modItem.find("button.mi-save").click(function () {
-                    var t = $(this);
-                    var data = App.getMiEmployeeData("save", t);
-                    App.requestModifyItem(modifyUrl, data, t);
+                    submitted = {dataFunction: App.getMiEmployeeUpdateData, button: $(this), requestType: "save"};
                 }).click();
                 modItem.find("button.mi-remove").click(function () {
-                    var t = $(this);
-                    var data = App.getMiEmployeeData("remove", t);
-                    App.requestModifyItem(modifyUrl, data, t);
+                    submitted = {dataFunction: App.getMiEmployeeUpdateData, button: $(this), requestType: "remove"};
                 });
                 modItem.hide().appendTo(modifier).slideDown(App.getAnimationTime());
             });
             modifier.find("button.mi-save").click(function () {
-                var t = $(this);
-                var data = App.getMiEmployeeData("save", t);
-                App.requestModifyItem(modifyUrl, data, t);
+                submitted = {dataFunction: App.getMiEmployeeUpdateData, button: $(this), requestType: "save"};
             });
             modifier.find("button.mi-remove").click(function () {
-                var t = $(this);
-                var data = App.getMiEmployeeData("remove", t);
-                App.requestModifyItem(modifyUrl, data, t);
+                submitted = {dataFunction: App.getMiEmployeeUpdateData, button: $(this), requestType: "remove"};
             });
             break;
         case "/mod/receipt" :            
-            modifier.find("button.mi-save").click(function () {
-                var t = $(this);
-                var data = App.getMiReceiptData("save", t);
-                App.requestModifyItem(modifyUrl, data, t);
+            modifier.find("button.mi-save").click(function () {               
+                submitted = {dataFunction: App.getMiReceiptUpdateData, button: $(this), requestType: "save"};
             });
             break;
-        case "/mod/pos" :            
-        modifier.find("button.mi-save").click(function () {
-            var t = $(this);
-            var data = App.getMiPOSData("save", t);
-            App.requestModifyItem(modifyUrl, data, t);
-        });
-        break;
+        case "/mod/pos" :
+            modifier.find("button.mi-save").click(function () {
+                submitted = {dataFunction: App.getMiPosUpdateData, button: $(this), requestType: "save"};
+            });
+            break;
         default:
     }
 };
@@ -1873,7 +1918,7 @@ App.bindModSettings = function (form, modifyUrl) {
 App.renderStaffSettings = function () {
     var staffDOM =
                '<div class="form-header">Staff Settings</div>\
-                <form id="staff-settings" action="" method="POST">\
+                <div class="mod-form">\
                     <div class="form-row">\
                         <div class="form-label">MANAGE YOUR TEAM</div>\
                         <div class="adder"></div>\
@@ -1882,25 +1927,30 @@ App.renderStaffSettings = function () {
     var staff = App.staff;
     for (var i = 0; i < staff.length; i++) {
         var employee = staff[i];
-        staffDOM += App.generateModItemDOM("staff", employee);
+        staffDOM += App.generateModItemFormDOM("staff", {
+            role: {title: "Admin of Seller", valid : /^(Admin|Seller)$/, value: employee.role},
+            number: {title: "1-4 digits", valid : /^\d{1,4}$/, value: employee.number},
+            name: {title: "3 or more characters", valid : /^.{3,50}$/, value: employee.name},
+            pin: {title: "4 digits", valid : /^\d{4}$/, value: employee.pin}
+        });
     }
-    staffDOM += '</div>\
-                </form>';
+    staffDOM +=    '</div>\
+                </div>';
     App.cpBody.html(App.createCenterBox(true, staffDOM));
     App.cpBody.find(".center-box").prepend(App.createGoBack());
 
-    var form = App.cpBody.find("#staff-settings");     
+    var modFormContainer = App.cpBody.find(".mod-form");     
     var modifyUrl = "/mod/staff";
         
-    App.bindModSettings(form, modifyUrl);
+    App.bindModSettings(modFormContainer, modifyUrl);
 };
 
-App.getMiEmployeeData = function (requestType, button) {
+App.getMiEmployeeUpdateData = function (requestType, button) {
     var miBody = button.parents().eq(1);
     return {
         requestType: requestType,
-        number: miBody.find("input[placeholder='NUMBER']").val(),
         role: miBody.find("input[placeholder='ROLE']").val(),
+        number: miBody.find("input[placeholder='NUMBER']").val(),
         name: miBody.find("input[placeholder='NAME']").val(),
         pin: miBody.find("input[placeholder='PIN']").val()
     };
@@ -1917,32 +1967,32 @@ App.findMaxEmployeeNumber = function (modifier) {
     return lastMax;
 };
 
-//--------------------------- RECEIPT SETTINGS ---------------------------------//
+//------------------------- RECEIPT SETTINGS ---------------------------------//
 App.renderReceiptSettings = function () {
     var receiptDOM =
             App.createCenterBox(true,
                    '<div class="form-header">Receipt Settings</div>\
-                    <form id="receipt-settings" action="" method="POST">\
+                    <div class="mod-form" action="" method="POST">\
                         <div class="form-row">\
                             <div class="form-label">EDIT YOU RECEIPT</div>\
                         </div>\
                         <div class="modifier">'
-                      + App.generateModItemDOM("receipt", {
-                          header: App.receipt.header,
-                          footer: App.receipt.footer
+                      + App.generateModItemFormDOM("receipt", {
+                        header: {title: "Max 256 characters", valid : /^.{0,256}$/, value: App.receipt.header},
+                        footer: {title: "Max 256 characters", valid : /^.{0,256}$/, value: App.receipt.footer}
                       })  
                       + '</div>\
-                    </form>');
+                    </div>');
     App.cpBody.html(receiptDOM);    
     App.cpBody.find(".center-box").prepend(App.createGoBack());
     
-    var form = App.cpBody.find("#receipt-settings");
+    var modFormContainer = App.cpBody.find(".mod-form");
     var modifyUrl = "/mod/receipt";
     
-    App.bindModSettings(form, modifyUrl);
+    App.bindModSettings(modFormContainer, modifyUrl);
 };
 
-App.getMiReceiptData = function (requestType, button) {
+App.getMiReceiptUpdateData = function (requestType, button) {
     var miBody = button.parents().eq(1);
     return {
         requestType: requestType,
@@ -1951,39 +2001,40 @@ App.getMiReceiptData = function (requestType, button) {
     };
 };
 
-//--------------------------- RECEIPT SETTINGS ---------------------------------//
+//--------------------------- POS SETTINGS -----------------------------------//
 App.renderPOSSettings = function () {
     var receiptDOM =
             App.createCenterBox(true,
                     '<div class="form-header">Point of Sale Settings</div>\
-                    <form id="poss-settings" action="" method="POST">\
+                    <div class="mod-form" action="" method="POST">\
                         <div class="form-row">\
                             <div class="form-label">Configure your Cash Register</div>\
                         </div>\
                         <div class="modifier">'
-                    + App.generateModItemDOM("pos", {
-                        name: App.settings.name,
-                        tin: App.settings.tin,
-                        vat: App.settings.vat,
-                        street: App.settings.address.street,
-                        city: App.settings.address.city,
-                        zip: App.settings.address.zip,
-                        country: App.settings.address.country,
-                        phone: App.settings.phone,
-                        currency: App.settings.currency /*ATTENTION!!!*/
+                    + App.generateModItemFormDOM("pos", {
+                        name:       {title: "3-100 characters", valid : /^.{3,100}$/,           value: App.settings.name},
+                        tin:        {title: "8 digits", valid : /^\d{8}$/,              value: App.settings.tin},
+                        vat:        {title: "Example: CZ1234567890", valid : /^[A-Z]{2}\d{8,10}$/,   value: App.settings.vat},
+                        street:     {title: "5-100 characters", valid : /^.{5,100}$/,           value: App.settings.address.street},
+                        city:       {title: "2-75 characters", valid : /^.{2,75}$/,            value: App.settings.address.city},
+                        zip:        {title: "3-10 letters", valid : /^\w{3,10}$/,           value: App.settings.address.zip},
+                        country:    {title: "3-75 characters", valid : /^.{3,75}$/,            value: App.settings.address.country},
+                        phone:      {title: "9 digits with optional prefix", valid : /^\+?(\d{3})?\d{9}$/,   value: App.settings.phone},
+                        /*ATTENTION!!! HANDLING this in calling function with if else*/
+                        currency:   {title: "", valid : /^\{"code":"(CZK)","symbol":"(Kč)"\}$/, value: App.settings.currency}
                     })
                     + '</div>\
-                    </form>');
+                    </div>');
     App.cpBody.html(receiptDOM);
     App.cpBody.find(".center-box").prepend(App.createGoBack());
     
-    var form = App.cpBody.find("#poss-settings");
+    var modFormContainer = App.cpBody.find(".mod-form");
     var modifyUrl = "/mod/pos";
     
-    App.bindModSettings(form, modifyUrl);
+    App.bindModSettings(modFormContainer, modifyUrl);
 };
 
-App.getMiPOSData = function (requestType, button) {
+App.getMiPosUpdateData = function (requestType, button) {
     var miBody = button.parents().eq(1);
     return {
         requestType: requestType,
@@ -1998,3 +2049,116 @@ App.getMiPOSData = function (requestType, button) {
         currency: miBody.find("select").find(":selected").attr("data")
     };
 };
+
+//--------------------------- PLU SETTINGS -----------------------------------//
+App.renderPLUSettings = function () {
+    var pluDOM =
+               '<div class="form-header">PLU Settings</div>\
+                <div class="mod-form" action="" method="POST">\
+                    <div class="form-row">\
+                        <div class="form-label">MANAGE YOUR CATALOG</div>\
+                    </div>\
+                    <div class="form-row control">\
+                        <button id="plu-import">Import CSV</button>\
+                        <button id="plu-export">Export CSV</button>\
+                    </div>\
+                    <div class="hline"></div>\
+                    <div class="mi-info">Tip: New PLU will be highlighted green if the EAN code is not found</div>\
+                    <form class="form-row control">\
+                        <input class="plu-searcher" placeholder="SEARCH EAN CODE" pattern="\\d{1,13}" title="EAN must have 1-13 digits">\
+                        <button class="plu-search">Search / Add</button>\
+                    </form>\
+                    <div class="modifier"></div>\
+                </form>';
+    App.cpBody.html(App.createCenterBox(true, pluDOM));
+    App.cpBody.find(".center-box").prepend(App.createGoBack());
+
+    var modFormContainer = App.cpBody.find(".mod-form");     
+    var modifyUrl = "/mod/plu";
+    
+    var modifier = modFormContainer.find(".modifier");
+    var submitted = null;
+    modFormContainer.submit(function(e){
+        e.preventDefault();       
+    });
+    
+    var pluInput = modFormContainer.find(".plu-searcher");
+    modFormContainer.find(".plu-search").click(function () {
+        var searchEAN = pluInput.val();
+        pluInput.val("");
+        if (searchEAN) {
+            var i = App.catalog.articles.binaryIndexOf("ean", searchEAN);
+            modifier.empty();
+            if (i >= 0) {
+                var item = App.catalog.articles[i];
+                var modItem = $(App.generateModItemFormDOM("plu", {
+                    ean: {title: "1-13 digits", valid : /^\d{1,13}$/, value: item.ean},
+                    name: {title: "1-128 characters", valid : /^.{1,128}$/, value: item.name},
+                    price: {title: "Example: 42.00", valid : /^\d{1,5}\.\d{2}$/, value: item.price},
+                    group: {title: "Max 128 characters", valid : /^.{0,128}$/, value: item.group},
+                    // ATTENTION!!! Handling this in calling function...
+                    tax: {title: "", valid : /^(0|10|15|21)$/, value: item.tax}
+                }));                
+                modItem.submit(function (e) {
+                    e.preventDefault();
+                    var data = submitted.dataFunction(submitted.requestType, submitted.button);
+                    App.requestModifyItem(modifyUrl, data, submitted.button);
+                });
+                modItem.find("input").change(function () {
+                    App.resetRequestButtons(modItem);
+                });
+                modItem.find(".mi-header").click(function () {
+                    $(this).next(".mi-body").slideToggle(200);
+                });
+                modItem.find("button.mi-save").click(function () {                    
+                    submitted = {dataFunction: App.getMiPluUpdateData, button: $(this), requestType: "save"};
+                });
+                modItem.find("button.mi-remove").click(function () {
+                    submitted = {dataFunction: App.getMiPluUpdateData, button: $(this), requestType: "remove"};
+                });
+                modItem.hide().appendTo(modifier).slideDown(App.getAnimationTime());
+            } else {
+                var modItem = $(App.generateModItemFormDOM("newplu", {
+                    ean: {title: "1-13 digits", valid : /^\d{1,13}$/, value: searchEAN},
+                    name: {title: "1-128 characters", valid : /^.{1,128}$/, value: ""},
+                    price: {title: "Example: 42.00", valid : /^\d{1,5}\.\d{2}$/, value: ""},
+                    group: {title: "Max 128 characters", valid : /^.{0,128}$/, value: ""},
+                    // ATTENTION!!! Handling this in calling function...
+                    tax: {title: "", valid : /^(0|10|15|21)$/, value: App.settings.tax_rates[0]}
+                }));
+                modItem.submit(function (e) {
+                    e.preventDefault();
+                    var data = submitted.dataFunction(submitted.requestType, submitted.button);
+                    App.requestModifyItem(modifyUrl, data, submitted.button);
+                });
+                modItem.find("input").change(function () {
+                    App.resetRequestButtons(modItem);
+                });
+                modItem.find(".mi-header").click(function () {
+                    $(this).next(".mi-body").slideToggle(200);
+                });
+                modItem.find("button.mi-save").click(function () {                    
+                    submitted = {dataFunction: App.getMiPluUpdateData, button: $(this), requestType: "save"};
+                });
+                modItem.find("button.mi-remove").click(function () {                    
+                    submitted = {dataFunction: App.getMiPluUpdateData, button: $(this), requestType: "remove"};
+                });
+                modItem.hide().appendTo(modifier).slideDown(App.getAnimationTime());
+            }
+        }
+    });
+};
+
+App.getMiPluUpdateData = function (requestType, button) {
+    var miBody = button.parents().eq(1);
+    return {
+        requestType: requestType,
+        ean     : miBody.find("input[placeholder='EAN']").val(),
+        name    : miBody.find("input[placeholder='NAME']").val(),
+        price   : miBody.find("input[placeholder='PRICE']").val(),
+        group   : miBody.find("input[placeholder='GROUP']").val(),
+        tax     : miBody.find("select").find(":selected").val()
+    };
+};
+
+//------------------------ SALE GROUPS SETTINGS ------------------------------//

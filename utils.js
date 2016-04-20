@@ -32,6 +32,32 @@ var utils = {
             }
         }
         return true;
+    },
+    sortByEAN: function (a, b) {
+        return a.ean < b.ean ? -1 : 1;
+    },
+    binaryIndexOf: function (array, field, needle) {
+        var minIndex = 0;
+        var maxIndex = array.length - 1;
+        var currentIndex;
+        var currentElement;
+
+        while (minIndex <= maxIndex) {
+            currentIndex = (minIndex + maxIndex) / 2 | 0;
+            currentElement = array[currentIndex];
+
+            if (currentElement[field] < needle) {
+                minIndex = currentIndex + 1;
+            }
+            else if (currentElement[field] > needle) {
+                maxIndex = currentIndex - 1;
+            }
+            else {
+                return currentIndex;
+            }
+        }
+
+        return -1;
     }
 };
 

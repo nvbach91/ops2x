@@ -5,8 +5,8 @@ var utils = require('../../utils');
 router.post('/staff', function (req, res) {
     var validator = {
         requestType: /^(save|remove)$/,
-        number: /^\d{1,4}$/,
         role: /^(Admin|Seller)$/,
+        number: /^\d{1,4}$/,
         name: /^.{3,50}$/,
         pin: /^\d{4}$/
     };

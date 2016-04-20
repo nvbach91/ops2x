@@ -10,7 +10,17 @@
     width: 6px;
 }
 ::-webkit-scrollbar-thumb {
-    background-color: #E4644B;
+    background-color: #BB5151;
+}
+.hline {
+    border-bottom: 1px solid #ccc;
+    margin: 10px 0;
+}
+input[type=number] {
+    -moz-appearance: textfield;
+}
+select {
+    cursor: pointer;
 }
 #kc {
     display: none;
@@ -51,7 +61,6 @@ html, body, #app, #main, #curtain, #control-panel {
     align-items: center;
 }
 .center-box.scrollable {
-    padding-top: 10px;
     height: auto;
 }
 #success, #invalid-request {
@@ -76,7 +85,8 @@ html, body, #app, #main, #curtain, #control-panel {
     padding: 10px 20px;
     background-size: 25px;
 }
-form {
+form, .mod-form {
+    overflow-y: scroll;
     background-color: #fff;
     padding: 20px;
     width: 100%;
@@ -98,9 +108,6 @@ form input {
     background-repeat: no-repeat;
     background-size: 20px;
     text-indent: 40px;
-}
-form#staff-settings {
-    overflow-y: scroll;
 }
 form#sign-up input {
     padding: 5px 20px;
@@ -130,7 +137,7 @@ form#employee-login [type="submit"] {
 form [type="submit"]:hover {    
     background-color: #59AAD3;
 }
-form .form-label {   
+.form-label {   
     color: #353535;
     font-size: 18px;
     line-height: 40px;
@@ -224,15 +231,15 @@ nav {
     cursor: pointer;
     font-size: 16px;
     text-align: center;
-    line-height: 75px;
     background-color: #903030;
     width: 100%;
     max-width: 640px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     background-image: url("../img/ico/goback.svg");
     background-position: 20px;
-    background-size: 40px;
     background-repeat: no-repeat;
+    background-size: 20px;
+    line-height: 40px;
 }
 #go-back:hover {
     background-color: #334C60;
@@ -240,6 +247,39 @@ nav {
 .form-row {
     min-height: 40px;
     display: flex;
+}
+.form-row.control {
+    margin-bottom: 10px;
+    min-height: 50px;
+    flex-direction: row;
+    padding: 0;
+}
+.plu-searcher {    
+    margin: 0 5px 0 0;
+    border: 1px solid #CACACA;
+    padding: 0;
+    flex-grow: 1;
+    text-indent: 10px;
+}
+.plu-search {
+    width: 100px;
+    background-image: url('/img/ico/magnifier.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+    text-indent: -9999px;
+}
+#plu-export, #plu-import {
+    cursor: pointer;
+    font-size: 14px;
+    padding: 10px;
+    border-radius: 3px;
+    margin: auto;
+}
+#plu-export {    
+    background-color: #65C365;
+}
+#plu-import {    
+    background-color: #BB5151;
 }
 .adder {
     height: 40px;
@@ -250,6 +290,9 @@ nav {
     line-height: 40px;
     cursor: pointer;
 }
+.adder.hidden {
+    display: none;
+}
 .adder:before {
     content: "+";
 }
@@ -258,6 +301,7 @@ nav {
 }
 .mod-item {
     margin: 5px 0;
+    padding: 0;
 }
 .mod-item input {
     padding: 5px;
@@ -267,7 +311,9 @@ nav {
 .mod-item select {
     padding: 0;
     text-indent: 0;
-    width: 100%;
+    width: 100%;    
+    height: 40px;
+    margin: auto;
 }
 .mi-header {
     background-color: #BB5151;
@@ -275,6 +321,9 @@ nav {
     padding: 10px;
     cursor: pointer;
     border-radius: 3px;
+}
+.mi-header.new-item {    
+    background-color: #65C365;
 }
 .mi-header:hover {
     background-color: #334C60;
@@ -286,9 +335,15 @@ nav {
     display: none;
 }
 .mi-info {
-    color: #353535;
+    color: #6D6D6D;
     font-size: 14px;
-    text-align: right;
+    text-align: left;    
+    background-image: url('/img/ico/info.svg');
+    background-repeat: no-repeat;
+    background-size: 15px;
+    background-position: left;
+    text-indent: 20px;
+    margin-bottom: 5px;
 }
 .mi-row {
     display: flex;
@@ -342,7 +397,7 @@ nav {
 #cp-header {
     display: flex;
     background-color: #903030;
-    margin-bottom: 25px;
+    margin-bottom: 10px;
     line-height: 50px;
     min-height: 50px;
     font-size: 18px;
@@ -512,9 +567,7 @@ button:active {
     filter: grayscale(.7);
 }
 button:disabled {
-    -webkit-filter: grayscale(1);
-    -moz-filter: grayscale(1);
-    filter: grayscale(1);    
+    background-color: grey; 
     cursor: default;
 }
 .sg, .qs-item button {
@@ -742,6 +795,7 @@ input.si-name {
 .si-total, .si-price {
     flex-grow: 2;
     text-align: right;
+    line-height: 41px;
 }
 .si-total {
     flex-grow: 4;
@@ -1350,7 +1404,11 @@ div#taxes-label {
     }
 }
 
-@media screen and (min-width: 720px){
+@media screen and (min-width: 720px){    
+    #go-back {
+        background-size: 40px;
+        line-height: 75px;
+    }
     #paycalc {
         min-height: 75px;
     }

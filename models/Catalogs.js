@@ -9,9 +9,9 @@ var Catalogs = new Schema({
             name: String,
             price: String,
             group: String,
-            tax: Number,
-            tags: [String],
-            desc: String
+            tax: Number
+            //tags: [String],
+            //desc: String
         }
     ]
 });
