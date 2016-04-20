@@ -1577,9 +1577,7 @@ App.bindControlPanel = function () {
                 t.click(App.renderPLUSettings);
                 break;
             case "sgs-settings":
-                t.click(function () {
-                    t.text("Not yet available");
-                });
+                t.click(App.renderSaleGroupsSettings);
                 break;
             case "qss-settings":
                 t.click(function () {
@@ -1731,6 +1729,9 @@ App.requestModifyItem = function (url, data, button) {
                         }
                     }
                     break;
+                case "/mod/salegroups" :
+                    //App.settings = resp.msg;
+                    break;
                 default:
             }
             if (!isSaveRequestType) {
@@ -1749,13 +1750,14 @@ App.requestModifyItem = function (url, data, button) {
         span.html(requestFailMsg + "<br>Status: " + resp.status);
         if (resp.status === 0) {
             App.closeCurtain();
-            App.showWarning("Network error. Please check your internet connection");
+            App.showWarning("Network error. Server may be down or your internet connection is lost");
         }
     });
 };
 
 App.generateModItemFormDOM = function (type, item) {
     var disabledFields = [];
+    var hiddenFields = [];
     var info = "";
     var isNewItem = "";
     switch (type) {
@@ -1773,6 +1775,10 @@ App.generateModItemFormDOM = function (type, item) {
         case "newplu":
             isNewItem = " new-item";
             break;
+        case "salegroups":
+            disabledFields = ["_id"];
+            hiddenFields = ["_id"];
+            break;
         default:
     }
 
@@ -1780,9 +1786,10 @@ App.generateModItemFormDOM = function (type, item) {
     var isFirstAdmin = item.number && (item.number.value === 0) && item.role && (item.role.value === "Admin");
     var isReceipt = type === "receipt";
     var isPOS = type === "pos";
-    var isHiddenBody = ["staff"].indexOf(type) >= 0;
+    var isHiddenBody = ["staff", "salegroups"].indexOf(type) >= 0;
     var header = item.name ? item.name.value : type.toUpperCase();
     header = item.ean ? item.ean.value : header;
+    header = item.text ? item.text.value : header;
 
     var keys = Object.keys(item);
     var dom = '<form class="mod-item" action method="POST">\
@@ -1790,8 +1797,9 @@ App.generateModItemFormDOM = function (type, item) {
                     <div class="mi-body'+ (isHiddenBody ? ' hidden': '') + '">'
                   +'<div class="mi-info">' + info + '</div>';
     for (var i = 0; i < keys.length; i++) {
-        if(["_id", "id"].indexOf(keys[i]) < 0 ) {
+        //if(["_id", "id"].indexOf(keys[i]) < 0) {
                 var fieldDisabled = disabledFields.indexOf(keys[i]) >= 0;
+                var fieldHidden = hiddenFields.indexOf(keys[i]) >= 0;
                 var roleDisabled = isFirstAdmin && (keys[i] === "role");
                 var maxLength = 0;
                 switch (keys[i]) {
@@ -1801,7 +1809,7 @@ App.generateModItemFormDOM = function (type, item) {
                     default:
                         maxLength = 0;
                 }
-                dom += '<div class="mi-row">\
+                dom += '<div class="mi-row' + (fieldHidden ? ' hidden': '') + '">\
                             <div class="mi-row-label">' + keys[i].toUpperCase() + '</div>';
                 if(keys[i] === "currency") { 
                 // ATTENTION!!!
@@ -1828,10 +1836,10 @@ App.generateModItemFormDOM = function (type, item) {
                                    value="' + item[keys[i]].value + '"'
                                    + ((fieldDisabled || roleDisabled) ? ' disabled' : '')
                                    + (maxLength ? ' maxLength="' + maxLength + '"' : '') 
-                                   + ' required>';   
+                                   + (fieldHidden ? '': ' required') + '>';   
                 }
                 dom += '</div>';
-        }
+        //}
     }    
                 dom += '<div class="mi-control">\
                             <button class="mi-save">\
@@ -1847,6 +1855,11 @@ App.generateModItemFormDOM = function (type, item) {
                 </form>';
     
     return dom;
+};
+
+// prepare submit to validate form before submit
+App.prepareSubmit = function (dataFunction, button, requestType) {
+    return {dataFunction: dataFunction, button: button, requestType: requestType};
 };
 
 App.bindModSettings = function (modFormContainer, modifyUrl) {  
@@ -1886,28 +1899,60 @@ App.bindModSettings = function (modFormContainer, modifyUrl) {
                     $(this).next(".mi-body").slideToggle(200);
                 });
                 modItem.find("button.mi-save").click(function () {
-                    submitted = {dataFunction: App.getMiEmployeeUpdateData, button: $(this), requestType: "save"};
+                    submitted = App.prepareSubmit(App.getMiEmployeeUpdateData, $(this), "save");
                 }).click();
                 modItem.find("button.mi-remove").click(function () {
-                    submitted = {dataFunction: App.getMiEmployeeUpdateData, button: $(this), requestType: "remove"};
+                    submitted = App.prepareSubmit(App.getMiEmployeeUpdateData, $(this), "remove");
                 });
                 modItem.hide().appendTo(modifier).slideDown(App.getAnimationTime());
             });
             modifier.find("button.mi-save").click(function () {
-                submitted = {dataFunction: App.getMiEmployeeUpdateData, button: $(this), requestType: "save"};
+                submitted = App.prepareSubmit(App.getMiEmployeeUpdateData, $(this), "save");
             });
             modifier.find("button.mi-remove").click(function () {
-                submitted = {dataFunction: App.getMiEmployeeUpdateData, button: $(this), requestType: "remove"};
+                submitted = App.prepareSubmit(App.getMiEmployeeUpdateData, $(this),"remove");
             });
             break;
         case "/mod/receipt" :            
             modifier.find("button.mi-save").click(function () {               
-                submitted = {dataFunction: App.getMiReceiptUpdateData, button: $(this), requestType: "save"};
+                submitted = App.prepareSubmit(App.getMiReceiptUpdateData, $(this), "save");
             });
             break;
         case "/mod/pos" :
             modifier.find("button.mi-save").click(function () {
-                submitted = {dataFunction: App.getMiPosUpdateData, button: $(this), requestType: "save"};
+                submitted = App.prepareSubmit(App.getMiPosUpdateData, $(this), "save");
+            });
+            break;
+        case "/mod/salegroups" :            
+            modFormContainer.find(".adder").click(function () {
+                var modItem = $(App.generateModItemFormDOM("salegroups", {
+                    tax: {title: "1-50 characters", valid: /^(0|10|15|21)$/, value: 15},
+                    group: {title: "1-50 characters", valid: /^.{1,50}$/, value: "New Group"},
+                    bg: {title: "Background color. Example: FFFFFF", valid: /^[A-Fa-f0-9]{6}$/, value: "BB5151"},
+                    text: {title: "Display Text. 1-50 characters", valid: /^.{1,50}$/, value: "New Group"},
+                    _id: {title: "24 \\w", valid: /^\w{24}$/, value: "new sg"}
+                }));
+                modItem.submit(function (e) {
+                    e.preventDefault();
+                    var data = submitted.dataFunction(submitted.requestType, submitted.button);
+                    App.requestModifyItem(modifyUrl, data, submitted.button);
+                });
+                modItem.find("input").change(function () {
+                    App.resetRequestButtons(modItem);
+                });
+                modItem.find(".mi-header").click(function () {
+                    $(this).next(".mi-body").slideToggle(200);
+                });
+                modItem.find("button.mi-save").click(function () {
+                    submitted = App.prepareSubmit(App.getMiSaleGroupUpdateData, $(this), "save");
+                }).click();
+                modItem.find("button.mi-remove").click(function () {
+                    submitted = App.prepareSubmit(App.getMiSaleGroupUpdateData, $(this), "remove");
+                });
+                modItem.hide().appendTo(modifier).slideDown(App.getAnimationTime());
+            });
+            modifier.find("button.mi-save").click(function () {
+                submitted = App.prepareSubmit(App.getMiSaleGroupUpdateData, $(this), "save");
             });
             break;
         default:
@@ -2111,10 +2156,10 @@ App.renderPLUSettings = function () {
                     $(this).next(".mi-body").slideToggle(200);
                 });
                 modItem.find("button.mi-save").click(function () {                    
-                    submitted = {dataFunction: App.getMiPluUpdateData, button: $(this), requestType: "save"};
+                    submitted = App.prepareSubmit(App.getMiPluUpdateData,  $(this), "save");
                 });
                 modItem.find("button.mi-remove").click(function () {
-                    submitted = {dataFunction: App.getMiPluUpdateData, button: $(this), requestType: "remove"};
+                    submitted = App.prepareSubmit(App.getMiPluUpdateData, $(this), "remove");
                 });
                 modItem.hide().appendTo(modifier).slideDown(App.getAnimationTime());
             } else {
@@ -2138,10 +2183,10 @@ App.renderPLUSettings = function () {
                     $(this).next(".mi-body").slideToggle(200);
                 });
                 modItem.find("button.mi-save").click(function () {                    
-                    submitted = {dataFunction: App.getMiPluUpdateData, button: $(this), requestType: "save"};
+                    submitted = App.prepareSubmit(App.getMiPluUpdateData, $(this), "save");
                 });
                 modItem.find("button.mi-remove").click(function () {                    
-                    submitted = {dataFunction: App.getMiPluUpdateData, button: $(this), requestType: "remove"};
+                    submitted = App.prepareSubmit(App.getMiPluUpdateData, $(this), "remove");
                 });
                 modItem.hide().appendTo(modifier).slideDown(App.getAnimationTime());
             }
@@ -2162,3 +2207,45 @@ App.getMiPluUpdateData = function (requestType, button) {
 };
 
 //------------------------ SALE GROUPS SETTINGS ------------------------------//
+App.renderSaleGroupsSettings = function () {
+    var sgDOM =
+            '<div class="form-header">Sale Groups Settings</div>\
+                <div class="mod-form">\
+                    <div class="form-row">\
+                        <div class="form-label">MANAGE YOUR SALE GROUP BUTTONS</div>\
+                        <div class="adder"></div>\
+                    </div>\
+                    <div class="modifier">';
+    var saleGroups = App.buttons.saleGroups;
+    for (var i = 0; i < saleGroups.length; i++) {
+        var saleGroup = saleGroups[i];
+        sgDOM += App.generateModItemFormDOM("salegroups", {
+            tax: {title: "1-50 characters", valid: /^(0|10|15|21)$/, value: saleGroup.tax},
+            group: {title: "1-50 characters", valid: /^.{1,50}$/, value: saleGroup.group},
+            bg: {title: "Background color. Example: FFFFFF", valid: /^[A-Fa-f0-9]{6}$/, value: saleGroup.bg},
+            text: {title: "Display Text. 1-50 characters", valid: /^.{1,50}$/, value: saleGroup.text},
+            _id: {title: "24 \\w", valid: /^(\w{24}|new sg)$/, value: saleGroup._id}
+        });
+    }
+    sgDOM += '</div>\
+                </div>';
+    App.cpBody.html(App.createCenterBox(true, sgDOM));
+    App.cpBody.find(".center-box").prepend(App.createGoBack());
+
+    var modFormContainer = App.cpBody.find(".mod-form");
+    var modifyUrl = "/mod/salegroups";
+
+    App.bindModSettings(modFormContainer, modifyUrl);
+};
+
+App.getMiSaleGroupUpdateData = function (requestType, button) {
+    var miBody = button.parents().eq(1);
+    return {
+        requestType: requestType,
+        tax     : miBody.find("select").find(":selected").val(),
+        group   : miBody.find("input[placeholder='GROUP']").val(),
+        bg      : miBody.find("input[placeholder='BG']").val(),
+        text    : miBody.find("input[placeholder='TEXT']").val(),
+        _id     : miBody.find("input[placeholder='_ID']").val()
+    };
+};
