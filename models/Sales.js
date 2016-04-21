@@ -5,15 +5,15 @@ var Sales = new Schema({
     userId: {type: Schema.ObjectId, index: {unique: true}},
     receipts: [
         {
-            number: Number,
+            number: String,
             date: Date,
-            clerk: Number,
+            clerk: String,
             items: [
                 {
-                    ean: String,
-                    price: Number,
-                    tax: Number,
-                    quantity: Number
+                    name: String,
+                    price: String,
+                    quantity: Number,
+                    tax_rate: Number
                 }
             ],
             confirmed: Boolean

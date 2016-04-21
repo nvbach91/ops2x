@@ -70,8 +70,13 @@ App.week = [
     {short: "Sun", long: "Sunday"}
 ];
 
-App.createDateObject = function () {
-    var now = new Date();
+App.createDateObject = function (s) {
+    var now = null;
+    if (s) {
+        now = new Date(s);
+    } else {
+        now = new Date();
+    }
     return {
         day: App.week[now.getDay()].short,
         date: App.correctTime(now.getDate()),
@@ -83,8 +88,8 @@ App.createDateObject = function () {
     };
 };
 
-App.getDate = function () {
-    var d = App.createDateObject();
+App.getDate = function (s) {
+    var d = App.createDateObject(s);
     return d.day + " " + d.date + "/" + d.month + "/" + d.year + " " + d.hh + ":" + d.mm + ":" + d.ss;
 };
 
@@ -875,7 +880,8 @@ App.renderWebRegister = function () {
             App.beep();
         }
     });
-
+    
+    var currentReceipt = {};
     // bind pay button to proceed to payment, generate payment box
     $("#pay").click(function () {
         if (App.jSaleList.find(".sale-item").size() < 1) {
@@ -908,7 +914,7 @@ App.renderWebRegister = function () {
                     </div>\
                 </div>');
         $("<div>").addClass("receipt-custom-header").html(App.receipt.header).appendTo(receiptHeader);
-        $("<div>").attr("id", "receipt-number").text("Receipt #" + App.getDatePrefix() + 0).appendTo(receiptHeader);
+        $("<div>").attr("id", "receipt-number").text("Receipt #" + App.getDatePrefix() + App.sales.receipts.length).appendTo(receiptHeader);
         receipt.append(receiptHeader);
         var receiptBody = $("<ul>").addClass("receipt-body");
         var taxValues = {};
@@ -917,12 +923,29 @@ App.renderWebRegister = function () {
             taxValues[App.settings.tax_rates[i]] = {tax: null, total: null};
         }
         var totalItems = 0;
+        currentReceipt = {
+            number: App.getDatePrefix() + App.sales.receipts.length,
+            date: null,
+            clerk: App.currentEmployee.name,
+            items: [],
+            confirmed: false
+        };
+        
         App.jSaleList.find(".sale-item").each(function () {
             var t = $(this);
             var q = t.find(".si-quantity").val();
             totalItems += parseFloat(q);
             var p = t.find(".si-price").text();
             var n = t.find(".si-name").val();
+            var taxRate = t.find(".si-tax").text();
+            
+            currentReceipt.items.push({
+                name: n,
+                price: p,
+                quantity: parseInt(q),
+                tax_rate: parseInt(taxRate)
+            });
+    
             var thisTotal = t.find(".si-total").text();
             var receiptItem = $("<li>").addClass("receipt-item")
                     .append($("<div>").addClass("ri-n").text(n))
@@ -934,7 +957,6 @@ App.renderWebRegister = function () {
                             );
             receiptBody.append(receiptItem);
 
-            var taxRate = t.find(".si-tax").text();
             taxValues[taxRate].tax += (parseFloat(thisTotal) * parseFloat(taxRate) / 100);
             taxValues[taxRate].total += parseFloat(thisTotal);
         });
@@ -982,11 +1004,6 @@ App.renderWebRegister = function () {
             }
         }
         receiptSummary.appendTo(receipt);
-        /*App.receiptTime = $("<div>").attr("id", "receipt-time").text(App.getDate());
-        App.startReceiptTime();
-        $("<div>").addClass("receipt-row")
-                .append($("<div>").addClass("receipt-clerk").text("Checked: " + App.currentEmployee.name))
-                .append(App.receiptTime).appendTo(receipt);*/
         
         $("<div>").addClass("receipt-clerk").text("Checked: " + App.currentEmployee.name).appendTo(receipt);
         App.receiptTime = $("<div>").attr("id", "receipt-time").text(App.getDate()).appendTo(receipt);        
@@ -1068,42 +1085,65 @@ App.renderWebRegister = function () {
             var t = $(this);
             if (!t.hasClass("disabled")) {
                 clearInterval(App._receiptTimeInterval);
-                payment.children().remove();
-                App.discardSale(true);
-                $("<div>").addClass("pc-label").text("Sale complete!").appendTo(payment);
-                if (App.changeAmount !== "0.00") {
-                    $("<div>").addClass("pc-change").text("Issue change of " + App.changeAmount + " " + App.settings.currency.symbol).appendTo(payment);
-                }
-                $("<button>").attr("id", "print-receipt").text("Print receipt").click(function () {
-                    window.print();
-                    receiptPrinted = true;
-                }).appendTo(payment);
-                var emailReceipt = $("<div>").addClass("email-receipt").appendTo(payment);
-                var emailInput = $("<input>").attr("id", "email-input").focus(function () {
-                    emailInput.removeClass("invalid");
-                    if (emailInput.val() !== "@") {
-                        emailInput.val("@");
-                        emailInput.select();
-                    }
-                }).val("@").appendTo(emailReceipt);
-                $("<button>").attr("id", "email-send").text("Email receipt").click(function () {
-                    var recipient = emailInput.val();
-                    if (App.isValidEmail(recipient)) {
-                        $(this).text("Email sent").addClass("sent").off();
-                        emailInput.remove();
+
+                currentReceipt.date = new Date();
+                currentReceipt.items = JSON.stringify(currentReceipt.items);
+                $.ajax({
+                    type: "POST",
+                    url: "/mod/addsale",
+                    dataType: "json",
+                    data: currentReceipt
+                }).done(function (resp) {
+                    if (resp.success) {
+                        //App.sales.receipts.push(currentReceipt);
+                        App.sales.receipts.push(resp.msg);
+
+                        payment.children().remove();
+                        App.discardSale(true);
+                        $("<div>").addClass("pc-label").text("Sale complete!").appendTo(payment);
+                        if (App.changeAmount !== "0.00") {
+                            $("<div>").addClass("pc-change").text("Issue change of " + App.changeAmount + " " + App.settings.currency.symbol).appendTo(payment);
+                        }
+                        $("<button>").attr("id", "print-receipt").text("Print receipt").click(function () {
+                            window.print();
+                            receiptPrinted = true;
+                        }).appendTo(payment);
+                        var emailReceipt = $("<div>").addClass("email-receipt").appendTo(payment);
+                        var emailInput = $("<input>").attr("id", "email-input").focus(function () {
+                            emailInput.removeClass("invalid");
+                            if (emailInput.val() !== "@") {
+                                emailInput.val("@");
+                                emailInput.select();
+                            }
+                        }).val("@").appendTo(emailReceipt);
+                        $("<button>").attr("id", "email-send").text("Email receipt").prop("disabled", true).click(function () {
+                            var recipient = emailInput.val();
+                            if (App.isValidEmail(recipient)) {
+                                $(this).text("Email sent").addClass("sent").off();
+                                emailInput.remove();
+                            } else {
+                                emailInput.addClass("invalid").val("Invalid email");
+                            }
+                        }).appendTo(emailReceipt);
+                        emailReceipt.appendTo(payment);
+                        //payment.append(paymentComplete);
+                        $("<button>").attr("id", "done-payment").text("Done").click(function () {
+                            if (!receiptPrinted) {
+                                window.print();
+                            }
+                            App.closeCurtain();
+                            App.jPriceInput.focus();
+                        }).appendTo(payment);
                     } else {
-                        emailInput.addClass("invalid").val("Invalid email");
+                        App.closeCurtain();
+                        App.showWarning("Server refused to sync. " + resp.msg);
+                        console.log(resp);
                     }
-                }).appendTo(emailReceipt);
-                emailReceipt.appendTo(payment);
-                //payment.append(paymentComplete);
-                $("<button>").attr("id", "done-payment").text("Done").click(function () {
-                    if (!receiptPrinted) {
-                        window.print();
-                    }
+                }).fail(function (resp) {
                     App.closeCurtain();
-                    App.jPriceInput.focus();
-                }).appendTo(payment);
+                    console.log(resp);
+                    App.showWarning("Sale sync failed: " + resp.status);
+                });
             }
         }).appendTo(payment);
         payment.appendTo(paymentBody);
@@ -1518,6 +1558,10 @@ App.renderForgot = function () {
     };
 
     var afterPrint = function () {
+        if(App.jPrinterCopy) {
+            App.jPrinterCopy.remove();
+            App.jPrinterCopy = null;            
+        }
         //App.closeCurtain();
     };
 
@@ -1539,17 +1583,17 @@ App.renderForgot = function () {
 
 //--------------------------- CONTROL PANEL ----------------------------------//
 App.createControlPanel = function () {
-    var cpContent = '<div class="cp-item" id="sale-history">Sales History</div>\
-                    <div class="cp-item" id="close-register">Close Register</div>';
+    var cpContent = '<div class="cp-item" id="sale-history">Sales History</div>';
+                    //<div class="cp-item" id="close-register">Close Register</div>';
     if (App.currentEmployee.role === "Admin") {
         cpContent +=
                 '<div class="cp-item" id="acc-settings">Account Settings</div>\
                 <div class="cp-item" id="sta-settings">Staff Settings</div>\
                 <div class="cp-item" id="pos-settings">Point of Sale Settings</div>\
                 <div class="cp-item" id="plu-settings">Edit PLU Articles</div>\
-                <div class="cp-item" id="sgs-settings">Edit Sale Groups</div>\
-                <div class="cp-item" id="qss-settings">Edit Quick Sales</div>\
-                <div class="cp-item" id="rec-settings">Edit Receipt</div>';
+                <div class="cp-item" id="sgs-settings">Edit Sale Groups</div>'
+                //<div class="cp-item" id="qss-settings">Edit Quick Sales</div>\
+              +'<div class="cp-item" id="rec-settings">Edit Receipt</div>';
     }
     App.cpBody.append($(cpContent));
     App.bindControlPanel();
@@ -1561,9 +1605,7 @@ App.bindControlPanel = function () {
         var id = t.attr("id");
         switch (id) {
             case "sale-history":
-                t.click(function () {
-                    t.text("Not available");
-                });
+                t.click(App.renderSaleHistory);
                 break;
             case "close-register":
                 t.click(function () {
@@ -2402,4 +2444,162 @@ App.bindColpick = function (t) {
             t.text(hex.toUpperCase());
         }
     });
+};
+
+//------------------------ RENDER SALE HISTORY -------------------------------//
+App.renderSaleHistory = function () {
+    var shDOM =
+            App.createCenterBox(false, 
+                '<div class="form-header">Sale history</div>\
+                <div id="sale-history-container">\
+                </div>');
+    App.cpBody.html(shDOM);
+    
+    App.cpBody.find(".center-box").prepend(App.createGoBack());
+    
+    var container = App.cpBody.find("#sale-history-container");
+    var receipts = App.sales.receipts;
+    var receiptsDOM = '<div class="history-receipt hr-header">\
+                            <div class="hr-col">NUMBER</div>\
+                            <div class="hr-col">DATE</div>\
+                            <div class="hr-col">EMPLOYEE</div>\
+                            <div class="hr-col">TOTAL PAID</div>\
+                            <div class="hr-col">CONFIRMED</div>\
+                            <div class="hr-col">RECEIPT</div>\
+                       </div>';
+    for (var i = receipts.length - 1; i >= 0; i--) {
+        var receipt = receipts[i];
+        var receiptTotal = 0;
+        var items = receipt.items;
+        for(var j = 0; j < items.length; j++) {
+            receiptTotal += (parseFloat(items[j].price) * items[j].quantity);
+        }
+        receiptsDOM += 
+                '<div class="history-receipt hr-row">\
+                    <div class="hr-col hr-index">' + i + '</div>\
+                    <div class="hr-col">' + receipt.number + '</div>\
+                    <div class="hr-col">' + App.getDate(receipt.date) + '</div>\
+                    <div class="hr-col">' + receipt.clerk + '</div>\
+                    <div class="hr-col">' + receiptTotal.formatMoney() + ' ' + App.settings.currency.symbol + '</div>\
+                    <div class="hr-col">' + (receipt.confirmed ? "YES" : "NO") + '</div>\
+                    <div class="hr-col hr-print"></div>\
+                </div>';
+    }
+
+    container.append(receiptsDOM);
+    container.find(".hr-print").click(function () {
+        var t = $(this);
+        var receiptIndex = parseInt(t.parent().find(".hr-index").text());
+        
+        var b = $("<div>").addClass("pb-body");
+        var c = $("<div>").addClass("receipt-container");
+        var r = App.renderReceipt(receipts[receiptIndex]);
+        
+        c.append(r);
+        b.append(c);
+        
+        App.jPrinterCopy = $("<div id='payment-box'></div>").append(b);
+        
+        App.jAppContainer.append(App.jPrinterCopy);
+
+        window.print();
+    });
+};
+
+App.renderReceipt = function (rec) {
+    var items = rec.items;
+    var receipt = $("<div>").addClass("receipt");
+    /* var receiptHeader = $("<div>").addClass("receipt-header");
+     $("<div>").addClass().text("Receipt Preview").appendTo(receipt);*/
+    var receiptHeader = $(
+            '<div class="receipt-header">\
+                    <div class="preview">' + 'Receipt Preview' + '</div>\
+                    <div class="company-name">' + App.settings.name + '</div>\
+                    <div class="address-1">' + App.settings.address.street + '</div>\
+                    <div class="address-2">' + App.settings.address.zip + ' ' + App.settings.address.city + '</div>\
+                    <div class="receipt-row">\
+                        <div class="tin">' + 'TIN: ' + App.settings.tin + '</div>\
+                        <div class="vat">' + 'VAT: ' + App.settings.vat + '</div>\
+                    </div>\
+                </div>');
+    $("<div>").addClass("receipt-custom-header").html(App.receipt.header + "<br>" + "<strong>RECEIPT COPY</strong>").appendTo(receiptHeader);
+    $("<div>").attr("id", "receipt-number").text("Receipt #" + rec.number).appendTo(receiptHeader);
+    receipt.append(receiptHeader);
+    var receiptBody = $("<ul>").addClass("receipt-body");
+    var taxValues = {};
+    var nTrs = App.settings.tax_rates.length;
+    for (var i = 0; i < nTrs; i++) {
+        taxValues[App.settings.tax_rates[i]] = {tax: null, total: null};
+    }
+    var totalItems = 0;
+    var total = 0;
+
+    for (var i = 0; i < items.length; i++) {
+        var item = items[i];
+        var q = item.quantity;
+        totalItems += parseFloat(q);
+        var p = item.price;
+        var n = item.name;
+        var taxRate = item.tax_rate;
+
+        var thisTotal = parseFloat(p) * parseFloat(q);
+        var receiptItem = $("<li>").addClass("receipt-item")
+                .append($("<div>").addClass("ri-n").text(n))
+                .append($("<div>").addClass("ri-v")
+                        .append($("<div>").addClass("ri-q").text(q))
+                        .append($("<div>").addClass("ri-x"))
+                        .append($("<div>").addClass("ri-p").text(p))
+                        .append($("<div>").addClass("ri-tt").text(thisTotal.formatMoney()))
+                        );
+        receiptBody.append(receiptItem);
+
+        taxValues[taxRate].tax += (parseFloat(thisTotal) * parseFloat(taxRate) / 100);
+        taxValues[taxRate].total += parseFloat(thisTotal);
+        total += thisTotal;
+    }
+    //var total = App.jPayAmount.text().replace(/,/g, ".").replace(/[^\d\.\-]/g, "");
+    receiptBody.appendTo(receipt);
+
+    //creating receipt summary
+    var receiptSummary = $("<div>").attr("id", "receipt-summary");
+    $("<div>").attr("id", "rs-total-items")
+            .append($("<div>").addClass("rs-label").text("Total items:"))
+            .append($("<div>").addClass("rs-value").text(totalItems))
+            .appendTo(receiptSummary);
+    $("<div>").attr("id", "rs-total")
+            .append($("<div>").addClass("rs-label").text("Total amount:"))
+            .append($("<div>").addClass("rs-value").text(total.formatMoney()))
+            .appendTo(receiptSummary);
+    $("<div>").attr("id", "taxes-label").text("VAT summary:").appendTo(receiptSummary);
+    $("<div>").attr("id", "tax-header")
+            .append($("<div>").addClass("th-rate").text("Rate"))
+            .append($("<div>").addClass("th-net").text("Net"))
+            .append($("<div>").addClass("th-value").text("Tax"))
+            .append($("<div>").addClass("th-total").text("Total"))
+            .appendTo(receiptSummary);
+
+    // calculate taxes
+    var taxRates = Object.keys(taxValues);
+    var nTrsv = taxRates.length;
+    for (var i = 0; i < nTrsv; i++) {
+        if (taxValues[taxRates[i]].tax !== null) {
+            $("<div>").addClass("rs-tax")
+                    .append($("<div>").addClass("rs-tax-rate").text(taxRates[i] + "%"))
+                    .append($("<div>").addClass("rs-tax-net").text((taxValues[taxRates[i]].total.toFixed(2) - taxValues[taxRates[i]].tax.toFixed(2)).toFixed(2)))
+                    .append($("<div>").addClass("rs-tax-tax").text(taxValues[taxRates[i]].tax.toFixed(2)))
+                    .append($("<div>").addClass("rs-tax-total").text(taxValues[taxRates[i]].total.toFixed(2)))
+                    .appendTo(receiptSummary);
+        }
+    }
+    receiptSummary.appendTo(receipt);
+
+    $("<div>").addClass("receipt-clerk").text("Checked: " + rec.clerk).appendTo(receipt);
+    App.receiptTime = $("<div>").attr("id", "receipt-time").text(App.getDate(rec.date)).appendTo(receipt);
+
+    $("<div>").addClass("receipt-gratitude").text(App.receipt.footer).appendTo(receipt);
+
+    //creating receipt footer
+    $("<div>").addClass("receipt-footer").text("EnterpriseApps").appendTo(receipt);
+        
+    return receipt;
 };

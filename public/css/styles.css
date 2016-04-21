@@ -403,6 +403,51 @@ nav {
     position: absolute;
     top: -9999px;
 }
+#sale-history-container {
+    margin-top: 5px;
+    font-size: 14px;
+    width: 100%;
+}
+.hr-col:first-child {
+    border-left: 5px solid transparent;
+}
+.history-receipt {
+    display: flex;
+    justify-content: center;
+}
+.hr-col {
+    padding: 10px 0;
+    flex-grow: 1;
+    text-align: center;
+    margin: 0px;
+    max-width: 200px;
+    min-width: 100px;
+    width: 100%;
+}
+.hr-header .hr-col {
+    padding: 0;
+    border-left: 0px solid transparent;
+    background-color: #903030;
+}
+.hr-row {
+    cursor: pointer;
+    margin: 0;
+}
+.hr-row:hover {
+    background-color: #334C60;
+}
+.hr-row:hover .hr-col:first-child {    
+    border-left: 5px solid #CACACA;
+}
+.hr-print {
+    background-image: url('../img/ico/printw.svg');
+    background-size: 20px;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.hr-index {
+    display: none;
+}
 /********************************** MAIN CSS **********************************/
 #main {
     margin: 0 auto;

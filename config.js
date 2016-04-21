@@ -1,5 +1,6 @@
 var config = {
     host: 'http://localhost:7000',
+    //host: 'http://ops2x-62081.onmodulus.net',
     mongodb_host: 'mongodb://127.0.0.1/testx',
     //mongodb_host: 'mongodb://tester:suchpass@waffle.modulusmongo.net:27017/ep2Ubebu',
     
