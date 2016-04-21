@@ -145,63 +145,53 @@ function generateDefaultButtons(newUserId) {
         saleGroups: [
             {
                 tax: 15,
-                group: "Food",
-                bg: "DF5441",
-                text: "Food 15"
+                group: "Food 15",
+                bg: "DF5441"
             },
             {
                 tax: 15,
-                group: "Food",
-                bg: "D34B57",
-                text: "Food 21"
+                group: "Food 21",
+                bg: "D34B57"
             },
             {
                 tax: 15,
                 group: "Vegetable",
-                bg: "334C60",
-                text: "Vegetable"
+                bg: "334C60"
             },
             {
                 tax: 15,
                 group: "Drinks",
-                bg: "13A7CB",
-                text: "Drinks"
+                bg: "13A7CB"
             },
             {
                 tax: 21,
                 group: "Alcohol",
-                bg: "01AA93",
-                text: "Alcohol"
+                bg: "01AA93"
             },
             {
                 tax: 21,
                 group: "Tobacco",
-                bg: "E65D65",
-                text: "Tobacco"
+                bg: "E65D65"
             },
             {
                 tax: 15,
                 group: "Press",
-                bg: "425B71",
-                text: "Press"
+                bg: "425B71"
             },
             {
                 tax: 21,
                 group: "Drugs",
-                bg: "5B5B5B",
-                text: "Drugs"
+                bg: "5B5B5B"
             },
             {
                 tax: 15,
                 group: "Uncategorized",
-                bg: "996DB8",
-                text: "Uncateg. 15"
+                bg: "996DB8"
             },
             {
                 tax: 21,
                 group: "Uncategorized",
-                bg: "E4644B",
-                text: "Uncateg. 21"
+                bg: "E4644B"
             }
         ],
         tabs: [

@@ -13,9 +13,8 @@ var expressSession = require('express-session');
 var passport = require('passport');
 
 var mongoose = require('mongoose');
-// use one of the following mongodb connections, either a local instance or a remote instance
+// change the host in config.js file
 mongoose.connect(config.mongodb_host);
-//mongoose.connect('mongodb://81.2.236.231:37017/test', {user: 'guest', pass: 'tseug'});
 
 var app = express();
 

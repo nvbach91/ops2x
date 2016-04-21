@@ -5,10 +5,9 @@ var Buttons = new Schema({
     userId: {type: Schema.ObjectId, index: {unique: true}},
     saleGroups: [
         {
-            text: String,
-            bg: String,
+            tax: Number,
             group: String,
-            tax: Number
+            bg: String
         }
     ],
     tabs: [

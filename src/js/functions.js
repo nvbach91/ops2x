@@ -742,7 +742,23 @@ App.init = function () {
      return "You are about to close this application. Any unsaved work will be lost!";
      });*/
 };
-
+App.renderSaleGroupsButtons = function () {
+    var currentSaleGroups = App.buttons.saleGroups;
+    var sgContent = "";
+    var nSgs = currentSaleGroups.length;
+    for (var i = 0; i < nSgs; i++) {
+        sgContent += $("<button>", {
+            class: "sg",
+            "sg-id": "sg" + i,
+            "sg-tax": currentSaleGroups[i].tax,
+            "sg-group": currentSaleGroups[i].group,
+            text: currentSaleGroups[i].group,
+            style: "background-color: #" + currentSaleGroups[i].bg
+        }).prop("outerHTML");
+    }
+    App.sg.html(sgContent);
+    App.bindSaleGroups(App.sg);
+};
 // render web register view
 App.renderWebRegister = function () {
     App.closeCurtain();
@@ -788,24 +804,11 @@ App.renderWebRegister = function () {
         App.isInRegistrySession = false/*.text("0")*/;
     });
 
-    // generate sale groups and quick sale
-    var btns = App.buttons;
-    var sg = $("#sale-groups");
-    var sgContent = "";
-    var nSgs = btns.saleGroups.length;
-    for (var i = 0; i < nSgs; i++) {
-        sgContent += $("<button>", {
-            class: "sg",
-            "sg-id": "sg" + i,
-            "sg-tax": btns.saleGroups[i].tax,
-            "sg-group": btns.saleGroups[i].group,
-            text: btns.saleGroups[i].text,
-            style: "background-color: #" + btns.saleGroups[i].bg
-        }).prop("outerHTML");
-    }
-    sg.append(sgContent);
-    App.bindSaleGroups(sg);
+    // generate sale groups
+    App.sg = $("#sale-groups");
+    App.renderSaleGroupsButtons();
 
+    // generate quicksale tabs
     var tabsContainer = $("#tabs");
     var tabNavsContainer = $("#tab-navs");
     var tabs = App.buttons.tabs;
@@ -1730,7 +1733,23 @@ App.requestModifyItem = function (url, data, button) {
                     }
                     break;
                 case "/mod/salegroups" :
-                    //App.settings = resp.msg;
+                    var currentSG = App.buttons.saleGroups;
+                    if (data._id === "new sg") {
+                        button.parents().eq(1).find("input[placeholder='_ID']").val(resp.msg._id);
+                        currentSG.push(resp.msg);
+                    } else {
+                        for (var i = 0; i < currentSG.length; i++) {
+                            if (currentSG[i]._id === resp.msg._id) {
+                                if (isSaveRequestType) {
+                                    currentSG[i] = resp.msg;
+                                } else {
+                                    currentSG.splice(i, 1);
+                                }
+                                break;
+                            }
+                        }
+                    }                    
+                    App.renderSaleGroupsButtons();
                     break;
                 default:
             }
@@ -1786,16 +1805,19 @@ App.generateModItemFormDOM = function (type, item) {
     var isFirstAdmin = item.number && (item.number.value === 0) && item.role && (item.role.value === "Admin");
     var isReceipt = type === "receipt";
     var isPOS = type === "pos";
+    var isSG = type === "salegroups";
     var isHiddenBody = ["staff", "salegroups"].indexOf(type) >= 0;
     var header = item.name ? item.name.value : type.toUpperCase();
     header = item.ean ? item.ean.value : header;
-    header = item.text ? item.text.value : header;
+    if (isSG) {
+        header = item.group ? item.group.value : header;
+    }
 
     var keys = Object.keys(item);
     var dom = '<form class="mod-item" action method="POST">\
                     <div class="mi-header' + isNewItem + '">' + header + '</div>\
-                    <div class="mi-body'+ (isHiddenBody ? ' hidden': '') + '">'
-                  +'<div class="mi-info">' + info + '</div>';
+                    <div class="mi-body' + (isHiddenBody ? ' hidden' : '') + '">\
+                    <div class="mi-info">' + info + '</div>';
     for (var i = 0; i < keys.length; i++) {
         //if(["_id", "id"].indexOf(keys[i]) < 0) {
                 var fieldDisabled = disabledFields.indexOf(keys[i]) >= 0;
@@ -1826,6 +1848,10 @@ App.generateModItemFormDOM = function (type, item) {
                 }
                 dom +=     '</select>';
                 
+                } else if (keys[i] === "bg") {
+                     dom += '<div class="colpicker" \
+                                placeholder="' + keys[i].toUpperCase() + '">' 
+                                + item[keys[i]].value + '</div>';
                 } else {
                 var validator = item[keys[i]].valid.toString().replace(/[\/^$]/g, "");
                 dom +=     '<input class="" \
@@ -1929,7 +1955,6 @@ App.bindModSettings = function (modFormContainer, modifyUrl) {
                     tax: {title: "1-50 characters", valid: /^(0|10|15|21)$/, value: 15},
                     group: {title: "1-50 characters", valid: /^.{1,50}$/, value: "New Group"},
                     bg: {title: "Background color. Example: FFFFFF", valid: /^[A-Fa-f0-9]{6}$/, value: "BB5151"},
-                    text: {title: "Display Text. 1-50 characters", valid: /^.{1,50}$/, value: "New Group"},
                     _id: {title: "24 \\w", valid: /^\w{24}$/, value: "new sg"}
                 }));
                 modItem.submit(function (e) {
@@ -1949,10 +1974,17 @@ App.bindModSettings = function (modFormContainer, modifyUrl) {
                 modItem.find("button.mi-remove").click(function () {
                     submitted = App.prepareSubmit(App.getMiSaleGroupUpdateData, $(this), "remove");
                 });
+                modItem.find("div[placeholder='BG']").each(function () {
+                    var t = $(this);
+                    App.bindColpick(t);
+                });
                 modItem.hide().appendTo(modifier).slideDown(App.getAnimationTime());
             });
             modifier.find("button.mi-save").click(function () {
                 submitted = App.prepareSubmit(App.getMiSaleGroupUpdateData, $(this), "save");
+            });
+            modifier.find("button.mi-remove").click(function () {
+                submitted = App.prepareSubmit(App.getMiSaleGroupUpdateData, $(this), "remove");
             });
             break;
         default:
@@ -2223,7 +2255,6 @@ App.renderSaleGroupsSettings = function () {
             tax: {title: "1-50 characters", valid: /^(0|10|15|21)$/, value: saleGroup.tax},
             group: {title: "1-50 characters", valid: /^.{1,50}$/, value: saleGroup.group},
             bg: {title: "Background color. Example: FFFFFF", valid: /^[A-Fa-f0-9]{6}$/, value: saleGroup.bg},
-            text: {title: "Display Text. 1-50 characters", valid: /^.{1,50}$/, value: saleGroup.text},
             _id: {title: "24 \\w", valid: /^(\w{24}|new sg)$/, value: saleGroup._id}
         });
     }
@@ -2234,7 +2265,10 @@ App.renderSaleGroupsSettings = function () {
 
     var modFormContainer = App.cpBody.find(".mod-form");
     var modifyUrl = "/mod/salegroups";
-
+    modFormContainer.find("div[placeholder='BG']").each(function () {
+        var t = $(this);
+        App.bindColpick(t);
+    });
     App.bindModSettings(modFormContainer, modifyUrl);
 };
 
@@ -2244,8 +2278,20 @@ App.getMiSaleGroupUpdateData = function (requestType, button) {
         requestType: requestType,
         tax     : miBody.find("select").find(":selected").val(),
         group   : miBody.find("input[placeholder='GROUP']").val(),
-        bg      : miBody.find("input[placeholder='BG']").val(),
-        text    : miBody.find("input[placeholder='TEXT']").val(),
+        bg      : miBody.find("div[placeholder='BG']").text(),
         _id     : miBody.find("input[placeholder='_ID']").val()
     };
+};
+
+App.bindColpick = function (t) {
+    t.colpick({
+        color: t.text(),
+        onSubmit: function (hsb, hex, rgb, el, bySetColor) {
+            t.text(hex.toUpperCase());
+            $(el).colpickHide();
+        },
+        onChange: function (hsb, hex, rgb, el, bySetColor) {
+            t.text(hex.toUpperCase());
+        }
+    });
 };
