@@ -79,6 +79,7 @@ var staff = require('./routes/mod/staff');
 var receipt = require('./routes/mod/receipt');
 var pos = require('./routes/mod/pos');
 var plu = require('./routes/mod/plu');
+var pluimport = require('./routes/mod/pluimport');
 var salegroups = require('./routes/mod/salegroups');
 app.use('/mod', ensureAuthenticated);
 app.use('/mod', changepassword);
@@ -86,6 +87,7 @@ app.use('/mod', staff);
 app.use('/mod', receipt);
 app.use('/mod', pos);
 app.use('/mod', plu);
+app.use('/mod', pluimport);
 app.use('/mod', salegroups);
 
 

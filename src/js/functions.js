@@ -1279,6 +1279,9 @@ App.initDashBoard = function () {
             }),
             $.getJSON("/api/buttons", function (buttons) {
                 App.buttons = buttons;
+            }),
+            $.getJSON("/api/sales", function (sales) {
+                App.sales = sales;
             })
             ).then(function () {
         App.renderDashBoard();
@@ -1559,12 +1562,12 @@ App.bindControlPanel = function () {
         switch (id) {
             case "sale-history":
                 t.click(function () {
-                    t.text("Not yet available");
+                    t.text("Not available");
                 });
                 break;
             case "close-register":
                 t.click(function () {
-                    t.text("Not yet available");
+                    t.text("Not available");
                 });
                 break;
             case "acc-settings":
@@ -1584,7 +1587,7 @@ App.bindControlPanel = function () {
                 break;
             case "qss-settings":
                 t.click(function () {
-                    t.text("Not yet available");
+                    t.text("Not available");
                 });
                 break;
             case "rec-settings":
@@ -1684,6 +1687,11 @@ App.requestModifyItem = function (url, data, button) {
     var requestPerformingMsg = isSaveRequestType ? "Saving" : "Removing";
     var requestSuccessMsg = isSaveRequestType ? "Saved" : "Removed";
     var requestFailMsg = isSaveRequestType ? "Save failed" : "Remove failed";
+    if (data.requestType === "import") {
+        requestPerformingMsg = "Importing";
+        requestSuccessMsg = "Imported";
+        requestFailMsg = "Import failed";
+    }
     var loader = button.find(".mi-loader");
     var span = button.find("span");    
     loader.addClass("loading");
@@ -1732,6 +1740,10 @@ App.requestModifyItem = function (url, data, button) {
                         }
                     }
                     break;
+                case "/mod/pluimport" :
+                    App.catalog = resp.msg;
+                    App.catalog.articles.sort(App.sortByEAN);
+                    break;
                 case "/mod/salegroups" :
                     var currentSG = App.buttons.saleGroups;
                     if (data._id === "new sg") {
@@ -1753,7 +1765,7 @@ App.requestModifyItem = function (url, data, button) {
                     break;
                 default:
             }
-            if (!isSaveRequestType) {
+            if (data.requestType === "remove") {
                 button.parents().eq(2).slideUp(App.getAnimationTime(), function () {
                     $(this).remove();
                 });
@@ -1766,7 +1778,7 @@ App.requestModifyItem = function (url, data, button) {
     }).fail(function (resp) {
         loader.removeClass("loading");
         button.addClass("fail");
-        span.html(requestFailMsg + "<br>Status: " + resp.status);
+        span.html(requestFailMsg + "<br>Status: " + resp.status + " " + resp.responseText);
         if (resp.status === 0) {
             App.closeCurtain();
             App.showWarning("Network error. Server may be down or your internet connection is lost");
@@ -2128,6 +2140,68 @@ App.getMiPosUpdateData = function (requestType, button) {
 };
 
 //--------------------------- PLU SETTINGS -----------------------------------//
+App.checkAndTrimPluImportCSV = function (csv, lineSeparator, valueDelimiter) {    
+    var lines = csv.split(lineSeparator);
+    var validHeaders = ["ean", "name", "price", "group", "tax"];
+    var headers = lines[0].split(valueDelimiter);
+    if (headers.length !== validHeaders.length) {
+        return {isValid: false, msg: "Invalid CSV header format. Incorrect number of fields. Must be " + validHeaders.length};
+    }
+    for (var i = 0; i < headers.length; i++) {
+        headers[i] = headers[i].trim();
+        if (headers[i] !== validHeaders[i]) {
+            return {isValid: false, msg: "Invalid CSV header " + (i + 1) + ": " + headers[i] + ". Must be " + validHeaders[i]};
+        }
+    }
+    var result = validHeaders.join(";");
+    var validLine = [/^\d{1,13}$/, /^.{1,128}$/, /^\d{1,5}\.\d{2}$/, /^.{0,128}$/, /^(0|10|15|21)$/];
+    var eanSet = [];               
+    //var result = [];
+
+    for (var i = 1; i < lines.length; i++) {
+        var currentLine = lines[i].split(valueDelimiter);
+        if (validLine.length !== currentLine.length) {            
+            return {isValid: false, msg: "Invalid format on line " + (i + 1) + ". Must have " + validLine.length + " values separated by semicolons (;)"};
+        }
+        //var obj = {};
+        for (var j = 0; j < validLine.length; j++) {
+            currentLine[j] = currentLine[j].trim();
+            if (!validLine[j].test(currentLine[j])) {
+                return {isValid: false, msg: "Invalid CSV on line " + (i + 1) + ", column: " + headers[j] + ", value: " + (currentLine[j] || "/empty/")};
+            }
+            if (headers[j] === "ean") {
+                eanSet.push({lineNumber: i + 1, ean: currentLine[j]});
+            }
+            //obj[headers[j]] = currentline[j];
+        }
+        result += "\n" + currentLine.join(";");
+        //result.push(obj);
+    }
+    eanSet.sort(App.sortByEAN);
+    var eanSetMaxLength = eanSet.length - 1;
+    for (var i = 0; i < eanSetMaxLength; i++) {
+        var currentItem = eanSet[i];
+        var nextItem = eanSet[i + 1];
+        if (currentItem.ean === nextItem.ean) {
+            return {isValid: false, msg: "There are duplicate EAN codes in your csv on lines " + nextItem.lineNumber + " and " + currentItem.lineNumber};
+        }
+    }
+    return {isValid: true, msg: result};
+};
+
+App.downloadTextFile = function (filename, text) {
+    var element = document.createElement("a");
+    element.setAttribute("href", "data:text/plain;charset=utf-8," + encodeURIComponent(text));
+    element.setAttribute("download", filename);
+
+    element.style.display = "none";
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
+};
+
 App.renderPLUSettings = function () {
     var pluDOM =
                '<div class="form-header">PLU Settings</div>\
@@ -2136,9 +2210,11 @@ App.renderPLUSettings = function () {
                         <div class="form-label">MANAGE YOUR CATALOG</div>\
                     </div>\
                     <div class="form-row control">\
-                        <button id="plu-import">Import CSV</button>\
+                        <button id="plu-import"><span>Import CSV</span><div class="mi-loader"></div></button>\
+                        <input type="file" id="plu-import-input" accept=".csv"/>\
                         <button id="plu-export">Export CSV</button>\
                     </div>\
+                    <div class="mi-info">Warning: Import will overwrite the current catalog!</div>\
                     <div class="hline"></div>\
                     <div class="mi-info">Tip: New PLU will be highlighted green if the EAN code is not found</div>\
                     <form class="form-row control">\
@@ -2223,6 +2299,38 @@ App.renderPLUSettings = function () {
                 modItem.hide().appendTo(modifier).slideDown(App.getAnimationTime());
             }
         }
+    });
+
+    var pluImportButton = modFormContainer.find("#plu-import").click(function () {
+        pluImportInput.wrap("<form>").closest("form").get(0).reset();
+        pluImportInput.unwrap();
+        pluImportInput.click();
+    });
+    var pluImportInput = modFormContainer.find("#plu-import-input");
+    pluImportInput.change(function (e) {
+        var files = e.target.files;
+        var file = files[0];
+        var reader = new FileReader();
+        reader.onload = function () {
+            var csv = App.checkAndTrimPluImportCSV(this.result, /[\n\r]+/, ";");
+            if (!csv.isValid) {
+                App.closeCurtain();
+                App.showWarning(csv.msg);
+            } else {
+                App.requestModifyItem("/mod/pluimport", {data: csv.msg, requestType: "import"}, pluImportButton);
+            }
+        };
+        reader.readAsText(file);
+    });
+    modFormContainer.find("#plu-export").click(function () {
+        var articles = App.catalog.articles;
+        var articlesLength = articles.length;
+        var result = "ean;name;price;group;tax";
+        for (var i = 0; i < articlesLength; i++) {
+            var article = articles[i];
+            result += "\n" + article.ean + ";" + article.name + ";" + article.price + ";" + article.group + ";" + article.tax;
+        }
+        App.downloadTextFile("catalog.csv", result);
     });
 };
 

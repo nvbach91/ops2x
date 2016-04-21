@@ -379,9 +379,6 @@ nav {
 .mi-control .success {    
     background-color: #65C365;
 }
-.mi-control .processing {
-    
-}
 .colpicker {
     cursor: pointer;
     width: 100%;
@@ -395,6 +392,16 @@ nav {
 .colpick {
     z-index: 1;
     height: 180px;
+}
+#plu-import {
+    display: flex;
+}
+#plu-import .loading {
+    margin: 0 0 0 10px;
+}
+#plu-import-input {
+    position: absolute;
+    top: -9999px;
 }
 /********************************** MAIN CSS **********************************/
 #main {
