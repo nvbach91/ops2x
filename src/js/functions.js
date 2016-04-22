@@ -280,7 +280,7 @@ App.showInCurtain = function (show) {
         App.jMain ? App.jMain.addClass("blur") : null;
         App.curtain = $("<div>").attr("id", "curtain").click(function () {
             App.closeCurtain();
-        }).append(show).hide().appendTo(App.jAppContainer).fadeIn(App.getAnimationTime());
+        }).append(show)/*.hide()*/.appendTo(App.jAppContainer)/*.fadeIn(App.getAnimationTime())*/;
     }
 };
 
@@ -1559,7 +1559,7 @@ App.renderForgot = function () {
 
     var afterPrint = function () {
         if(App.jPrinterCopy) {
-            App.jPrinterCopy.remove();
+            App.closeCurtain();
             App.jPrinterCopy = null;            
         }
         //App.closeCurtain();
@@ -1583,17 +1583,17 @@ App.renderForgot = function () {
 
 //--------------------------- CONTROL PANEL ----------------------------------//
 App.createControlPanel = function () {
-    var cpContent = '<div class="cp-item" id="sale-history">Sales History</div>';
-                    //<div class="cp-item" id="close-register">Close Register</div>';
+    var cpContent = '<div class="cp-item" id="sale-history">Sales History</div>\
+                    <div class="cp-item" id="close-register">Close Register</div>';
     if (App.currentEmployee.role === "Admin") {
         cpContent +=
                 '<div class="cp-item" id="acc-settings">Account Settings</div>\
                 <div class="cp-item" id="sta-settings">Staff Settings</div>\
                 <div class="cp-item" id="pos-settings">Point of Sale Settings</div>\
                 <div class="cp-item" id="plu-settings">Edit PLU Articles</div>\
-                <div class="cp-item" id="sgs-settings">Edit Sale Groups</div>'
-                //<div class="cp-item" id="qss-settings">Edit Quick Sales</div>\
-              +'<div class="cp-item" id="rec-settings">Edit Receipt</div>';
+                <div class="cp-item" id="sgs-settings">Edit Sale Groups</div>\
+                <div class="cp-item" id="qss-settings">Edit Quick Sales</div>\
+                <div class="cp-item" id="rec-settings">Edit Receipt</div>';
     }
     App.cpBody.append($(cpContent));
     App.bindControlPanel();
@@ -1641,8 +1641,11 @@ App.bindControlPanel = function () {
     });
 };
 
-App.createGoBack = function () {
+App.createGoBack = function (cb) {
     return $('<div id="go-back">Go back</div>').click(function () {
+        if (cb) {
+            cb();
+        }
         App.cpBody.html("");
         App.createControlPanel();
     });
@@ -1854,7 +1857,8 @@ App.generateModItemFormDOM = function (type, item) {
             break;
         default:
     }
-
+    
+    var validRoles = ["Admin", "Seller"];
     // disable role field and remove button of the first admin user
     var isFirstAdmin = item.number && (item.number.value === 0) && item.role && (item.role.value === "Admin");
     var isReceipt = type === "receipt";
@@ -1893,6 +1897,16 @@ App.generateModItemFormDOM = function (type, item) {
                                 <option data=\'{"code":"CZK","symbol":"Kč"}\' selected>CZK - Czech Koruna</option>\
                             </select>';   
                                             
+                } else if(keys[i] === "role") {
+                dom += '<select id="roles">';
+                for (var j = 0; j < validRoles.length; j++) {
+                    dom += '<option' 
+                            + (validRoles[j] === item[keys[i]].value ? ' selected' : '')
+                            + (isFirstAdmin ? ' disabled' : '')
+                            +'>' + validRoles[j] + '</option>';
+                }
+                dom += '</select>';
+                
                 } else if(keys[i] === "tax") {
                 // ATTENTION!!!    
                 dom +=     '<select id="tax_rates">';
@@ -2080,7 +2094,7 @@ App.getMiEmployeeUpdateData = function (requestType, button) {
     var miBody = button.parents().eq(1);
     return {
         requestType: requestType,
-        role: miBody.find("input[placeholder='ROLE']").val(),
+        role: miBody.find("select").find(":selected").val(),
         number: miBody.find("input[placeholder='NUMBER']").val(),
         name: miBody.find("input[placeholder='NAME']").val(),
         pin: miBody.find("input[placeholder='PIN']").val()
@@ -2411,7 +2425,9 @@ App.renderSaleGroupsSettings = function () {
     sgDOM += '</div>\
                 </div>';
     App.cpBody.html(App.createCenterBox(true, sgDOM));
-    App.cpBody.find(".center-box").prepend(App.createGoBack());
+    App.cpBody.find(".center-box").prepend(App.createGoBack(function () {
+        $(".colpick.colpick_full").remove();
+    }));
 
     var modFormContainer = App.cpBody.find(".mod-form");
     var modifyUrl = "/mod/salegroups";
@@ -2500,7 +2516,7 @@ App.renderSaleHistory = function () {
         
         App.jPrinterCopy = $("<div id='payment-box'></div>").append(b);
         
-        App.jAppContainer.append(App.jPrinterCopy);
+        App.showInCurtain(App.jPrinterCopy);
 
         window.print();
     });
@@ -2532,7 +2548,7 @@ App.renderReceipt = function (rec) {
         taxValues[App.settings.tax_rates[i]] = {tax: null, total: null};
     }
     var totalItems = 0;
-    var total = 0;
+    var totalAmount = 0;
 
     for (var i = 0; i < items.length; i++) {
         var item = items[i];
@@ -2555,7 +2571,7 @@ App.renderReceipt = function (rec) {
 
         taxValues[taxRate].tax += (parseFloat(thisTotal) * parseFloat(taxRate) / 100);
         taxValues[taxRate].total += parseFloat(thisTotal);
-        total += thisTotal;
+        totalAmount += thisTotal;
     }
     //var total = App.jPayAmount.text().replace(/,/g, ".").replace(/[^\d\.\-]/g, "");
     receiptBody.appendTo(receipt);
@@ -2568,7 +2584,7 @@ App.renderReceipt = function (rec) {
             .appendTo(receiptSummary);
     $("<div>").attr("id", "rs-total")
             .append($("<div>").addClass("rs-label").text("Total amount:"))
-            .append($("<div>").addClass("rs-value").text(total.formatMoney()))
+            .append($("<div>").addClass("rs-value").text(totalAmount.formatMoney()))
             .appendTo(receiptSummary);
     $("<div>").attr("id", "taxes-label").text("VAT summary:").appendTo(receiptSummary);
     $("<div>").attr("id", "tax-header")
