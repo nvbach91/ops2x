@@ -1,7 +1,7 @@
 var config = {
     host: 'http://localhost:7000',
-    //host: 'http://ops2x-62081.onmodulus.net',
     mongodb_host: 'mongodb://127.0.0.1/testx',
+    //host: 'https://ops2x-62081.onmodulus.net',
     //mongodb_host: 'mongodb://tester:suchpass@waffle.modulusmongo.net:27017/ep2Ubebu',
     
     // when changing mail service, follow the EAUTH instructions from the service provider

@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node bin/www.http.js",
     "dev": "gulp",
-    "https": "gulp --https"
+    "devhttps": "gulp --https"
   },
   "author": "Nguyen Viet Bach <nvbach91@outlook.com>",
   "contributors": [],

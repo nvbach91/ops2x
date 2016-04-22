@@ -407,6 +407,7 @@ nav {
     margin-top: 5px;
     font-size: 14px;
     width: 100%;
+    max-width: 1024px;
 }
 .hr-col:first-child {
     border-left: 5px solid transparent;
@@ -430,7 +431,6 @@ nav {
     background-color: #903030;
 }
 .hr-row {
-    cursor: pointer;
     margin: 0;
 }
 .hr-row:hover {
@@ -440,10 +440,12 @@ nav {
     border-left: 5px solid #CACACA;
 }
 .hr-print {
+    cursor: pointer;
     background-image: url('../img/ico/printw.svg');
     background-size: 20px;
     background-repeat: no-repeat;
     background-position: center;
+    transition: background-position .2s ease;
 }
 .hr-index {
     display: none;

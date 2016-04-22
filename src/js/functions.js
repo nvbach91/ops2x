@@ -2482,7 +2482,7 @@ App.renderSaleHistory = function () {
                     <div class="hr-col">' + receipt.clerk + '</div>\
                     <div class="hr-col">' + receiptTotal.formatMoney() + ' ' + App.settings.currency.symbol + '</div>\
                     <div class="hr-col">' + (receipt.confirmed ? "YES" : "NO") + '</div>\
-                    <div class="hr-col hr-print"></div>\
+                    <div class="hr-col hr-print" title="Print this receipt"></div>\
                 </div>';
     }
 
