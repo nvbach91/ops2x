@@ -8,6 +8,7 @@
 }
 ::-webkit-scrollbar {
     width: 6px;
+    cursor: pointer;
 }
 ::-webkit-scrollbar-thumb {
     background-color: #BB5151;
@@ -86,7 +87,7 @@ html, body, #app, #main, #curtain, #control-panel {
     background-size: 25px;
 }
 form, .mod-form {
-    overflow-y: scroll;
+    overflow-y: auto;
     background-color: #fff;
     padding: 20px;
     width: 100%;
@@ -408,7 +409,7 @@ nav {
     font-size: 14px;
     width: 100%;
     max-width: 1024px;
-    overflow-x: scroll;
+    overflow-x: auto;
 }
 .hr-col:first-child {
     border-left: 5px solid transparent;
@@ -684,7 +685,7 @@ button#park-sale, button#discard-sale {
     flex-wrap: wrap;
     padding: 1px;
     border-bottom: 1px solid #E8E8E8;
-    overflow-x: scroll;
+    overflow-x: auto;
     overflow-y: hidden;
     white-space: nowrap;
 }
@@ -744,7 +745,7 @@ button#park-sale, button#discard-sale {
     font-size: 0px;    
     background-color: #334C60;
     flex-wrap: wrap;
-    overflow-x: scroll;
+    overflow-x: auto;
     overflow-y: hidden;
     white-space: nowrap;
 }
@@ -780,7 +781,7 @@ button#park-sale, button#discard-sale {
     padding: 0;
     background-color: #fff;
     height: 190px;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 .sale-item {
     border-left: 4px solid transparent;
@@ -1080,7 +1081,7 @@ button.db-close:before, button.pb-close:before, button.wb-close:before {
 .pb-header {
 }
 .pb-body {
-    overflow-y: scroll;
+    overflow-y: auto;
     background-color: #fff;
     flex-grow: 1;
     justify-content: center;
@@ -1126,7 +1127,7 @@ button.db-close:before, button.pb-close:before, button.wb-close:before {
     font-size: 16px;
 }
 .receipt-body {
-    overflow-y: scroll;
+    overflow-y: auto;
     height: 220px;
     flex-grow: 1;
 }
