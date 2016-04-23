@@ -1259,22 +1259,23 @@ App.renderDashBoard = function () {
                 '<div class="form-header">Open Cash Register</div>\
                 <form id="employee-login" action="">\
                     <div class="form-label">EMPLOYEE LOGIN</div>\
-                    <input id="employee-number" type="text" pattern="\\d{1,4}" title="1-4 digits" placeholder="EMPLOYEE NUMBER">\
+                    <input id="employee-username" type="text" title="Employee username " placeholder="USERNAME">\
                     <input id="employee-pin" type="password" placeholder="PIN">\
                     <input type="submit" value="OK">\
                 </form>');
     App.jAppContainer.html(dashBoardDOM);
 
     var form = $("#employee-login");
+    var employeeUsername = form.find("#employee-username");
     form.submit(function (e) {
         e.preventDefault();
-        var employeeNumber = $(this).find("#employee-number");
-        var employeePIN = $(this).find("#employee-pin");
+        var employeeUsername = form.find("#employee-username");
+        var employeePIN = form.find("#employee-pin");
         var loggedIn = false;
         var nStaff = App.staff.length;
         for (var i = 0; i < nStaff; i++) {
             var employee = App.staff[i];
-            if (employee.number + '' === employeeNumber.val()) {
+            if (employee.name === employeeUsername.val()) {
                 if (employee.pin === employeePIN.val()) {
                     App.currentEmployee = employee;
                     loggedIn = true;
@@ -1303,7 +1304,7 @@ App.renderDashBoard = function () {
         });
     });
     
-    $("#employee-number").focus();
+    employeeUsername.focus();
 };
 
 // get data for web register

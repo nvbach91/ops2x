@@ -116,7 +116,7 @@ form#sign-up input {
 form#sign-up input[type='submit'] {
     padding: 20px;
 }
-form #username, form #employee-number {
+form #username, form #employee-username {
     background-image: url("../img/ico/user.svg");
 }
 form [type="password"] {
