@@ -112,9 +112,11 @@ App.sortByEAN = function (a, b) {
 
 // plays beep sound
 App.beep = function () {
-    App.beeper.pause();
-    App.beeper.currentTime = 0;
-    App.beeper.play();
+    if (!App.isMuted) {
+        App.beeper.pause();
+        App.beeper.currentTime = 0;
+        App.beeper.play();
+    }
 };
 
 // corrects input price value, eg. adds decimal points, reformats bad inputs
@@ -573,6 +575,7 @@ App.createWebRegisterDOM = function () {
                 <div id="logo"><div class="logo"></div></div>\
                 <div id="brand">EnterpriseApps</div>\
                 <div id="menu-top">\
+                    <div id="muter" title="Mute beep sound"></div>\
                     <div id="profile">' + (App.currentEmployee.name || 'LOGIN') + '</div>\
                     <div id="logout">Log out</div>\
                 </div>\
@@ -721,8 +724,21 @@ App.bindKeyboard = function () {
     });
 };
 
+App.loadLocalStorage = function () {
+    if (localStorage.hasOwnProperty("isMuted")) {
+        App.isMuted = localStorage.isMuted === "true";
+    } else {
+        localStorage.isMuted = false;
+        App.isMuted = false;
+    }
+};
+
 // initializes some global variables and functions
-App.init = function () {
+App.init = function () {    
+    /**********************************************************/
+    App.loadLocalStorage();  // localStorage to be implemented
+    /**********************************************************/
+    
     App.jAppContainer = $("#app");
     App.loadingScreen = $('<div class="loading"></div>');
     App.curtain = null;
@@ -747,6 +763,8 @@ App.init = function () {
      return "You are about to close this application. Any unsaved work will be lost!";
      });*/
 };
+
+//
 App.renderSaleGroupsButtons = function () {
     var currentSaleGroups = App.buttons.saleGroups;
     var sgContent = "";
@@ -764,6 +782,7 @@ App.renderSaleGroupsButtons = function () {
     App.sg.html(sgContent);
     App.bindSaleGroups(App.sg);
 };
+
 // render web register view
 App.renderWebRegister = function () {
     App.closeCurtain();
@@ -771,7 +790,7 @@ App.renderWebRegister = function () {
     App.bindKeyboard();
     App.jMain = $("#main");
     App.jSiPlaceholder = $("#si-placeholder");
-    App.beeper = new Audio("../sound/beep7.mp3");
+    App.beeper = new Audio("../sound/beep2.mp3");
     App.jKc = $("#kc");
     App.jSaleList = $("#sale-list");
     App.jPriceInput = $("#price-input");
@@ -788,8 +807,28 @@ App.renderWebRegister = function () {
 
     // registry session means a session when user types in prices with both physical keyboard and virtual keyboard
     // used to handle multiple articles in sale list
-    App.isInRegistrySession = true/*$("#registry-session")*/;
-
+    App.isInRegistrySession = true/*$("#registry-session")*/;    
+    
+    var muter = $("#muter");
+    if (App.isMuted) {
+        muter.addClass("muted");
+    } else {
+        muter.addClass("unmuted");        
+    }
+    muter.click(function () {
+        if (App.isMuted) {
+            muter.removeClass("muted");
+            muter.addClass("unmuted");
+            localStorage.isMuted = false;
+            App.isMuted = false;
+        } else {            
+            muter.removeClass("unmuted");
+            muter.addClass("muted");
+            localStorage.isMuted = true;
+            App.isMuted = true;
+        }
+    });
+    
     // reset checkout
     var jDiscardSale = $("#discard-sale");
     jDiscardSale.click(function () {
@@ -1237,6 +1276,7 @@ App.renderWebRegister = function () {
      });*/
 };
 
+//
 App.createCenterBox = function (scrollable, content) {
     return '<div class="center-box' + (scrollable ? ' scrollable' : '') + '">'
             + content
@@ -1264,7 +1304,6 @@ App.renderDashBoard = function () {
                     <input type="submit" value="OK">\
                 </form>');
     App.jAppContainer.html(dashBoardDOM);
-
     var form = $("#employee-login");
     var employeeUsername = form.find("#employee-username");
     form.submit(function (e) {
@@ -1284,7 +1323,7 @@ App.renderDashBoard = function () {
             }
         }
         if (!loggedIn) {
-            App.showWarning("Invalid Employee Number / PIN");
+            App.showWarning("Invalid Employee Name or PIN");
         } else {
             App.renderWebRegister();
         }
@@ -1337,6 +1376,7 @@ App.showLoading = function () {
 // check for valid email syntax, allows guest as valid
 App.emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
+//
 App.isValidEmail = function (email) {
     if (["guest"].indexOf(email) >= 0) {
         return true;
