@@ -2094,7 +2094,7 @@ App.bindModSettings = function (modFormContainer, modifyUrl) {
                 var modItem = $(App.generateModItemFormDOM("staff", {
                     role: {title: "Admin or Seller", valid : /^(Admin|Seller)$/, value: "Seller"},
                     number: {title: "1-4 digits", valid : /^\d{1,4}$/, value: lastNumber + 1},
-                    name: {title: "3 or more characters", valid : /^.{3,50}$/, value: "New employee"},
+                    name: {title: "3 or more characters", valid : /^.{3,50}$/, value: "Employee " + (lastNumber + 1)},
                     pin: {title: "4 digits", valid : /^\d{4}$/, value: "0000"}
                 }));
                 modItem.submit(function (e) {
@@ -2355,7 +2355,7 @@ App.checkAndTrimPluImportCSV = function (csv, lineSeparator, valueDelimiter) {
         var currentItem = eanSet[i];
         var nextItem = eanSet[i + 1];
         if (currentItem.ean === nextItem.ean) {
-            return {isValid: false, msg: "There are duplicate EAN codes in your csv on lines " + nextItem.lineNumber + " and " + currentItem.lineNumber};
+            return {isValid: false, msg: "EAN codes must be unique! Duplicate EAN codes on lines " + nextItem.lineNumber + " and " + currentItem.lineNumber};
         }
     }
     return {isValid: true, msg: result};
@@ -2482,14 +2482,19 @@ App.renderPLUSettings = function () {
     pluImportInput.change(function (e) {
         var files = e.target.files;
         var file = files[0];
+        var size = file.size;
         var reader = new FileReader();
         reader.onload = function () {
-            var csv = App.checkAndTrimPluImportCSV(this.result, /[\n\r]+/, ";");
-            if (!csv.isValid) {
-                App.closeCurtain();
-                App.showWarning(csv.msg);
+            if (size > 10000000) {
+                App.showWarning("File cannot be larger than 5 Megabytes");
             } else {
-                App.requestModifyItem("/mod/pluimport", {data: csv.msg, requestType: "import"}, pluImportButton);
+                var csv = App.checkAndTrimPluImportCSV(this.result, /[\n\r]+/, ";");
+                if (!csv.isValid) {
+                    App.closeCurtain();
+                    App.showWarning(csv.msg);
+                } else {
+                    App.requestModifyItem("/mod/pluimport", {data: csv.msg, requestType: "import"}, pluImportButton);
+                }
             }
         };
         reader.readAsText(file);
