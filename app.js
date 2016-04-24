@@ -24,7 +24,7 @@ app.set('view engine', 'jade');
 
 app.use(helmet());
 app.use(favicon(path.join(__dirname, 'public/img', 'favicon.png')));
-app.use(logger('dev'));
+//app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
@@ -82,6 +82,7 @@ var plu = require('./routes/mod/plu');
 var pluimport = require('./routes/mod/pluimport');
 var salegroups = require('./routes/mod/salegroups');
 var addsale = require('./routes/mod/addsale');
+var mailreceipt = require('./routes/mod/mailreceipt');
 app.use('/mod', ensureAuthenticated);
 app.use('/mod', changepassword);
 app.use('/mod', staff);
@@ -91,6 +92,7 @@ app.use('/mod', plu);
 app.use('/mod', pluimport);
 app.use('/mod', salegroups);
 app.use('/mod', addsale);
+app.use('/mod', mailreceipt);
 
 
 

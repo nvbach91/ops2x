@@ -16,6 +16,7 @@ var Sales = new Schema({
                     tax_rate: Number
                 }
             ],
+            tendered: Number,
             confirmed: Boolean
         }
     ]

@@ -289,7 +289,7 @@ App.checkNumericInput = function (e, t) {
 // sets the mobile device native keyboard to numeric
 App.setUpMobileNumericInput = function (input) {
     if ($.browser.mobile) {
-        input.attr("type", "number");
+        //input.attr("type", "number");
     }
 };
 
@@ -518,14 +518,26 @@ App.bindSaleGroups = function (sg) {
         v = v.replace(/[\s]+/g, "");
         var a = v.indexOf("*");
         var price = a >= 0 ? v.slice(a + 1, v.length) : v;
-        if (price.length === 0 || parseInt(price) === 0) {
+        if (price.length === 0 || parseInt(price) === 0 || v === "-") {
             App.jPriceInput.val("");
+            App.showWarning("You must enter a price");
             return false;
         }
         var mult = App.getMultiplicationNumber();
 
+        var sign = "";
+        if (price.charAt(0) === "-") {
+            price = price.slice(1);
+            sign = "-";
+        }
+        var correctValue = App.correctPrice(price);
+        if (!correctValue) {
+            App.jPriceInput.val("");
+            return false;
+        }
+
         price = App.correctPrice(price);
-        App.jPriceInput.val(price);
+        App.jPriceInput.val(sign + price);
 
         var id = t.attr("sg-id");
         var name = t.text();
@@ -601,6 +613,7 @@ App.createWebRegisterDOM = function () {
                 <div id="logo"><div class="logo"></div></div>\
                 <div id="brand">EnterpriseApps</div>\
                 <div id="menu-top">\
+                    <div id="cp-link" title="Open control panel"></div>\
                     <div id="muter" title="Mute beep sound"></div>\
                     <div id="profile">' + (App.currentEmployee.name || 'LOGIN') + '</div>\
                     <div id="logout">Log out</div>\
@@ -642,7 +655,7 @@ App.createWebRegisterDOM = function () {
                            <div>Registered items will be dsplayed here</div>\
                        </li>\
                    </ul>\
-                   <div id="keyboard">\
+                   <div id="keyboard" class="keyboard">\
                         <button id="btnp">PLU</button>\
                         <button id="btn7">7</button>\
                         <button id="btn8">8</button>\
@@ -741,7 +754,7 @@ App.bindKeyboard = function () {
                     activeInput.val(p.slice(0, -1));
                 }
                 break;
-            case "btndot": //backspace
+            case "btndot": // decimal point
                 if (p.length > 0 && p.indexOf(".") < 0) {
                     activeInput.val(p + ".");
                 }
@@ -806,7 +819,7 @@ App.renderSaleGroupsButtons = function () {
             "sg-id": "sg" + i,
             "sg-tax": currentSaleGroups[i].tax,
             "sg-group": currentSaleGroups[i].group,
-            text: currentSaleGroups[i].group,
+            text: currentSaleGroups[i].group.toUpperCase(),
             style: "background-color: #" + currentSaleGroups[i].bg
         }).prop("outerHTML");
     }
@@ -833,7 +846,7 @@ App.renderWebRegister = function () {
 
     App.cpBody = App.jControlPanel.find("#cp-body");
     App.createControlPanel();
-    // call numpad on mobile devices
+    // call numpad on mobile devices // temporary disabled because of decimal point ATTENTION!!!!
     App.setUpMobileNumericInput(App.jPriceInput);
 
     // registry session means a session when user types in prices with both physical keyboard and virtual keyboard
@@ -936,7 +949,7 @@ App.renderWebRegister = function () {
     });
 
     // bind control panel buttons
-    $("#logo > .logo").click(function () {
+    $("#logo > .logo, #cp-link").click(function () {
         App.jControlPanel.addClass("visible");
     });
     $("#cp-header > .close, #cp-header > .logo, #main").click(function () {
@@ -1153,11 +1166,13 @@ App.renderWebRegister = function () {
 
         $("<button>").attr("id", "cash-confirm").text("CONFIRM PAYMENT").click(function () {
             var t = $(this);
+            t.off();
             if (!t.hasClass("disabled")) {
                 clearInterval(App._receiptTimeInterval);
 
                 currentReceipt.date = new Date();
                 currentReceipt.items = JSON.stringify(currentReceipt.items);
+                currentReceipt.tendered = App.jCashInput.val();
                 $.ajax({
                     type: "POST",
                     url: "/mod/addsale",
@@ -1186,11 +1201,40 @@ App.renderWebRegister = function () {
                                 emailInput.select();
                             }
                         }).val("@").appendTo(emailReceipt);
-                        $("<button>").attr("id", "email-send").text("Email receipt").prop("disabled", true).click(function () {
+                        var sendButton = $("<button>").attr("id", "email-send").text('Email receipt').click(function () {
                             var recipient = emailInput.val();
                             if (App.isValidEmail(recipient)) {
-                                $(this).text("Email sent").addClass("sent").off();
-                                emailInput.remove();
+                                currentReceipt.recipient = recipient;
+                                currentReceipt.shop =
+                                        App.settings.name + "\n"
+                                        + App.settings.address.street + "\n"
+                                        + App.settings.address.city + " "
+                                        + App.settings.address.zip + " "
+                                        + App.settings.address.country + "\n"
+                                        + "TIN: " + App.settings.tin + "\n"
+                                        + "VAT: " + App.settings.vat + "\n"
+                                        + "Phone: " + App.settings.phone;
+                                sendButton.html('<div class="mi-loader loading"></div>');
+                                $.ajax({
+                                    type: "POST",
+                                    url: "/mod/mailreceipt",
+                                    dataType: "json",
+                                    data: currentReceipt
+                                }).done(function (resp) {
+                                    if (resp.success) {
+                                        sendButton.off();
+                                        emailInput.prop("disable", true);
+                                        sendButton.html("Email sent");
+                                        sendButton.addClass("sent");
+                                    } else {
+                                        sendButton.html("Email could not be sent. Try again");                                        
+                                        console.log(resp);
+                                    }
+                                }).fail(function (resp) {
+                                    sendButton.html("Email could not be sent. Try again");
+                                    console.log(resp);
+                                });
+                                //App.sendMailReceipt($(this), emailInput, recipient, currentReceipt);
                             } else {
                                 emailInput.addClass("invalid").val("Invalid email");
                             }
@@ -1630,9 +1674,9 @@ App.renderForgot = function () {
     };
 
     var afterPrint = function () {
-        if(App.jPrinterCopy) {
+        if(App.jPrinterCopyReceipt) {
             App.closeCurtain();
-            App.jPrinterCopy = null;            
+            App.jPrinterCopyReceipt = null;            
         }
         //App.closeCurtain();
     };
@@ -2578,17 +2622,10 @@ App.renderSaleHistory = function () {
     container.find(".hr-print").click(function () {
         var t = $(this);
         var receiptIndex = parseInt(t.parent().find(".hr-index").text());
-        
-        var b = $("<div>").addClass("pb-body");
-        var c = $("<div>").addClass("receipt-container");
-        var r = App.renderReceipt(receipts[receiptIndex]);
-        
-        c.append(r);
-        b.append(c);
-        
-        App.jPrinterCopy = $("<div id='payment-box'></div>").append(b);
-        
-        App.showInCurtain(App.jPrinterCopy);
+
+        App.jPrinterCopyReceipt = App.renderReceipt(receipts[receiptIndex]);
+
+        App.showInCurtain(App.jPrinterCopyReceipt);
 
         window.print();
     });
@@ -2621,6 +2658,7 @@ App.renderReceipt = function (rec) {
     }
     var totalItems = 0;
     var totalAmount = 0;
+    var tendered = parseFloat(rec.tendered);
 
     for (var i = 0; i < items.length; i++) {
         var item = items[i];
@@ -2658,6 +2696,14 @@ App.renderReceipt = function (rec) {
             .append($("<div>").addClass("rs-label").text("Total amount:"))
             .append($("<div>").addClass("rs-value").text(totalAmount.formatMoney()))
             .appendTo(receiptSummary);
+    $("<div>").attr("id", "rs-tender")
+            .append($("<div>").addClass("rs-label").text("Tendered:"))
+            .append($("<div>").addClass("rs-value").text(tendered.formatMoney()))
+            .appendTo(receiptSummary);
+    $("<div>").attr("id", "rs-change")
+            .append($("<div>").addClass("rs-label").text("Change:"))
+            .append($("<div>").addClass("rs-value").text((tendered - totalAmount).formatMoney()))
+            .appendTo(receiptSummary);
     $("<div>").attr("id", "taxes-label").text("VAT summary:").appendTo(receiptSummary);
     $("<div>").attr("id", "tax-header")
             .append($("<div>").addClass("th-rate").text("Rate"))
@@ -2688,6 +2734,12 @@ App.renderReceipt = function (rec) {
 
     //creating receipt footer
     $("<div>").addClass("receipt-footer").text("EnterpriseApps").appendTo(receipt);
-        
-    return receipt;
+
+    var paymentBody = $("<div>").addClass("pb-body");
+    var container = $("<div>").addClass("receipt-container");
+
+    container.append(receipt);
+    paymentBody.append(container);
+
+    return $("<div id='payment-box'></div>").append(paymentBody);
 };

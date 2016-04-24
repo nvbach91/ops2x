@@ -13,7 +13,7 @@ router.post('/staff', function (req, res) {
     if (!utils.isValidRequest(validator, req.body)) {
         res.json({success: false, msg: 'Invalid request'});
     } else {
-        if (req.body.role === "Admin" && req.body.number === "0") {
+        if (req.body.role === 'Admin' && req.body.number === '0' && req.body.requestType === 'remove') {
             res.json({success: false, msg: 'Cannot remove super admin'});
         } else {
             var query = {userId: req.user._id};
@@ -69,7 +69,7 @@ router.post('/staff', function (req, res) {
                             res.json({success: false, msg: err});
                         });
                     } else {
-                        res.json({success: false, msg: "Invalid request. Employee number not found"});
+                        res.json({success: false, msg: 'Invalid request. Employee number not found'});
                     }
                 }
             });

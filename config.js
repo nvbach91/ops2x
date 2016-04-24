@@ -3,7 +3,7 @@ var config = {
     mongodb_host: 'mongodb://127.0.0.1/testx',
     //host: 'https://ops2x-62081.onmodulus.net',
     //mongodb_host: 'mongodb://tester:suchpass@waffle.modulusmongo.net:27017/ep2Ubebu',
-    
+
     // when changing mail service, follow the EAUTH instructions from the service provider
     mail_transport: {
         service: 'Gmail',
@@ -14,7 +14,7 @@ var config = {
     },
     generateSignupMail: function (recipient, key) {
         return {
-            from: '"EnterpriseApps" <info.enterpriseapps@gmail.com>',
+            from: '"EnterpriseApps" <' + config.mail_transport.auth.user + '>',
             to: recipient,
             subject: 'Sign Up - Online Point of Sale System',
             text: 'Hello,\n\nyou have recently registered an account on Online Point of Sale System.\n'
@@ -29,7 +29,7 @@ var config = {
     },
     generateForgotMail: function (recipient, key, token) {
         return {
-            from: '"EnterpriseApps" <info.enterpriseapps@gmail.com>',
+            from: '"EnterpriseApps" <' + config.mail_transport.auth.user + '>',
             to: recipient,
             subject: 'Password Reset - Online Point of Sale System',
             text: 'Hello,\n\nyou have recently requested for a password reset.\n'
@@ -43,7 +43,87 @@ var config = {
                     + '<br><br>If you don\'t recall doing this, you can safely ignore this message.</p>'
                     + '<br><br>Best regards,<br>Online Point of Sale System Team</p>'
         };
+    },
+    generateReceiptMail: function (recipient, receipt) {
+        var content = "Hello, \nthis is the receipt you have recently purchased from\n\n" + receipt.shop + "\n\n"
+                + "Receipt number: " + receipt.number + "\n"
+                + "Date and time of purchase: " + getDate(receipt.date) + "\n"
+                + "Employee: " + receipt.clerk + "\n\n"
+                + "Items: \n";
+        var items = receipt.items;
+        var total = 0;
+        var taxes = {0: 0, 10: 0, 15: 0, 21: 0};
+        for (var i = 0; i < items.length; i++) {
+            var item = items[i];
+            var name = item.name;
+            var quantity = item.quantity;
+            var price = item.price;
+            var thisTotal = parseFloat(price) * quantity;
+            total += thisTotal;
+            taxes[item.tax_rate] += thisTotal * item.tax_rate / 100;
+            content += "• " + name + ": " + quantity + " x " + price + " = " + thisTotal.formatMoney() + "\n";
+        }
+        content += "\nTotal amount = " + total.formatMoney() + "\n"
+                + "Tendered = " + parseFloat(receipt.tendered).formatMoney() + "\n"
+                + "Change = " + (parseFloat(receipt.tendered) - total).formatMoney() + "\n";
+        
+        var taxKeys = Object.keys(taxes);
+        for (var i = 0; i < taxKeys.length; i++) {
+            var taxKey = taxKeys[i];
+            var tax = taxes[taxKey];
+            if (tax !== 0) {
+                content += "Tax " + taxKey + "% = " + tax.formatMoney() + "\n\n";
+            }
+        }
+        content += "Have a nice day\nEnterpriseApps";
+        return {
+            from: '"EnterpriseApps" <' + config.mail_transport.auth.user + '>',
+            to: recipient,
+            subject: 'Your receipt ' + receipt.number,
+            text: content,
+            html: ''
+        };
     }
+};
+
+function createDateObject(s) {
+    var now = null;
+    if (s) {
+        now = new Date(s);
+    } else {
+        now = new Date();
+    }
+    return {
+        date: correctTime(now.getDate()),
+        month: correctTime(now.getMonth() + 1),
+        year: correctTime(now.getFullYear()),
+        hh: correctTime(now.getHours()),
+        mm: correctTime(now.getMinutes()),
+        ss: correctTime(now.getSeconds())
+    };
+}
+;
+
+function correctTime(s) {
+    return s < 10 ? "0" + s : s;
+}
+;
+
+function getDate(s) {
+    var d = createDateObject(s);
+    return d.date + "/" + d.month + "/" + d.year + " " + d.hh + ":" + d.mm + ":" + d.ss;
+}
+;
+Number.prototype.formatMoney = function (c, d, t) {
+    //d = App.settings.decimal_delimiter;
+    var n = this,
+            c = isNaN(c = Math.abs(c)) ? 2 : c,
+            d = d === undefined ? "." : d,
+            t = t === undefined ? "" : t,
+            s = n < 0 ? "-" : "",
+            i = parseInt(n = Math.abs(+n || 0).toFixed(c)) + "",
+            j = (j = i.length) > 3 ? j % 3 : 0;
+    return s + (j ? i.substr(0, j) + t : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) + (c ? d + Math.abs(n - i).toFixed(c).slice(2) : "");
 };
 
 module.exports = config;

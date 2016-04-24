@@ -10,6 +10,7 @@ router.post('/addsale', function (req, res) {
         date: new Date(newReceipt.date),
         clerk: newReceipt.clerk,
         items: JSON.parse(newReceipt.items),
+        tendered: parseFloat(newReceipt.tendered),
         confirmed: true
     };
     Sales.findOne(query).exec().then(function (sales) {

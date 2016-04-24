@@ -12,10 +12,12 @@ router.post('/forgot', function (req, res) {
         } else {
             utils.mailer.sendMail(config.generateForgotMail(newEmail, user._id.valueOf(), token), function (error, info) {
                 if (error) {
-                    return console.log(error);
+                    console.log(error);
+                    res.json({success: false, msg: error});
+                } else {
+                    console.log('Forgot Message sent to ' + newEmail + ': ' + info.response);
+                    res.json({success: true, msg: newEmail});
                 }
-                console.log('Forgot Message sent to ' + newEmail + ': ' + info.response);
-                res.json({success: true, msg: newEmail});
             });
         }
     }).catch(function (err) {
