@@ -24,7 +24,7 @@ select {
     cursor: pointer;
 }
 #kc {
-    display: none;
+    /*display: none;*/
     position: fixed;
     right: 0;
     bottom: 0;
@@ -964,7 +964,7 @@ button#btnm.activePLU:before {
 #subtotal {
     text-align: center;
     width: 25%;
-    background-color: #334C60;
+    background-color: #2C8DAE;
 }
 #pay {
     position: relative;
@@ -975,7 +975,7 @@ button#btnm.activePLU:before {
     text-align: left;
     padding: 0 20px;
     width: 75%;
-    background-color: #E4644B;    
+    background-color: #65C365;    
 }
 #pay:active {    
     -webkit-filter: grayscale(.7);

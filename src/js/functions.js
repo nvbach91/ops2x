@@ -121,7 +121,23 @@ App.beep = function () {
 
 // corrects input price value, eg. adds decimal points, reformats bad inputs
 App.correctPrice = function (pr) {
-    var p = pr.replace(/\./g, "");
+    var p = pr;
+    var dotIndex = p.indexOf(".");
+    if (dotIndex > 0) {
+        var intPart = p.slice(0, dotIndex);
+        var decPart = p.slice(dotIndex + 1, p.length);        
+        if (decPart.length > 2) {
+            decPart = decPart.slice(0, 2);
+        } else if (decPart.length > 1) {
+            
+        } else if (decPart.length > 0) {
+            decPart = decPart + "0";
+        } else {
+            decPart = decPart + "00";            
+        }        
+        return intPart + "." + decPart;
+    }
+    p = pr.replace(/\./g, "");
     var correctValue = "";
     while (p.length > 2 && p.charAt(0) === "0") {
         p = p.slice(1);
@@ -170,7 +186,7 @@ App.recalculateTotalCost = function () {
 // corrects input in price input
 App.correctPriceInput = function () {
     var p = App.jPriceInput.val();
-    if (!/^\-?\d+\*?(\d+)?$/g.test(p) || p === "-") {
+    if (!/^\-?\d+\*?(\d+)?\.?(\d+)?$/g.test(p) || p === "-") {
         App.jPriceInput.val("");
         return false;
     }
@@ -203,7 +219,7 @@ App.correctPriceInput = function () {
 App.checkPriceInput = function (e) {
     e.stopPropagation();
     App.jKc.text("keyCode: " + e.keyCode);
-    if (e.keyCode === 27) {
+    if (e.keyCode === 27) { // allow esc
         App.jPriceInput.blur();
         return true;
     }
@@ -239,7 +255,17 @@ App.checkPriceInput = function (e) {
         }
         return false;
     }
-    // prevent non-digit key press
+    if (e.keyCode === 110) {        
+        if (App.jPriceInput.val().length === 0) {
+            return false;
+        }
+        if (App.jPriceInput.val().indexOf(".") < 0) {
+            //p.attr("maxlength", 9);
+            return true;
+        }
+        return false;
+    }
+    // prevent other non-digit key press
     if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
         e.preventDefault();
     }
@@ -489,7 +515,7 @@ App.bindSaleGroups = function (sg) {
         var v = App.jPriceInput.val();
 
         // extract price and multiplication number
-        v = v.replace(/[\s\.]+/g, "");
+        v = v.replace(/[\s]+/g, "");
         var a = v.indexOf("*");
         var price = a >= 0 ? v.slice(a + 1, v.length) : v;
         if (price.length === 0 || parseInt(price) === 0) {
@@ -630,8 +656,8 @@ App.createWebRegisterDOM = function () {
                         <button id="btn2">2</button>\
                         <button id="btn3">3</button>\
                         <button id="btnc">C</button>\
+                        <button id="btndot">.</button>\
                         <button id="btn0">0</button>\
-                        <button id="btn00">00</button>\
                         <button id="btnb"></button>\
                    </div>\
                    <div id="paycalc">\
@@ -713,6 +739,11 @@ App.bindKeyboard = function () {
             case "btnb": //backspace
                 if (p.length > 0) {
                     activeInput.val(p.slice(0, -1));
+                }
+                break;
+            case "btndot": //backspace
+                if (p.length > 0 && p.indexOf(".") < 0) {
+                    activeInput.val(p + ".");
                 }
                 break;
             default: //numbers
@@ -1175,7 +1206,7 @@ App.renderWebRegister = function () {
                         }).appendTo(payment);
                     } else {
                         App.closeCurtain();
-                        App.showWarning("Server refused to sync. " + resp.msg);
+                        App.showWarning("Server refused to sync");
                         console.log(resp);
                     }
                 }).fail(function (resp) {
