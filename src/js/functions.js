@@ -655,7 +655,7 @@ App.createWebRegisterDOM = function () {
                            <div>Registered items will be dsplayed here</div>\
                        </li>\
                    </ul>\
-                   <div id="keyboard" class="keyboard">\
+                   <div id="keyboard" class="keyboard" style="display: none;">\
                         <button id="btnp">PLU</button>\
                         <button id="btn7">7</button>\
                         <button id="btn8">8</button>\
@@ -674,7 +674,7 @@ App.createWebRegisterDOM = function () {
                         <button id="btnb"></button>\
                    </div>\
                    <div id="paycalc">\
-                       <button id="subtotal">Sub</button>\
+                       <button id="kb-toggle" class="open"></button>\
                        <div id="pay">\
                            <div id="pay-label">Pay</div>\
                            <div id="pay-amount">0</div>\
@@ -697,10 +697,10 @@ App.simulateEnterKeyup = function () {
 
 // binds events to virtual keyboard
 App.bindKeyboard = function () {
-    var keyboard = $("#keyboard");
-    var btnPLU = keyboard.find("#btnp");
-    var btnMul = keyboard.find("#btnm");
-    $("#keyboard button").click(function () {
+    App.keyboard = $("#keyboard");
+    var btnPLU = App.keyboard.find("#btnp");
+    var btnMul = App.keyboard.find("#btnm");
+    App.keyboard.find("button").click(function () {
         if (App.isInRegistrySession/*.text() === "1"*/) {
             App.isInRegistrySession = false/*.text("0")*/;
             App.jPriceInput.val("");
@@ -956,12 +956,26 @@ App.renderWebRegister = function () {
         App.jControlPanel.removeClass("visible");
     });
 
-    $("#subtotal").click(function () {
-        if (App.jSaleList.find(".sale-item").size()) {
+    $("#kb-toggle").click(function () {
+        /*if (App.jSaleList.find(".sale-item").size()) {
             App.recalculateTotalCost();
             App.jPayAmount.addClass("checked");
             App.beep();
+        }*/
+        var t = $(this);
+        if(t.hasClass("close")){
+            t.removeClass("close");
+            t.addClass("open");
+        } else {
+            t.removeClass("open");
+            t.addClass("close");            
         }
+        App.keyboard.slideToggle(App.getAnimationTime(), function () {
+            App.jSaleList.animate({
+                scrollTop: App.jSaleList[0].scrollHeight
+            }, App.getAnimationTime());
+        });
+        
     });
     
     var currentReceiptObj = null;
@@ -1275,7 +1289,7 @@ App.renderWebRegister = function () {
                         }).appendTo(emailReceipt);
                         emailReceipt.appendTo(payment);
                         //payment.append(paymentComplete);
-                        $("<button>").attr("id", "done-payment").text("Done").click(function () {
+                        $("<button>").attr("id", "done-payment").text("DONE").click(function () {
                             if (!receiptPrinted) {
                                 window.print();
                             }
