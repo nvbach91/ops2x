@@ -18,7 +18,7 @@ gulp.task('scripts', function () {
         'src/js/main.js'
     ]).pipe(plumber())
             .pipe(concat('build.js'))
-            //.pipe(rename({suffix:'.min'}))
+            //.pipe(rename({suffix: '.min'}))
             //.pipe(uglify())
             .pipe(gulp.dest('public/js'))
             .pipe(reload({stream: true}));

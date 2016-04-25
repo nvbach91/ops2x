@@ -336,7 +336,7 @@ div#cp-link {
     margin: auto;
 }
 .mi-header {
-    background-color: #BB5151;
+    background-color: #4A698A;
     font-size: 16px;
     padding: 10px;
     cursor: pointer;
@@ -730,6 +730,7 @@ button#park-sale, button#discard-sale {
     display: none;
 }
 #sale-groups button, .qs-item {
+    white-space: normal;
     width: 33.33333%;
     margin: 0px;
     display: inline-block;

@@ -185,12 +185,12 @@ function generateDefaultButtons(newUserId) {
             },
             {
                 tax: 15,
-                group: "Uncategorized",
+                group: "Misc 15",
                 bg: "996DB8"
             },
             {
                 tax: 21,
-                group: "Uncategorized",
+                group: "Misc 21",
                 bg: "E4644B"
             }
         ],

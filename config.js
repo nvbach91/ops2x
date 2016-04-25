@@ -63,7 +63,9 @@ var config = {
             taxes[item.tax_rate] += thisTotal * item.tax_rate / 100;
             content += "• " + name + ": " + quantity + " x " + price + " = " + thisTotal.formatMoney() + "\n";
         }
-        content += "\nTotal amount = " + total.formatMoney() + "\n"
+        content += "\nSubtotal = " + total.formatMoney() + "\n"
+                + "Round = " + (Math.round(total) - total).formatMoney() + "\n"
+                + "Total amount = " + Math.round(total).formatMoney() + "\n"
                 + "Tendered = " + parseFloat(receipt.tendered).formatMoney() + "\n"
                 + "Change = " + (parseFloat(receipt.tendered) - total).formatMoney() + "\n";
         
@@ -72,16 +74,16 @@ var config = {
             var taxKey = taxKeys[i];
             var tax = taxes[taxKey];
             if (tax !== 0) {
-                content += "Tax " + taxKey + "% = " + tax.formatMoney() + "\n\n";
+                content += "Tax " + taxKey + "% = " + tax.formatMoney() + "\n";
             }
         }
-        content += "Have a nice day\nEnterpriseApps";
+        content += "\nHave a nice day\nEnterpriseApps";
         return {
             from: '"EnterpriseApps" <' + config.mail_transport.auth.user + '>',
             to: recipient,
             subject: 'Your receipt ' + receipt.number,
             text: content,
-            html: ''
+            html: '<pre>' + content + '</pre>'
         };
     }
 };
