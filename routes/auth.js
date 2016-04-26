@@ -11,7 +11,11 @@ passport.use(new passportLocal.Strategy(function (username, password, done) {
         Users.findOne({email: username}, function (err, user) {
             if (user) {
                 if (username === user.email && utils.hash(password) === user.password && user.activated) {
-                    done(null, {id: user._id, username: username});
+                    //var session_token = utils.generateRandomString(16);
+                    //user.session_token = session_token;
+                    //user.save().then(function (user) {
+                        done(null, {id: user._id, username: username});
+                    //});
                 } else {
                     done(null, null);
                 }

@@ -100,7 +100,8 @@ function generateNewUser(newUserId, newEmail, password) {
         email: newEmail,
         password: utils.hash(password),
         activated: false,
-        password_pending: "no"
+        password_pending: "no"/*,
+        session_token: "no"*/
     };
 }
 ;

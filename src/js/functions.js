@@ -1147,19 +1147,16 @@ App.renderWebRegister = function () {
         var payment = $("<div>").attr("id", "payment");
         App.jCashInput = $("<input>");
         //$("<div>").addClass("cash-pay-label").text("Amount to pay").appendTo(payment);
-        $("<div>").attr("id", "cash-pay-topay").text("Total: " + total + " " + App.settings.currency.symbol)
+        /*$("<div>").attr("id", "cash-pay-topay").text("Total: " + total + " " + App.settings.currency.symbol)
                 .click(function () {
                     App.jCashInput.val(total).blur();
-                }).appendTo(payment);
+                }).appendTo(payment);*/
 
-        //var quickCashLabel = $("<div>").addClass("cash-quick-label").text("Quick cash payment");
-        //quickCashLabel.appendTo(payment);
+        var quickCashLabel = $("<div>").addClass("cash-quick-label").text("Quick cash payment");
+        quickCashLabel.appendTo(payment);
         var quickCash = $("<div>").addClass("cash-quick");
-        var cashChange = $("<div>").attr("id", "cash-change");
-        App.changeAmount = 0;
-        var qcs = [100, 200, 500, 1000, 2000, 5000];
-        var nQcs = qcs.length;
-        for (var i = 0; i < nQcs; i++) {
+        var qcs = [50, 100, 200, 500, 1000, 2000];
+        for (var i = 0; i < qcs.length; i++) {
             $("<button>").addClass("cash-button").text(qcs[i])
                     .click(function () {
                         var t = $(this);
@@ -1169,9 +1166,30 @@ App.renderWebRegister = function () {
                     .appendTo(quickCash);
         }
         quickCash.appendTo(payment);
-
+        
+        var cashChange = $("<div>").attr("id", "cash-change");
+        App.changeAmount = 0;
         //var payForm = $("<div>").addClass("pay-form");
-        $("<div>").addClass("cash-pay-label").text("Cash").appendTo(payment);
+        $("<div>").addClass("cash-pay-label").text("Amount tendered").appendTo(payment);
+        var cashInputRow = $("<div>").addClass("cash-input-row");
+        $("<div>").attr("id", "pk-toggle").addClass("open").click(function () {
+            var t = $(this);
+            if (t.hasClass("close")) {
+                t.removeClass("close");
+                t.addClass("open");
+            } else {
+                App.jCashInput.val("").blur();
+                t.removeClass("open");
+                t.addClass("close");
+            }
+            paymentKeyboard.slideToggle(App.getAnimationTime());
+            quickCash.slideToggle(App.getAnimationTime());
+            quickCashLabel.slideToggle(App.getAnimationTime());
+        }).appendTo(cashInputRow);
+        $("<div>").attr("id", "cash-input-clear").click(function () {
+            App.jCashInput.val("");
+            App.jCashInput.blur();
+        }).appendTo(cashInputRow);
         App.jCashInput.attr("id", "cash-input")
                 .attr("placeholder", "0.00")
                 .attr("maxlength", "9")
@@ -1201,8 +1219,56 @@ App.renderWebRegister = function () {
                     paymentBox.find("#rs-change .rs-value").text(App.changeAmount);
                 }).focus(function () {
                     $(this).select();
-                }).appendTo(payment);
+                }).appendTo(cashInputRow);
         //payForm.appendTo(payment);
+        cashInputRow.appendTo(payment);
+        
+        var paymentKeyboard = $(
+                '<div id="pkeyboard" class="keyboard" style="display: none;">\
+                        <button id="pbtn7">7</button>\
+                        <button id="pbtn8">8</button>\
+                        <button id="pbtn9">9</button>\
+                        <button id="pbtn4">4</button>\
+                        <button id="pbtn5">5</button>\
+                        <button id="pbtn6">6</button>\
+                        <button id="pbtn1">1</button>\
+                        <button id="pbtn2">2</button>\
+                        <button id="pbtn3">3</button>\
+                        <button id="pbtndot">.</button>\
+                        <button id="pbtn0">0</button>\
+                        <button id="pbtnb"></button>\
+                        <button id="pbtnok">OK</button>\
+                   </div>');
+        paymentKeyboard.find("button").click(function () {
+            var t = $(this);
+            var id = t.attr("id");
+            var currentInput = App.jCashInput.val();
+            var decimalPointIndex = currentInput.indexOf(".");
+            switch (id) {
+                case "pbtndot":
+                    if (currentInput.length > 0 && decimalPointIndex < 0) {
+                        App.jCashInput.val(currentInput + ".");
+                    }
+                    break;
+                case "pbtnok":
+                    App.jCashInput.blur();
+                    break;
+                case "pbtnb":
+                    App.jCashInput.val(currentInput.slice(0, currentInput.length - 1));
+                    break;
+                default:
+                    if (decimalPointIndex > 0) {
+                        if (currentInput.length - decimalPointIndex < 3) {
+                            App.jCashInput.val(currentInput + t.text());
+                        }
+                    } else {
+                        App.jCashInput.val(currentInput + t.text());
+                    }
+            }
+        });
+        paymentKeyboard.appendTo(payment);
+
+        
         App.setUpMobileNumericInput(App.jCashInput);
         cashChange.text("Change: " + Number(0).formatMoney() + " " + App.settings.currency.symbol).appendTo(payment);
 
@@ -1224,7 +1290,7 @@ App.renderWebRegister = function () {
                     data: currentReceiptObj
                 }).done(function (resp) {
                     if (resp.success) {
-                        //App.sales.receipts.push(currentReceipt);
+                        paymentBody.addClass("done");
                         App.sales.receipts.push(resp.msg);
 
                         payment.children().remove();
@@ -2726,14 +2792,17 @@ App.renderReceipt = function (receiptObj) {
         var taxRate = item.tax_rate;
 
         var thisTotal = parseFloat(p) * parseFloat(q);
-        var receiptItem = $("<li>").addClass("receipt-item")
-                .append($("<div>").addClass("ri-n").text(n))
-                .append($("<div>").addClass("ri-v")
-                        .append($("<div>").addClass("ri-q").text(q))
-                        .append($("<div>").addClass("ri-x"))
-                        .append($("<div>").addClass("ri-p").text(p))
-                        .append($("<div>").addClass("ri-tt").text(thisTotal.formatMoney()))
-                        );
+        var receiptItemDOM =
+                '<li class="receipt-item">'
+                + '<div class="ri-n">' + n + '</div>'
+                + '<div class="ri-v">'
+                + '   <div class="ri-q">' + q + '</div>'
+                + '   <div class="ri-x"></div>'
+                + '   <div class="ri-p">' + p + '</div>'
+                + '   <div class="ri-tt">' + thisTotal.formatMoney() + '</div>'
+                + '</div>'
+                + '</li>';
+        var receiptItem = $(receiptItemDOM);
         receiptBody.append(receiptItem);
 
         taxValues[taxRate].tax += (parseFloat(thisTotal) * parseFloat(taxRate) / 100);
@@ -2745,6 +2814,7 @@ App.renderReceipt = function (receiptObj) {
          
         var total = Math.round(parseFloat(subTotal)).formatMoney();
         var round = (parseFloat(total) - parseFloat(subTotal)).formatMoney();
+        var changeAmount = (tendered - subTotal).formatMoney();
         
     var rsDOM =
             '<div id="receipt-summary">'
@@ -2755,12 +2825,14 @@ App.renderReceipt = function (receiptObj) {
             + '<div id="rs-subtotal">'
             + '    <div class="rs-label">Subtotal:</div>'
             + '    <div class="rs-value">' + subTotal.formatMoney() + '</div>'
-            + '</div>'
-            + '<div id="rs-round">'
-            + '    <div class="rs-label">Round:</div>'
-            + '    <div class="rs-value">' + round + '</div>'
-            + '</div>'
-            + '<div id="rs-total">'
+            + '</div>';
+    if (round !== "0.00") {
+        rsDOM += '<div id="rs-round">'
+                + '    <div class="rs-label">Round:</div>'
+                + '    <div class="rs-value">' + round + '</div>'
+                + '</div>';
+    }
+    rsDOM += '<div id="rs-total">'
             + '    <div class="rs-label">Total amount:</div>'
             + '    <div class="rs-value">' + total + '</div>'
             + '</div>'
@@ -2770,7 +2842,7 @@ App.renderReceipt = function (receiptObj) {
             + '</div>'
             + '<div id="rs-change">'
             + '    <div class="rs-label">Change:</div>'
-            + '    <div class="rs-value">' + (tendered - subTotal).formatMoney() + '</div>'
+            + '    <div class="rs-value">' + changeAmount + '</div>'
             + '</div>'
             + '<div id="taxes-label">VAT summary:</div>'
             + '<div id="tax-header">'
