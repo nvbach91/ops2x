@@ -178,9 +178,18 @@ App.recalculateTotalCost = function () {
     });
     totalCost.toFixed(2);
     var totalCostText = totalCost.formatMoney();
-    App.jCheckoutTotal.text("Total: " + totalCostText + " " + App.settings.currency.symbol);
+    App.jCheckoutTotal.text(App.lang.reg_total + ": " + totalCostText + " " + App.settings.currency.symbol);
     App.jPayAmount.text(totalCostText);
-    App.jCheckoutLabel.text("CHECKOUT (" + itemsCnt + " item" + (itemsCnt !== 1 ? "s" : "") + ")");
+    App.jCheckoutLabel.text(
+            App.lang.reg_checkout
+            + " (" + itemsCnt + " "
+            + (App.locale === "en" ?
+                    (itemsCnt !== 1 ? App.lang.reg_items + "s" : App.lang.reg_items + "")
+                    :
+                    (itemsCnt === 1 ? App.lang.reg_item : (itemsCnt >= 2 && itemsCnt <= 4) ? App.lang.reg_item_plural : App.lang.reg_items)
+                    )
+            + ")"
+            );
 };
 
 // corrects input in price input
@@ -391,7 +400,7 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
     var siExtension = $("<div>").addClass("sale-item-extend");
 
     var individualPrice = $("<div>").addClass("change-price");
-    $("<div>").addClass("d-label").text("Individual Price").appendTo(individualPrice);
+    $("<div>").addClass("d-label").text(App.lang.reg_individual_price).appendTo(individualPrice);
     $("<input>")
             .addClass("d-price")
             .attr({maxlength: 7, placeholder: "e.g. 4200 = 42.00"})
@@ -422,7 +431,7 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
             .appendTo(individualPrice);
 
     var individualDiscount = $("<div>").addClass("change-discount");
-    $("<div>").addClass("d-label").text("Individual Discount (%)").appendTo(individualDiscount);
+    $("<div>").addClass("d-label").text(App.lang.reg_individual_discount + " (%)").appendTo(individualDiscount);
     $("<input>").addClass("d-discount")
             .attr({maxlength: 2, placeholder: "0 - 100", disabled: true})
             .val(0)
@@ -444,7 +453,7 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
             .appendTo(individualDiscount);
 
     var openDetailsLightbox = $("<div>").addClass("open-detail");
-    $("<div>").addClass("d-label").text("Details").appendTo(openDetailsLightbox);
+    $("<div>").addClass("d-label").text(App.lang.reg_details).appendTo(openDetailsLightbox);
 
     // bind details button in sale list, generate details box
     $("<button>").addClass("d-detail")
@@ -607,27 +616,26 @@ App.discardSale = function (immediate) {
 
 // appends the dom structure to web register
 App.createWebRegisterDOM = function () {
-    // nav, menu-left, registry-session
+    // nav, menu-left, registry-session    
     var appDOM =
             '<nav>\
                 <div id="logo"><div class="logo"></div></div>\
                 <div id="brand">EnterpriseApps</div>\
                 <div id="menu-top">\
-                    <div id="cp-link" title="Open control panel"></div>\
-                    <div id="muter" title="Mute beep sound"></div>\
+                    <div id="cp-link" title="' + App.lang.reg_open_cp + '"></div>\
+                    <div id="muter" title="' + App.lang.reg_mute + '"></div>\
                     <div id="profile">' + (App.currentEmployee.name || 'LOGIN') + '</div>\
-                    <div id="logout">Log out</div>\
+                    <div id="logout">' + App.lang.reg_logout + '</div>\
                 </div>\
              </nav>\
              <div id="control-panel">\
                 <div id="cp-header">\
                    <div class="logo"></div>\
-                   <div class="label">Control Panel</div>\
+                   <div class="label">' + App.lang.reg_cp + '</div>\
                    <div class="close"></div>\
                 </div>\
                 <div id="cp-body"></div>\
              </div>\
-             <div id="registry-session">1</div>\
              <div id="main">\
                 <div id="col-1">\
                     <div id="live-search">\
@@ -643,16 +651,16 @@ App.createWebRegisterDOM = function () {
                 </div>\
                 <div id="col-2">\
                    <div id="checkout-header">\
-                       <div id="checkout-label">CHECKOUT (0 items)</div>\
-                       <div id="checkout-total">Total: 0 ' + App.settings.currency.symbol + '</div>\
+                       <div id="checkout-label">' + App.lang.reg_checkout + ' (0 ' + App.lang.reg_items + ')</div>\
+                       <div id="checkout-total">' + App.lang.reg_total + ': 0 ' + App.settings.currency.symbol + '</div>\
                    </div>\
                    <div id="checkout-btns">\
-                       <button id="park-sale">Park Sale</button>\
-                       <button id="discard-sale">Discard Sale</button>\
+                       <button id="park-sale">' + App.lang.reg_park + '</button>\
+                       <button id="discard-sale">' + App.lang.reg_discard + '</button>\
                    </div>\
                    <ul id="sale-list">\
                        <li id="si-placeholder">\
-                           <div>Registered items will be dsplayed here</div>\
+                           <div>' + App.lang.reg_si_placeholder + '</div>\
                        </li>\
                    </ul>\
                    <div id="keyboard" class="keyboard" style="display: none;">\
@@ -676,7 +684,7 @@ App.createWebRegisterDOM = function () {
                    <div id="paycalc">\
                        <button id="kb-toggle" class="open"></button>\
                        <div id="pay">\
-                           <div id="pay-label">Pay</div>\
+                           <div id="pay-label">' + App.lang.reg_pay + '</div>\
                            <div id="pay-amount">0</div>\
                            <div id="pay-currency">' + App.settings.currency.symbol + '</div>\
                        </div>\
@@ -768,6 +776,11 @@ App.bindKeyboard = function () {
     });
 };
 
+App.saveLocale = function (locale) {
+    localStorage.locale = locale;
+    App.locale = locale;
+};
+
 App.loadLocalStorage = function () {
     if (localStorage.hasOwnProperty("isMuted")) {
         App.isMuted = localStorage.isMuted === "true";
@@ -775,6 +788,15 @@ App.loadLocalStorage = function () {
         localStorage.isMuted = false;
         App.isMuted = false;
     }
+    if (localStorage.hasOwnProperty("locale")) {
+        App.locale = localStorage.locale;
+    } else {
+        App.saveLocale("en");
+    }
+};
+
+App.loadLocale = function () {
+    App.lang = (App.locale === "en" ? GLocalEN : GLocalCS);
 };
 
 // initializes some global variables and functions
@@ -782,7 +804,7 @@ App.init = function () {
     /**********************************************************/
     App.loadLocalStorage();  // localStorage to be implemented
     /**********************************************************/
-    
+    App.loadLocale();
     App.jAppContainer = $("#app");
     App.loadingScreen = $('<div class="loading"></div>');
     App.curtain = null;
@@ -1481,14 +1503,14 @@ App.renderDashBoard = function () {
                 <div id="brand">EnterpriseApps</div>\
                 <div id="menu-top">\
                     <div id="profile">' + App.settings.name + '</div>\
-                    <div id="sign-out">Sign out</div>\
+                    <div id="sign-out">' + App.lang.dashboard_sign_out + '</div>\
                 </div>\
              </nav>'
-            + App.createCenterBox(false,
-                '<div class="form-header">Open Cash Register</div>\
+            + App.createCenterBox(false,    
+                '<div class="form-header">' + App.lang.dashboard_header + '</div>\
                 <form id="employee-login" action="">\
-                    <div class="form-label">EMPLOYEE LOGIN</div>\
-                    <input id="employee-username" type="text" title="Employee username " placeholder="USERNAME">\
+                    <div class="form-label">' + App.lang.dashboard_label + '</div>\
+                    <input id="employee-username" type="text" title="Employee username " placeholder="' + App.lang.dashboard_username + '">\
                     <input id="employee-pin" type="password" placeholder="PIN">\
                     <input type="submit" value="OK">\
                 </form>');
@@ -1526,7 +1548,6 @@ App.renderDashBoard = function () {
         }).done(function () {
             App.renderSignin();
         }).fail(function () {
-            //App.renderLogin();
             App.closeCurtain();
             App.showWarning("Unable to sign out. Please check your connection");
         });
@@ -1578,19 +1599,40 @@ App.renderSignin = function () {
     App.closeCurtain();
     var signinDOM = 
             App.createCenterBox(false,
-               '<div class="form-header">Welcome to OPS</div>\
+               '<div class="form-header">' + App.lang.sign_in_header + '</div>\
                 <form id="sign-in" action="" method="POST">\
-                    <div class="form-label">OPEN YOUR STORE</div>\
-                    <input id="username" type="text" placeholder="EMAIL">\
-                    <input id="password" type="password" placeholder="PASSWORD">\
-                    <input type="submit" value="SIGN IN">\
+                    <div class="form-row">\
+                        <div class="form-label">' + App.lang.sign_in_label + '</div>\
+                        <div id="lang-switch">\
+                            <div class="lang en' + (App.locale === "en" ? ' active' : '') + '" title="Use English"></div>\
+                            <div class="lang cs' + (App.locale === "cs" ? ' active' : '') + '" title="Use Czech"></div>\
+                        </div>\
+                    </div>\
+                    <input id="username" type="text" placeholder="' + App.lang.sign_in_username + '">\
+                    <input id="password" type="password" placeholder="' + App.lang.sign_in_password + '">\
+                    <input type="submit" value="' + App.lang.sign_in_sign_in + '">\
                     <div id="form-help">\
-                        <div id="signup">Sign up</div>\
-                        <div id="forgot">Forgot your password?</div>\
+                        <div id="signup">' + App.lang.sign_in_sign_up + '</div>\
+                        <div id="forgot">' + App.lang.sign_in_forgot + '</div>\
                     </div>\
                 </form>\
                 <div class="form-footer">Powered by EnterpriseApps</div>');
+    
     App.jAppContainer.html(signinDOM);
+    $("#lang-switch").find(".lang").click(function () {
+        var t = $(this);        
+        if (t.hasClass("en")) {
+            App.saveLocale("en");
+        } else if (t.hasClass("cs")) {
+            App.saveLocale("cs");
+        }
+        if (!t.hasClass("active")) {
+            t.addClass("active");
+            t.siblings().removeClass("active");     
+            App.loadLocale();
+            App.renderSignin();
+        }
+    });
     var form = $("#sign-in");
     form.find("#forgot").click(function () {
         App.renderForgot();
@@ -1640,26 +1682,26 @@ App.renderSignin = function () {
 App.renderSignup = function () {
     var signupDOM =
             App.createCenterBox(true,
-               '<div class="form-header">Welcome to OPS</div>\
+               '<div class="form-header">' + App.lang.sign_up_header + '</div>\
                 <form id="sign-up" action="" method="POST">\
-                    <div class="form-label">CREATE A NEW STORE</div>\
-                    <input id="username" type="text" placeholder="EMAIL" required>\
-                    <input id="password" type="password" placeholder="PASSWORD" pattern=".{8,128}" title="Password must be at least 8 characters long" required>\
-                    <input id="confirm" type="password" placeholder="CONFIRM PASSWORD" pattern=".{8,128}" title="Password must be at least 8 characters long" required>\
-                    <input id="name" type="text" placeholder="Name" pattern=".{3,100}" title="Your Best World Shop, Inc." required>\
-                    <input id="tin" type="text" placeholder="Taxpayer Identification Number" pattern="\\d{8}" title="Invalid TIN. Example: 12345678" required>\
-                    <input id="vat" type="text" placeholder="Value Added Tax Number" pattern="[A-Z]{2}\\d{8,10}" title="Invalid VAT. Example: CZ1234567890" required>\
-                    <input id="street" type="text" placeholder="Street and Property Number" pattern=".{5,100}" title="Example: Spálená 78/12" required>\
-                    <input id="city" type="text" placeholder="City" pattern=".{2,75}" title="Example: Prague" required>\
-                    <input id="zip" type="text" placeholder="ZIP Code" pattern="\\w{3,10}" title="Example: 18000" required>\
-                    <input id="country" type="text" placeholder="Country" pattern=".{3,75}" title="Example: Czech Republic" required>\
-                    <input id="phone" type="text" placeholder="Phone Number" pattern="\\+?(\\d{3})?\\d{9}" title="9 or +12 Digits Phone Number. Example: 777666555, +420777666555" required>\
+                    <div class="form-label">' + App.lang.sign_up_label + '</div>\
+                    <input id="username" type="text" placeholder="' + App.lang.sign_up_email + '" required>\
+                    <input id="password" type="password" placeholder="' + App.lang.sign_up_password + '" pattern=".{8,128}" title="Password must be at least 8 characters long" required>\
+                    <input id="confirm" type="password" placeholder="' + App.lang.sign_up_confirm_password + '" pattern=".{8,128}" title="Password must be at least 8 characters long" required>\
+                    <input id="name" type="text" placeholder="' + App.lang.sign_up_name + '" pattern=".{3,100}" title="Your Best World Shop, Inc." required>\
+                    <input id="tin" type="text" placeholder="' + App.lang.sign_up_tin + '" pattern="\\d{8}" title="Invalid TIN. Example: 12345678" required>\
+                    <input id="vat" type="text" placeholder="' + App.lang.sign_up_vat + '" pattern="[A-Z]{2}\\d{8,10}" title="Invalid VAT. Example: CZ1234567890" required>\
+                    <input id="street" type="text" placeholder="' + App.lang.sign_up_street + '" pattern=".{5,100}" title="Example: Spálená 78/12" required>\
+                    <input id="city" type="text" placeholder="' + App.lang.sign_up_city + '" pattern=".{2,75}" title="Example: Prague" required>\
+                    <input id="zip" type="text" placeholder="' + App.lang.sign_up_zip + '" pattern="\\w{3,10}" title="Example: 18000" required>\
+                    <input id="country" type="text" placeholder="' + App.lang.sign_up_country + '" pattern=".{3,75}" title="Example: Czech Republic" required>\
+                    <input id="phone" type="text" placeholder="' + App.lang.sign_up_phone + '" pattern="\\+?(\\d{3})?\\d{9}" title="9 or +12 Digits Phone Number. Example: 777666555, +420777666555" required>\
                     <select id="currency">\
-                        <option data=\'{"code":"CZK","symbol":"Kč"}\' selected>CZK - Czech Koruna</option>\
+                        <option data=\'{"code":"CZK","symbol":"Kč"}\' selected>' + App.lang.sign_up_czk + '</option>\
                     </select>\
-                    <input type="submit" value="SIGN UP">\
+                    <input type="submit" value="' + App.lang.sign_up_sign_up + '">\
                     <div id="form-help">\
-                        <div id="signin">Back to sign in</div>\
+                        <div id="signin">' + App.lang.sign_up_back + '</div>\
                     </div>\
                 </form>\
                 <div class="form-footer">Powered by EnterpriseApps</div>');
@@ -1725,16 +1767,17 @@ App.renderSignup = function () {
 };
 
 // render forgot
-App.renderForgot = function () {
+App.renderForgot = function () {    
     var forgotDOM =
             App.createCenterBox(false,
-               '<div class="form-header">Welcome to OPS</div>\
+               '<div class="form-header">' + App.lang.forgot_header + '</div>\
                 <form id="reset-password" action="" method="POST">\
-                    <div class="form-label">RESET PASSWORD</div>\
-                    <input id="username" type="text" placeholder="EMAIL" required>\
-                    <input type="submit" value="SUBMIT">\
+                    <div class="form-label">' + App.lang.forgot_label + '</div>\
+                    <input id="username" type="text" placeholder="' + App.lang.forgot_email + '" required>\
+                    <div class="form-instruction">' + App.lang.forgot_instruction + '</div>\
+                    <input type="submit" value="' + App.lang.forgot_submit + '">\
                     <div id="form-help">\
-                        <div id="signin">Back to sign in</div>\
+                        <div id="signin">' + App.lang.forgot_back + '</div>\
                     </div>\
                 </form>\
                 <div class="form-footer">Powered by EnterpriseApps</div>');
