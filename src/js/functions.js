@@ -60,16 +60,6 @@ App.correctTime = function (s) {
     return s < 10 ? "0" + s : s;
 };
 
-App.week = [
-    {short: "Mon", long: "Monday"},
-    {short: "Tue", long: "Tuesday"},
-    {short: "Wed", long: "Wednesday"},
-    {short: "Thu", long: "Thursday"},
-    {short: "Fri", long: "Friday"},
-    {short: "Sat", long: "Saturday"},
-    {short: "Sun", long: "Sunday"}
-];
-
 App.createDateObject = function (s) {
     var now = null;
     if (s) {
@@ -462,18 +452,18 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
                     e.stopPropagation();
                 });
                 $("<div>").addClass("db-header")
-                        .append($("<div>").addClass("db-title").text("Product Details"))
+                        .append($("<div>").addClass("db-title").text(App.lang.details_title))
                         .append($("<button>").addClass("db-close").click(function () {
                             App.closeCurtain();
                         })).appendTo(detailsBox);
                 var lbBody = $("<div>").addClass("db-body");
                 var lbInfo = $("<div>").addClass("db-info");
-                $("<div>").addClass("db-name").text("Name: " + name).appendTo(lbInfo);
-                $("<div>").addClass("db-price").text("Price: " + price + " " + App.settings.currency.symbol).appendTo(lbInfo);
-                $("<div>").addClass("db-group").text("Group: " + group).appendTo(lbInfo);
-                $("<div>").addClass("db-tax").text("Tax: " + tax + "%").appendTo(lbInfo);
-                $("<div>").addClass("db-tags").text("Tags: " + tags).appendTo(lbInfo);
-                $("<div>").addClass("db-desc").text("Description: " + desc).appendTo(lbInfo);
+                $("<div>").addClass("db-name").text(App.lang.details_name + name).appendTo(lbInfo);
+                $("<div>").addClass("db-price").text(App.lang.details_price + price + " " + App.settings.currency.symbol).appendTo(lbInfo);
+                $("<div>").addClass("db-group").text(App.lang.details_group + group).appendTo(lbInfo);
+                $("<div>").addClass("db-tax").text(App.lang.details_tax + tax + "%").appendTo(lbInfo);
+                $("<div>").addClass("db-tags").text(App.lang.details_tags + tags).appendTo(lbInfo);
+                $("<div>").addClass("db-desc").text(App.lang.details_description + desc).appendTo(lbInfo);
                 lbInfo.appendTo(lbBody);
                 //$("<div>").addClass("db-img").appendTo(lbBody);
 
@@ -518,7 +508,8 @@ App.bindSaleGroups = function (sg) {
         var lastItem = App.jSaleList.find(".sale-item.last");
         if (lastItem.size() && t.attr("sg-id") !== lastItem.find(".si-id").text()
                 && App.isInRegistrySession/*.text() === "1"*/) {
-            App.jPriceInput.val("");
+            App.jPriceInput.val("");            
+            App.showWarning("You must enter a price");
             return false;
         }
         var v = App.jPriceInput.val();
@@ -796,7 +787,31 @@ App.loadLocalStorage = function () {
 };
 
 App.loadLocale = function () {
-    App.lang = (App.locale === "en" ? GLocalEN : GLocalCS);
+    switch (App.locale) {
+        case "cs" :
+            App.lang = GLocalCS;
+            App.week = [
+                {short: "Ne", long: "Neděle"},
+                {short: "Po", long: "Pondělí"},
+                {short: "Út", long: "Úterý"},
+                {short: "St", long: "Středa"},
+                {short: "Čt", long: "Čtvrtek"},
+                {short: "Pá", long: "Pátek"},
+                {short: "So", long: "Sobota"}
+            ];
+            break;
+        default:
+            App.lang = GLocalEN;
+            App.week = [
+                {short: "Sun", long: "Sunday"},
+                {short: "Mon", long: "Monday"},
+                {short: "Tue", long: "Tuesday"},
+                {short: "Wed", long: "Wednesday"},
+                {short: "Thu", long: "Thursday"},
+                {short: "Fri", long: "Friday"},
+                {short: "Sat", long: "Saturday"}
+            ];
+    }
 };
 
 // initializes some global variables and functions
@@ -847,6 +862,57 @@ App.renderSaleGroupsButtons = function () {
     }
     App.sg.html(sgContent);
     App.bindSaleGroups(App.sg);
+};
+
+App.renderQuickSales = function () {
+    var articles = App.catalog.articles;
+    var tabsContainer = $("#tabs").empty();
+    var tabNavsContainer = $("#tab-navs").empty();
+    var tabs = App.buttons.tabs;
+    var tabsContent = "";
+    var tabNavsContent = [];
+    for (var i = 0; i < tabs.length; i++) {
+        var quickSales = tabs[i].quickSales;
+        tabsContent += '<div class="quick-sales'
+                + (i === 0 ? ' activeTab' : '')
+                + '">';
+        for (var j = 0; j < quickSales.length; j++) {
+            var qs = quickSales[j];
+            var item = articles[articles.binaryIndexOf("ean", qs.ean)];
+            tabsContent +=
+                    '<div class="qs-item">\
+                        <button style="background-color:#' + qs.bg + '">' + item.name + '</button>\
+                        <div class="qs-id">qs-t' + (i + 1) + "-" + j + '</div>\
+                        <div class="qs-price">' + item.price + ' ' + App.settings.currency.symbol + '</div>\
+                        <div class="qs-group">' + item.group + '</div>\
+                        <div class="qs-tax">' + item.tax + '</div>\
+                    </div>'
+                    ;
+        }
+        tabsContent += '</div>';
+        tabNavsContent += '<div class="tab-nav'
+                + (i === 0 ? ' activeTab' : '')
+                + '">' + tabs[i].name + '</div>';
+    }
+    tabsContainer.append(tabsContent);
+    App.bindQuickSales(tabsContainer);
+    tabNavsContainer.append(tabNavsContent);
+
+    var tabQs = tabsContainer.find(".quick-sales");
+    var tabNavs = tabNavsContainer.find(".tab-nav");
+    tabNavs.each(function (index) {
+        var t = $(this);
+        t.click(function () {
+            tabNavs.each(function () {
+                $(this).removeClass("activeTab");
+            });
+            t.addClass("activeTab");
+            tabQs.each(function () {
+                $(this).removeClass("activeTab");
+            });
+            tabQs.eq(index).addClass("activeTab");
+        });
+    });
 };
 
 // render web register view
@@ -919,56 +985,7 @@ App.renderWebRegister = function () {
     App.renderSaleGroupsButtons();
 
     // generate quicksale tabs
-    var tabsContainer = $("#tabs");
-    var tabNavsContainer = $("#tab-navs");
-    var tabs = App.buttons.tabs;
-    var nTabs = tabs.length;
-    var tabsContent = "";
-    var tabNavsContent = [];
-    for (var i = 0; i < nTabs; i++) {
-        var qss = tabs[i].quickSales;
-        var nQs = qss.length;
-        tabsContent += '<div class="quick-sales'
-                + (i === 0 ? ' activeTab' : '')
-                + '">';
-        for (var j = 0; j < nQs; j++) {
-            var t = qss[j];
-            tabsContent +=
-                    '<div class="qs-item">\
-                        <button style="background-color:#' + t.bg + '">' + t.text + '</button>\
-                        <div class="qs-id">qs-t' + (i + 1) + "-" + j + '</div>\
-                        <div class="qs-price">' + t.price + ' ' + App.settings.currency.symbol + '</div>\
-                        <div class="qs-group">' + t.group + '</div>\
-                        <div class="qs-tax">' + t.tax + '</div>\
-                        <div class="qs-tags">' + t.tags + '</div>\
-                        <div class="qs-desc">' + t.desc + '</div>\
-                    </div>'
-                    ;
-        }
-        tabsContent += '</div>';
-        tabNavsContent += '<div class="tab-nav'
-                + (i === 0 ? ' activeTab' : '')
-                + '">' + tabs[i].name + '</div>';
-    }
-    tabsContainer.append(tabsContent);
-    App.bindQuickSales(tabsContainer);
-    tabNavsContainer.append(tabNavsContent);
-
-    var tabQs = tabsContainer.find(".quick-sales");
-    var tabNavs = tabNavsContainer.find(".tab-nav");
-    tabNavs.each(function (index) {
-        var t = $(this);
-        t.click(function () {
-            tabNavs.each(function () {
-                $(this).removeClass("activeTab");
-            });
-            t.addClass("activeTab");
-            tabQs.each(function () {
-                $(this).removeClass("activeTab");
-            });
-            tabQs.eq(index).addClass("activeTab");
-        });
-    });
+    App.renderQuickSales();
 
     // bind control panel buttons
     $("#logo > .logo, #cp-link").click(function () {
@@ -1013,7 +1030,7 @@ App.renderWebRegister = function () {
                     e.stopPropagation();
                 });
         $("<div>").addClass("pb-header")
-                .append($("<div>").addClass("pb-title").text("Payment"))
+                .append($("<div>").addClass("pb-title").text(App.lang.pay_payment))
                 .append($("<button>").addClass("pb-close").click(function () {
                     App.closeCurtain();
                 })).appendTo(paymentBox);
@@ -1046,135 +1063,18 @@ App.renderWebRegister = function () {
         var total = Math.round(parseFloat(subTotal)).formatMoney();
         var receipt = App.renderReceipt(currentReceiptObj);
         App.startReceiptTime();
-        /*var receipt = $("<div>").addClass("receipt");
-        var receiptHeader = $(
-                '<div class="receipt-header">\
-                    <div class="preview">' + 'Receipt Preview' + '</div>\
-                    <div class="company-name">' + App.settings.name + '</div>\
-                    <div class="address-1">' + App.settings.address.street + '</div>\
-                    <div class="address-2">' + App.settings.address.zip + ' ' + App.settings.address.city + '</div>\
-                    <div class="receipt-row">\
-                        <div class="tin">' + 'TIN: ' + App.settings.tin + '</div>\
-                        <div class="vat">' + 'VAT: ' + App.settings.vat + '</div>\
-                    </div>\
-                </div>');
-        $("<div>").addClass("receipt-custom-header").html(App.receipt.header).appendTo(receiptHeader);
-        $("<div>").attr("id", "receipt-number").text("Receipt #" + App.getDatePrefix() + App.sales.receipts.length).appendTo(receiptHeader);
-        receipt.append(receiptHeader);
-        var receiptBody = $("<ul>").addClass("receipt-body");
-        var taxValues = {};
-        var nTrs = App.settings.tax_rates.length;
-        for (var i = 0; i < nTrs; i++) {
-            taxValues[App.settings.tax_rates[i]] = {tax: null, total: null};
-        }
-        var totalItems = 0;
-                
-        App.jSaleList.find(".sale-item").each(function () {
-            var t = $(this);
-            var q = t.find(".si-quantity").val();
-            totalItems += parseFloat(q);
-            var p = t.find(".si-price").text();
-            var n = t.find(".si-name").val();
-            var taxRate = t.find(".si-tax").text();
-            
-            currentReceiptObj.items.push({
-                name: n,
-                price: p,
-                quantity: parseInt(q),
-                tax_rate: parseInt(taxRate)
-            });
-    
-            var thisTotal = t.find(".si-total").text();
-            var receiptItem = $("<li>").addClass("receipt-item")
-                    .append($("<div>").addClass("ri-n").text(n))
-                    .append($("<div>").addClass("ri-v")
-                            .append($("<div>").addClass("ri-q").text(q))
-                            .append($("<div>").addClass("ri-x"))
-                            .append($("<div>").addClass("ri-p").text(p))
-                            .append($("<div>").addClass("ri-tt").text(thisTotal))
-                            );
-            receiptBody.append(receiptItem);
-
-            taxValues[taxRate].tax += (parseFloat(thisTotal) * parseFloat(taxRate) / 100);
-            taxValues[taxRate].total += parseFloat(thisTotal);
-        });
         
-        // rounding price        
-        var subTotal = App.jPayAmount.text().replace(/,/g, ".").replace(/[^\d\.\-]/g, "");
-        var total = Math.round(parseFloat(subTotal)).formatMoney();
-        var round = (parseFloat(total) - parseFloat(subTotal)).formatMoney();
-       
-        receiptBody.appendTo(receipt);
-
-        var rsDOM =
-                '<div id="receipt-summary">'
-                + '<div id="rs-total-items">'
-                + '    <div class="rs-label">Total items:</div>'
-                + '    <div class="rs-value">' + totalItems + '</div>'
-                + '</div>'
-                + '<div id="rs-subtotal">'
-                + '    <div class="rs-label">Subtotal:</div>'
-                + '    <div class="rs-value">' + subTotal + '</div>'
-                + '</div>'
-                + '<div id="rs-round">'
-                + '    <div class="rs-label">Round:</div>'
-                + '    <div class="rs-value">' + round + '</div>'
-                + '</div>'
-                + '<div id="rs-total">'
-                + '    <div class="rs-label">Total amount:</div>'
-                + '    <div class="rs-value">' + total + '</div>'
-                + '</div>'
-                + '<div id="rs-tender">'
-                + '    <div class="rs-label">Tendered:</div>'
-                + '    <div class="rs-value">' + total + '</div>'
-                + '</div>'
-                + '<div id="rs-change">'
-                + '    <div class="rs-label">Change:</div>'
-                + '    <div class="rs-value">0.00</div>'
-                + '</div>'
-                + '<div id="taxes-label">VAT summary:</div>'
-                + '<div id="tax-header">'
-                + '    <div class="th-rate">Rate</div>'
-                + '    <div class="th-net">Net</div>'
-                + '    <div class="th-value">Tax</div>'
-                + '    <div class="th-total">Total</div>'
-                + '</div>'
-                + '</div>';
-        var receiptSummary = $(rsDOM);
-        // calculate taxes
-        var taxRates = Object.keys(taxValues);
-        var nTrsv = taxRates.length;
-        for (var i = 0; i < nTrsv; i++) {
-            if (taxValues[taxRates[i]].tax !== null) {
-                $("<div>").addClass("rs-tax")
-                        .append($("<div>").addClass("rs-tax-rate").text(taxRates[i] + "%"))
-                        .append($("<div>").addClass("rs-tax-net").text((taxValues[taxRates[i]].total.toFixed(2) - taxValues[taxRates[i]].tax.toFixed(2)).toFixed(2)))
-                        .append($("<div>").addClass("rs-tax-tax").text(taxValues[taxRates[i]].tax.toFixed(2)))
-                        .append($("<div>").addClass("rs-tax-total").text(taxValues[taxRates[i]].total.toFixed(2)))
-                        .appendTo(receiptSummary);
-            }
-        }
-        receiptSummary.appendTo(receipt);
-        
-        $("<div>").addClass("receipt-clerk").text("Checked: " + App.currentEmployee.name).appendTo(receipt);
-        App.receiptTime = $("<div>").attr("id", "receipt-time").text(App.getDate()).appendTo(receipt);        
-        App.startReceiptTime();
-        
-        $("<div>").addClass("receipt-gratitude").text(App.receipt.footer).appendTo(receipt);
-
-        //creating receipt footer
-        $("<div>").addClass("receipt-footer").text("EnterpriseApps").appendTo(receipt);*/
-
         //creating payment section
         var payment = $("<div>").attr("id", "payment");
         App.jCashInput = $("<input>");
+        
         //$("<div>").addClass("cash-pay-label").text("Amount to pay").appendTo(payment);
         /*$("<div>").attr("id", "cash-pay-topay").text("Total: " + total + " " + App.settings.currency.symbol)
                 .click(function () {
                     App.jCashInput.val(total).blur();
                 }).appendTo(payment);*/
 
-        var quickCashLabel = $("<div>").addClass("cash-quick-label").text("Quick cash payment");
+        var quickCashLabel = $("<div>").addClass("cash-quick-label").text(App.lang.pay_quick_cash);
         quickCashLabel.appendTo(payment);
         var quickCash = $("<div>").addClass("cash-quick");
         var qcs = [50, 100, 200, 500, 1000, 2000];
@@ -1192,7 +1092,7 @@ App.renderWebRegister = function () {
         var cashChange = $("<div>").attr("id", "cash-change");
         App.changeAmount = 0;
         //var payForm = $("<div>").addClass("pay-form");
-        $("<div>").addClass("cash-pay-label").text("Amount tendered").appendTo(payment);
+        $("<div>").addClass("cash-pay-label").text(App.lang.pay_tendered).appendTo(payment);
         var cashInputRow = $("<div>").addClass("cash-input-row");
         $("<div>").attr("id", "pk-toggle").addClass("open").click(function () {
             var t = $(this);
@@ -1236,7 +1136,7 @@ App.renderWebRegister = function () {
                     t.removeClass("invalid");
                     payment.find("#cash-confirm").removeClass("disabled");
                     App.changeAmount = (parseFloat(t.val()) - parseFloat(total)).formatMoney();
-                    cashChange.text("Change: " + App.changeAmount + " " + App.settings.currency.symbol);
+                    cashChange.text(App.lang.pay_change + App.changeAmount + " " + App.settings.currency.symbol);
                     paymentBox.find("#rs-tender .rs-value").text(t.val());
                     paymentBox.find("#rs-change .rs-value").text(App.changeAmount);
                 }).focus(function () {
@@ -1292,11 +1192,11 @@ App.renderWebRegister = function () {
 
         
         App.setUpMobileNumericInput(App.jCashInput);
-        cashChange.text("Change: " + Number(0).formatMoney() + " " + App.settings.currency.symbol).appendTo(payment);
+        cashChange.text(App.lang.pay_change + Number(0).formatMoney() + " " + App.settings.currency.symbol).appendTo(payment);
 
         var receiptPrinted = false;
 
-        $("<button>").attr("id", "cash-confirm").text("CONFIRM PAYMENT").click(function () {
+        $("<button>").attr("id", "cash-confirm").text(App.lang.pay_confirm).click(function () {
             var t = $(this);
             t.off();
             if (!t.hasClass("disabled")) {
@@ -1317,11 +1217,11 @@ App.renderWebRegister = function () {
 
                         payment.children().remove();
                         App.discardSale(true);
-                        $("<div>").addClass("pc-label").text("Sale complete!").appendTo(payment);
+                        $("<div>").addClass("pc-label").text(App.lang.pay_complete).appendTo(payment);
                         if (App.changeAmount !== "0.00") {
-                            $("<div>").addClass("pc-change").text("Issue change of " + App.changeAmount + " " + App.settings.currency.symbol).appendTo(payment);
+                            $("<div>").addClass("pc-change").text(App.lang.pay_issue_change + App.changeAmount + " " + App.settings.currency.symbol).appendTo(payment);
                         }
-                        $("<button>").attr("id", "print-receipt").text("Print receipt").click(function () {
+                        $("<button>").attr("id", "print-receipt").text(App.lang.pay_print_receipt).click(function () {
                             window.print();
                             receiptPrinted = true;
                         }).appendTo(payment);
@@ -1333,7 +1233,7 @@ App.renderWebRegister = function () {
                                 emailInput.select();
                             }
                         }).val("@").appendTo(emailReceipt);
-                        var sendEmailButton = $("<button>").attr("id", "email-send").text('Email receipt').click(function () {
+                        var sendEmailButton = $("<button>").attr("id", "email-send").text(App.lang.pay_email_receipt).click(function () {
                             var recipient = emailInput.val();
                             if (App.isValidEmail(recipient)) {
                                 emailInput.prop("disabled", true);
@@ -1377,7 +1277,7 @@ App.renderWebRegister = function () {
                         }).appendTo(emailReceipt);
                         emailReceipt.appendTo(payment);
                         //payment.append(paymentComplete);
-                        $("<button>").attr("id", "done-payment").text("DONE").click(function () {
+                        $("<button>").attr("id", "done-payment").text(App.lang.pay_done).click(function () {
                             if (!receiptPrinted) {
                                 window.print();
                             }
@@ -1643,7 +1543,7 @@ App.renderSignin = function () {
     form.submit(function (e) {
         e.preventDefault();
         var t = $(this);
-        var username = t.find("#username").val();
+        var username = t.find("#username").val().toLowerCase();
         var password = t.find("#password").val();
         if (!App.isValidEmail(username) || !password.length) {
             App.showWarning("Please enter your email and password to sign in");
@@ -1659,7 +1559,6 @@ App.renderSignin = function () {
                 }
             }).done(function (resp) {
                 if (resp.isAuthenticated) {
-                    //App.initWebRegister();
                     App.initDashBoard();
                 } else {
                     alert("Wrong credentials");
@@ -1856,8 +1755,8 @@ App.renderForgot = function () {
 
 //--------------------------- CONTROL PANEL ----------------------------------//
 App.createControlPanel = function () {
-    var cpContent = '<div class="cp-item" id="sale-history">Sales History</div>\
-                    <div class="cp-item" id="close-register">Close Register</div>';
+    var cpContent = '<div class="cp-item" id="sale-history">Sales History</div>';/*\
+                    <div class="cp-item" id="close-register">Close Register</div>';*/
     if (App.currentEmployee.role === "Admin") {
         cpContent +=
                 '<div class="cp-item" id="acc-settings">Account Settings</div>\
@@ -1865,6 +1764,7 @@ App.createControlPanel = function () {
                 <div class="cp-item" id="pos-settings">Point of Sale Settings</div>\
                 <div class="cp-item" id="plu-settings">Edit PLU Articles</div>\
                 <div class="cp-item" id="sgs-settings">Edit Sale Groups</div>\
+                <div class="cp-item" id="tab-settings">Edit Quick Sale Tabs</div>\
                 <div class="cp-item" id="qss-settings">Edit Quick Sales</div>\
                 <div class="cp-item" id="rec-settings">Edit Receipt</div>';
     }
@@ -1900,10 +1800,11 @@ App.bindControlPanel = function () {
             case "sgs-settings":
                 t.click(App.renderSaleGroupsSettings);
                 break;
+            case "tab-settings":
+                t.click(App.renderTabsSettings);
+                break;
             case "qss-settings":
-                t.click(function () {
-                    t.text("Not available");
-                });
+                t.click(App.renderQuickSalesSettings);
                 break;
             case "rec-settings":
                 t.click(App.renderReceiptSettings);
@@ -2081,11 +1982,24 @@ App.requestModifyItem = function (url, data, button) {
                     }                    
                     App.renderSaleGroupsButtons();
                     break;
+                case "/mod/tabs" :
+                    App.buttons.tabs = resp.msg;
+                    App.renderQuickSales();
+                    break;
                 default:
             }
             if (data.requestType === "remove") {
                 button.parents().eq(2).slideUp(App.getAnimationTime(), function () {
+                    var modifier = button.parents().eq(3);
                     $(this).remove();
+                    if (url === "/mod/tabs") {                        
+                        modifier.children().each(function (index) {
+                            var t = $(this);
+                            t.find("input[placeholder='NUMBER']").each(function () {
+                                $(this).val(index + 1);
+                            });
+                        });
+                    }
                 });
             }
         } else {
@@ -2128,6 +2042,9 @@ App.generateModItemFormDOM = function (type, item) {
             disabledFields = ["_id"];
             hiddenFields = ["_id"];
             break;
+        case "tabs":
+            disabledFields = ["number"];
+            break;
         default:
     }
     
@@ -2137,11 +2054,15 @@ App.generateModItemFormDOM = function (type, item) {
     var isReceipt = type === "receipt";
     var isPOS = type === "pos";
     var isSG = type === "salegroups";
-    var isHiddenBody = ["staff", "salegroups"].indexOf(type) >= 0;
+    var isQS = type === "quicksales";
+    var isHiddenBody = ["staff", "salegroups", "quicksales", "tabs"].indexOf(type) >= 0;
     var header = item.name ? item.name.value : type.toUpperCase();
     header = item.ean ? item.ean.value : header;
     if (isSG) {
         header = item.group ? item.group.value : header;
+    } else if (isQS) {
+        var eanItem = App.catalog.articles[App.catalog.articles.binaryIndexOf("ean", item.ean.value)];
+        header = item.ean.value + (eanItem ? (" - " + eanItem.name) : "");        
     }
 
     var keys = Object.keys(item);
@@ -2186,6 +2107,15 @@ App.generateModItemFormDOM = function (type, item) {
                 var taxRates = App.settings.tax_rates;
                 for (var j = 0; j < taxRates.length; j++){
                     dom +=     '<option' + (taxRates[j] === item[keys[i]].value ? ' selected' : '') + '>' + taxRates[j] + '</option>';    
+                }
+                dom +=     '</select>';
+                
+                } else if(keys[i] === "tab") {
+                // ATTENTION!!!    
+                dom +=     '<select id="tab-numbers">';
+                var tabs = App.buttons.tabs;
+                for (var j = 0; j < tabs.length; j++){
+                    dom +=     '<option tab-number="' + (j + 1) + '"' + ((j + 1) === item[keys[i]].value ? ' selected' : '') + '>' + (j + 1) + ' - ' + tabs[j].name + '</option>';    
                 }
                 dom +=     '</select>';
                 
@@ -2239,7 +2169,7 @@ App.bindModSettings = function (modFormContainer, modifyUrl) {
     var modifier = modFormContainer.find(".modifier");
     modifier.find(".mi-header").click(function () {
         var t = $(this);
-        t.next(".mi-body").slideToggle(200);
+        t.next(".mi-body").slideToggle(App.getAnimationTime());
     });    
     modifier.find("input").change(function () {
         App.resetRequestButtons($(this).parents().eq(1));
@@ -2263,7 +2193,7 @@ App.bindModSettings = function (modFormContainer, modifyUrl) {
                     App.resetRequestButtons(modItem);
                 });
                 modItem.find(".mi-header").click(function () {
-                    $(this).next(".mi-body").slideToggle(200);
+                    $(this).next(".mi-body").slideToggle(App.getAnimationTime());
                 });
                 modItem.find("button.mi-save").click(function () {
                     submitted = App.prepareSubmit(App.getMiEmployeeUpdateData, $(this), "save");
@@ -2295,7 +2225,7 @@ App.bindModSettings = function (modFormContainer, modifyUrl) {
                 var modItem = $(App.generateModItemFormDOM("salegroups", {
                     tax: {title: "1-50 characters", valid: /^(0|10|15|21)$/, value: 15},
                     group: {title: "1-50 characters", valid: /^.{1,50}$/, value: "New Group"},
-                    bg: {title: "Background color. Example: FFFFFF", valid: /^[A-Fa-f0-9]{6}$/, value: "BB5151"},
+                    bg: {title: "Background color", valid: /^[A-Fa-f0-9]{6}$/, value: "BB5151"},
                     _id: {title: "24 \\w", valid: /^\w{24}$/, value: "new sg"}
                 }));
                 modItem.submit(function (e) {
@@ -2307,7 +2237,7 @@ App.bindModSettings = function (modFormContainer, modifyUrl) {
                     App.resetRequestButtons(modItem);
                 });
                 modItem.find(".mi-header").click(function () {
-                    $(this).next(".mi-body").slideToggle(200);
+                    $(this).next(".mi-body").slideToggle(App.getAnimationTime());
                 });
                 modItem.find("button.mi-save").click(function () {
                     submitted = App.prepareSubmit(App.getMiSaleGroupUpdateData, $(this), "save");
@@ -2326,6 +2256,75 @@ App.bindModSettings = function (modFormContainer, modifyUrl) {
             });
             modifier.find("button.mi-remove").click(function () {
                 submitted = App.prepareSubmit(App.getMiSaleGroupUpdateData, $(this), "remove");
+            });
+            break;
+        case "/mod/tabs":           
+            modFormContainer.find(".adder").click(function () {
+                if (App.buttons.tabs.length >= 5) {
+                    App.showWarning("The maximum number of tabs is 5");
+                } else {
+                    var modItem = $(App.generateModItemFormDOM("tabs", {
+                        number: {title: "Tab number", valid: /^\d{1,13}$/, value: App.buttons.tabs.length + 1},
+                        name: {title: "Tab name 1-20 characters", valid: /^.{1,20}$/, value: "Tab " + (App.buttons.tabs.length + 1)}
+                    }));
+                    modItem.submit(function (e) {
+                        e.preventDefault();
+                        var data = submitted.dataFunction(submitted.requestType, submitted.button);
+                        App.requestModifyItem(modifyUrl, data, submitted.button);
+                    });
+                    modItem.find("input").change(function () {
+                        App.resetRequestButtons(modItem);
+                    });
+                    modItem.find(".mi-header").click(function () {
+                        $(this).next(".mi-body").slideToggle(App.getAnimationTime());
+                    });
+                    modItem.find("button.mi-save").click(function () {
+                        submitted = App.prepareSubmit(App.getMiTabsUpdateData, $(this), "save");
+                    }).click();
+                    modItem.find("button.mi-remove").click(function () {
+                        submitted = App.prepareSubmit(App.getMiTabsUpdateData, $(this), "remove");
+                    });
+                    modItem.hide().appendTo(modifier).slideDown(App.getAnimationTime());
+                }
+            });
+            modifier.find("button.mi-save").click(function () {
+                submitted = App.prepareSubmit(App.getMiTabsUpdateData, $(this), "save");
+            });
+            modifier.find("button.mi-remove").click(function () {
+                submitted = App.prepareSubmit(App.getMiTabsUpdateData, $(this), "remove");
+            });
+            break;
+        case "/mod/quicksales":
+            modFormContainer.find(".adder").click(function () {
+                var modItem = $(App.generateModItemFormDOM("quicksales", {
+                    tab: {title: "Tab number", valid: /^[1-5]$/, value: 1},
+                    ean: {title: "EAN code 1-13 digits", valid: /^\d{1,13}$/, value: "New Quick Sale Button"},
+                    bg: {title: "Background color", valid: /^[A-Fa-f0-9]{6}$/, value: "334C60"}
+                }));
+                modItem.submit(function (e) {
+                    e.preventDefault();
+                    var data = submitted.dataFunction(submitted.requestType, submitted.button);
+                    App.requestModifyItem(modifyUrl, data, submitted.button);
+                });
+                modItem.find("input").change(function () {
+                    App.resetRequestButtons(modItem);
+                });
+                modItem.find(".mi-header").click(function () {
+                    $(this).next(".mi-body").slideToggle(App.getAnimationTime());
+                });
+                modItem.find("button.mi-save").click(function () {
+                    submitted = App.prepareSubmit(App.getMiQuickSalesUpdateData, $(this), "save");
+                });
+                modItem.find("button.mi-remove").click(function () {
+                    submitted = App.prepareSubmit(App.getMiQuickSalesUpdateData, $(this), "remove");
+                });
+                modItem.hide().appendTo(modifier).slideDown(App.getAnimationTime());
+            });
+            modifier.find("button.mi-save").click(function () {
+                submitted = App.prepareSubmit(App.getMiQuickSalesUpdateData, $(this), "save");
+            });
+            modifier.find("button.mi-remove").click(function () {
+                submitted = App.prepareSubmit(App.getMiQuickSalesUpdateData, $(this), "remove");
             });
             break;
         default:
@@ -2390,7 +2389,7 @@ App.renderReceiptSettings = function () {
     var receiptDOM =
             App.createCenterBox(true,
                    '<div class="form-header">Receipt Settings</div>\
-                    <div class="mod-form" action="" method="POST">\
+                    <div class="mod-form">\
                         <div class="form-row">\
                             <div class="form-label">EDIT YOU RECEIPT</div>\
                         </div>\
@@ -2424,7 +2423,7 @@ App.renderPOSSettings = function () {
     var receiptDOM =
             App.createCenterBox(true,
                     '<div class="form-header">Point of Sale Settings</div>\
-                    <div class="mod-form" action="" method="POST">\
+                    <div class="mod-form">\
                         <div class="form-row">\
                             <div class="form-label">Configure your Cash Register</div>\
                         </div>\
@@ -2534,7 +2533,7 @@ App.downloadTextFile = function (filename, text) {
 App.renderPLUSettings = function () {
     var pluDOM =
                '<div class="form-header">PLU Settings</div>\
-                <div class="mod-form" action="" method="POST">\
+                <div class="mod-form">\
                     <div class="form-row">\
                         <div class="form-label">MANAGE YOUR CATALOG</div>\
                     </div>\
@@ -2576,7 +2575,7 @@ App.renderPLUSettings = function () {
                 var modItem = $(App.generateModItemFormDOM("plu", {
                     ean: {title: "1-13 digits", valid : /^\d{1,13}$/, value: item.ean},
                     name: {title: "1-128 characters", valid : /^.{1,128}$/, value: item.name},
-                    price: {title: "Example: 42.00", valid : /^\d{1,5}\.\d{2}$/, value: item.price},
+                    price: {title: "Example: 42.00", valid : /^\d{1,4}\.\d{2}$/, value: item.price},
                     group: {title: "Max 128 characters", valid : /^.{0,128}$/, value: item.group},
                     // ATTENTION!!! Handling this in calling function...
                     tax: {title: "", valid : /^(0|10|15|21)$/, value: item.tax}
@@ -2590,7 +2589,7 @@ App.renderPLUSettings = function () {
                     App.resetRequestButtons(modItem);
                 });
                 modItem.find(".mi-header").click(function () {
-                    $(this).next(".mi-body").slideToggle(200);
+                    $(this).next(".mi-body").slideToggle(App.getAnimationTime());
                 });
                 modItem.find("button.mi-save").click(function () {                    
                     submitted = App.prepareSubmit(App.getMiPluUpdateData,  $(this), "save");
@@ -2603,7 +2602,7 @@ App.renderPLUSettings = function () {
                 var modItem = $(App.generateModItemFormDOM("newplu", {
                     ean: {title: "1-13 digits", valid : /^\d{1,13}$/, value: searchEAN},
                     name: {title: "1-128 characters", valid : /^.{1,128}$/, value: ""},
-                    price: {title: "Example: 42.00", valid : /^\d{1,5}\.\d{2}$/, value: ""},
+                    price: {title: "Example: 42.00", valid : /^\d{1,4}\.\d{2}$/, value: ""},
                     group: {title: "Max 128 characters", valid : /^.{0,128}$/, value: ""},
                     // ATTENTION!!! Handling this in calling function...
                     tax: {title: "", valid : /^(0|10|15|21)$/, value: App.settings.tax_rates[0]}
@@ -2617,7 +2616,7 @@ App.renderPLUSettings = function () {
                     App.resetRequestButtons(modItem);
                 });
                 modItem.find(".mi-header").click(function () {
-                    $(this).next(".mi-body").slideToggle(200);
+                    $(this).next(".mi-body").slideToggle(App.getAnimationTime());
                 });
                 modItem.find("button.mi-save").click(function () {                    
                     submitted = App.prepareSubmit(App.getMiPluUpdateData, $(this), "save");
@@ -2696,7 +2695,7 @@ App.renderSaleGroupsSettings = function () {
         sgDOM += App.generateModItemFormDOM("salegroups", {
             tax: {title: "1-50 characters", valid: /^(0|10|15|21)$/, value: saleGroup.tax},
             group: {title: "1-50 characters", valid: /^.{1,50}$/, value: saleGroup.group},
-            bg: {title: "Background color. Example: FFFFFF", valid: /^[A-Fa-f0-9]{6}$/, value: saleGroup.bg},
+            bg: {title: "Background color", valid: /^[A-Fa-f0-9]{6}$/, value: saleGroup.bg},
             _id: {title: "24 \\w", valid: /^(\w{24}|new sg)$/, value: saleGroup._id}
         });
     }
@@ -2788,7 +2787,7 @@ App.renderSaleHistory = function () {
         var paymentBody = $("<div>").addClass("pb-body");
         var container = $("<div>").addClass("receipt-container");
 
-        container.append(App.renderReceipt(receipts[receiptIndex]));
+        container.append(App.renderReceipt(receipts[receiptIndex], true));
         paymentBody.append(container);
 
         App.jPrinterCopyReceipt = $("<div id='payment-box'></div>").append(paymentBody);
@@ -2799,21 +2798,21 @@ App.renderSaleHistory = function () {
     });
 };
 
-App.renderReceipt = function (receiptObj) {
+App.renderReceipt = function (receiptObj, isCopy) {
     var receipt = $("<div>").addClass("receipt");
     var receiptHeader = $(
             '<div class="receipt-header">\
-                    <div class="preview">' + 'Receipt Preview' + '</div>\
+                    <div class="preview">' + App.lang.receipt_preview + '</div>\
                     <div class="company-name">' + App.settings.name + '</div>\
                     <div class="address-1">' + App.settings.address.street + '</div>\
                     <div class="address-2">' + App.settings.address.zip + ' ' + App.settings.address.city + '</div>\
                     <div class="receipt-row">\
-                        <div class="tin">TIN: ' + App.settings.tin + '</div>\
-                        <div class="vat">VAT: ' + App.settings.vat + '</div>\
+                        <div class="tin">' + App.lang.receipt_tin + ' ' + App.settings.tin + '</div>\
+                        <div class="vat">' + App.lang.receipt_vat + ' ' + App.settings.vat + '</div>\
                     </div>\
                 </div>');
-    $("<div>").addClass("receipt-custom-header").html(App.receipt.header + "<br>" + "<strong>RECEIPT COPY</strong>").appendTo(receiptHeader);
-    $("<div>").attr("id", "receipt-number").text("Receipt #" + receiptObj.number).appendTo(receiptHeader);
+    $("<div>").addClass("receipt-custom-header").html(App.receipt.header + (isCopy ? ("<br>" + "<strong>" + App.lang.receipt_copy + "</strong>") : "")).appendTo(receiptHeader);
+    $("<div>").attr("id", "receipt-number").text(App.lang.receipt_receipt + receiptObj.number).appendTo(receiptHeader);
     receipt.append(receiptHeader);
     var receiptBody = $("<ul>").addClass("receipt-body");
     var taxValues = {};
@@ -2859,40 +2858,40 @@ App.renderReceipt = function (receiptObj) {
         var round = (parseFloat(total) - parseFloat(subTotal)).formatMoney();
         var changeAmount = (tendered - subTotal).formatMoney();
         
-    var rsDOM =
+    var rsDOM = 
             '<div id="receipt-summary">'
             + '<div id="rs-total-items">'
-            + '    <div class="rs-label">Total items:</div>'
+            + '    <div class="rs-label">' + App.lang.receipt_total_items + '</div>'
             + '    <div class="rs-value">' + totalItems + '</div>'
             + '</div>'
             + '<div id="rs-subtotal">'
-            + '    <div class="rs-label">Subtotal:</div>'
+            + '    <div class="rs-label">' + App.lang.receipt_subtotal + '</div>'
             + '    <div class="rs-value">' + subTotal.formatMoney() + '</div>'
             + '</div>';
     if (round !== "0.00") {
         rsDOM += '<div id="rs-round">'
-                + '    <div class="rs-label">Round:</div>'
+                + '    <div class="rs-label">' + App.lang.receipt_round + '</div>'
                 + '    <div class="rs-value">' + round + '</div>'
                 + '</div>';
     }
-    rsDOM += '<div id="rs-total">'
-            + '    <div class="rs-label">Total amount:</div>'
-            + '    <div class="rs-value">' + total + '</div>'
+    rsDOM +=  '<div id="rs-total">'
+            + '    <div class="rs-label">' + App.lang.receipt_total_amount + '</div>'
+            + '    <div class="rs-value">' + total + ' ' + App.settings.currency.symbol + '</div>'
             + '</div>'
             + '<div id="rs-tender">'
-            + '    <div class="rs-label">Tendered:</div>'
+            + '    <div class="rs-label">' + App.lang.receipt_tendered + '</div>'
             + '    <div class="rs-value">' + tendered.formatMoney() + '</div>'
             + '</div>'
             + '<div id="rs-change">'
-            + '    <div class="rs-label">Change:</div>'
+            + '    <div class="rs-label">' + App.lang.receipt_change + '</div>'
             + '    <div class="rs-value">' + changeAmount + '</div>'
             + '</div>'
-            + '<div id="taxes-label">VAT summary:</div>'
+            + '<div id="taxes-label">' + App.lang.receipt_vat_summary + '</div>'
             + '<div id="tax-header">'
-            + '    <div class="th-rate">Rate</div>'
-            + '    <div class="th-net">Net</div>'
-            + '    <div class="th-value">Tax</div>'
-            + '    <div class="th-total">Total</div>'
+            + '    <div class="th-rate">' + App.lang.receipt_rate + '</div>'
+            + '    <div class="th-net">' + App.lang.receipt_net + '</div>'
+            + '    <div class="th-value">' + App.lang.receipt_tax + '</div>'
+            + '    <div class="th-total">' + App.lang.receipt_total + '</div>'
             + '</div>'
             + '</div>';
     var receiptSummary = $(rsDOM);
@@ -2912,7 +2911,7 @@ App.renderReceipt = function (receiptObj) {
     }
     receiptSummary.appendTo(receipt);
 
-    $("<div>").addClass("receipt-clerk").text("Checked: " + receiptObj.clerk).appendTo(receipt);
+    $("<div>").addClass("receipt-clerk").text(App.lang.receipt_checked + receiptObj.clerk).appendTo(receipt);
     App.receiptTime = $("<div>").attr("id", "receipt-time").text(App.getDate(receiptObj.date)).appendTo(receipt);
 
     $("<div>").addClass("receipt-gratitude").text(App.receipt.footer).appendTo(receipt);
@@ -2922,3 +2921,93 @@ App.renderReceipt = function (receiptObj) {
     
     return receipt;    
 };
+
+//------------------------- RENDER TABS SETTINGS -----------------------------//
+App.renderTabsSettings = function () {
+    var tabs = App.buttons.tabs;
+    var tabDOM =
+            '<div class="form-header">Quick Sale Tabs Settings</div>\
+             <div class="mod-form">\
+                <div class="form-row">\
+                   <div class="form-label">MANAGE YOUR QUICK SALE TABS</div>\
+                   <div class="adder"></div>\
+                </div>\
+                <div class="mi-info">Warning: The content of the removed tab will also be removed</div>\
+                <div class="modifier">';
+    for (var i = 0; i < tabs.length; i++) {
+        var thisTab = tabs[i];
+        tabDOM += App.generateModItemFormDOM("tabs", {
+            number: {title: "Tab number", valid: /^[1-5]$/, value: i + 1},
+            name: {title: "Tab name 1-20 characters", valid: /^.{1,20}$/, value: thisTab.name}
+        });
+    }
+    tabDOM += '</div>\
+             </div>';
+    App.cpBody.html(App.createCenterBox(true, tabDOM));
+    App.cpBody.find(".center-box").prepend(App.createGoBack());
+
+    var modFormContainer = App.cpBody.find(".mod-form");
+    var modifyUrl = "/mod/tabs";
+    App.bindModSettings(modFormContainer, modifyUrl);
+};
+
+App.getMiTabsUpdateData = function (requestType, button) {
+    var miBody = button.parents().eq(1);
+    return {
+        requestType: requestType,
+        number    : miBody.find("input[placeholder='NUMBER']").val(),
+        name      : miBody.find("input[placeholder='NAME']").val()
+    };
+};
+
+//------------------------ RENDER QUICK SALES SETTINGS -----------------------//
+App.renderQuickSalesSettings = function () {
+    var tabs = App.buttons.tabs;
+    var sgDOM =
+            '<div class="form-header">Quick Sale Settings</div>\
+             <div class="mod-form">\
+                <div class="form-row">\
+                    <div class="form-label">MANAGE YOUR QUICK SALE BUTTONS</div>\
+                    <div class="adder"></div>\
+                </div>\
+                <div class="mi-info">Tip: Search your catalog for the item, then reference its EAN code here</div>\
+                <div class="modifier">';
+    for (var i = 0; i < tabs.length; i++) {
+        var tab = tabs[i];
+        var qss = tab.quickSales;
+        for (var j = 0; j < qss.length; j++) {
+            var qs = qss[j];
+            sgDOM += App.generateModItemFormDOM("quicksales", {
+                tab: {title: "Tab number", valid: /^[1-5]$/, value: i + 1},
+                ean: {title: "EAN code 1-13 digits", valid: /^\d{1,13}$/, value: qs.ean},
+                bg: {title: "Background color", valid: /^[A-Fa-f0-9]{6}$/, value: qs.bg}
+            });
+        }
+        sgDOM += '<div class="hline"></div>';
+    }
+    sgDOM += '</div>\
+            </div>';
+    App.cpBody.html(App.createCenterBox(true, sgDOM));
+    App.cpBody.find(".center-box").prepend(App.createGoBack(function () {
+        $(".colpick.colpick_full").remove();
+    }));
+
+    var modFormContainer = App.cpBody.find(".mod-form");
+    var modifyUrl = "/mod/quicksales";
+    modFormContainer.find("div[placeholder='BG']").each(function () {
+        var t = $(this);
+        App.bindColpick(t);
+    });
+    App.bindModSettings(modFormContainer, modifyUrl);
+};
+
+App.getMiQuickSalesUpdateData = function (requestType, button) {
+    var miBody = button.parents().eq(1);
+    return {
+        requestType: requestType,
+        tab     : miBody.find("select").find(":selected").attr("tab-number"),
+        ean     : miBody.find("input[placeholder='EAN']").val(),
+        bg      : miBody.find("div[placeholder='BG']").text()
+    };
+};
+

@@ -15,13 +15,8 @@ var Buttons = new Schema({
             name: String,
             quickSales: [
                 {
-                    bg: String,
-                    text: String,
-                    price: String,
-                    group: String,
-                    tax: Number,
-                    tags: [String],
-                    desc: String
+                    ean: String,
+                    bg: String
                 }
             ]
         }

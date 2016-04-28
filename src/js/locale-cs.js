@@ -1,5 +1,5 @@
 var GLocalCS = {
-    sign_in_header             : "OPS Vás vítá",
+    sign_in_header             : "Vítejte v OPS",
     sign_in_label              : "OTEVŘENÍ OBCHODU",
     sign_in_username           : "UŽIVATELSKÉ JMÉNO",
     sign_in_password           : "HESLO",
@@ -7,7 +7,7 @@ var GLocalCS = {
     sign_in_sign_up            : "Registrace",
     sign_in_forgot             : "Zapomenuté heslo",
             
-    sign_up_header             : "OPS Vás vítá",
+    sign_up_header             : "Vítejte v OPS",
     sign_up_label              : "VYTVOŘENÍ NOVÉHO OBCHODU",
     sign_up_email              : "EMAIL",
     sign_up_password           : "HESLO",
@@ -24,7 +24,7 @@ var GLocalCS = {
     sign_up_sign_up            : "VYTVOŘIT ÚČET",
     sign_up_back               : "Zpět na přihlášení",
     
-    forgot_header              : "OPS Vás vítá",
+    forgot_header              : "Vítejte v OPS",
     forgot_label               : "OBNOVENÍ HESLA",
     forgot_email               : "EMAIL",
     forgot_instruction         : "Po stisknutí ODESLAT dostanete v mailu odkaz na obnovení hesla",
@@ -33,7 +33,7 @@ var GLocalCS = {
     
     dashboard_sign_out         : "Odhlásit se",
     dashboard_header           : "Otevření pokladny",
-    dashboard_label            : "ZAMĚSTNANECKÉ PŘIHLÁŠENÍ",
+    dashboard_label            : "PŘIHLÁŠENÍ ZAMĚSTNANCE",
     dashboard_username         : "UŽIVATELSKÉ JMÉNO",
     
     reg_open_cp                : "Otevřít ovládaví panel",
@@ -51,7 +51,45 @@ var GLocalCS = {
     reg_pay                    : "Zaplatit",
     reg_individual_price       : "Individuální cena",
     reg_individual_discount    : "Individuální sleva",
-    reg_details                : "Detaily"
+    reg_details                : "Info",
+    
+    pay_payment                : "Platba",
+    pay_quick_cash             : "Hotovost",
+    pay_tendered               : "Přijato",
+    pay_change                 : "Vráceno: ",
+    pay_confirm                : "POTVRDIT PLATBU",    
+    
+    receipt_preview            : "Náhled účtenky",
+    receipt_copy               : "Kopie",
+    receipt_tin                : "IČO:",
+    receipt_vat                : "DIČ:",
+    receipt_receipt            : "Účtenka č. ",
+    receipt_total_items        : "Celkem položek:",
+    receipt_subtotal           : "Mezisoučet:",
+    receipt_round              : "Zaokrouhlení:",
+    receipt_total_amount       : "Celkem k platbě:",
+    receipt_tendered           : "Přijato:",
+    receipt_change             : "Vráceno:",
+    receipt_vat_summary        : "Přehled DPH",
+    receipt_rate               : "Sazba",
+    receipt_net                : "Netto",
+    receipt_tax                : "DPH",
+    receipt_total              : "Celkem",
+    receipt_checked            : "Obsluha: ",
+    
+    pay_complete               : "Transakce dokončena!",
+    pay_issue_change           : "Vráceno ",
+    pay_print_receipt          : "Vytisknout účtenku",
+    pay_email_receipt          : "Poslat na mail",
+    pay_done                   : "Hotovo",
+    
+    details_title              : "Informace o položce",  
+    details_name               : "Název: ",  
+    details_price              : "Cena: ",  
+    details_group              : "Skupina: ",  
+    details_tax                : "Sazba: ",  
+    details_tags               : "Tagy: ",  
+    details_description        : "Popis: "
 };
 
 

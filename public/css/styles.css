@@ -196,7 +196,7 @@ form [type="submit"]:hover {
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
-    border: 1px solid #eee;
+    border: 1px solid #EEE;
 }
 .lang.en {    
     background-image: url("../img/flag/en.svg");
@@ -349,7 +349,7 @@ div#cp-link {
 .adder:hover {
     background-color: #334C60;
 }
-.mod-item {
+.mod-item, .tab-wrap {
     margin: 5px 0;
     padding: 0;
 }
@@ -365,12 +365,15 @@ div#cp-link {
     height: 40px;
     margin: auto;
 }
-.mi-header {
+.mi-header, .tw-header {
     background-color: #4A698A;
     font-size: 16px;
     padding: 10px;
     cursor: pointer;
     border-radius: 3px;
+}
+.tw-body {
+    padding-left: 20px;
 }
 .mi-header.new-item {    
     background-color: #65C365;
@@ -381,7 +384,7 @@ div#cp-link {
 .mi-body {
     padding: 10px;
 }
-.mi-body.hidden {
+.mi-body.hidden, .tw-body.hidden {
     display: none;
 }
 .mi-info, .form-instruction {
@@ -797,6 +800,7 @@ button#park-sale, button#discard-sale {
     overflow-x: auto;
     overflow-y: hidden;
     white-space: nowrap;
+    min-height: 70px;
 }
 #tab-navs .tab-nav {
     font-size: 14px;
@@ -881,7 +885,7 @@ input.si-name {
     text-align: center;
 }
 .d-detail {
-    background: url("../img/ico/details.svg") no-repeat;
+    background: url("../img/ico/info.svg") no-repeat;
     background-size: 25px;
     background-position: center;
     margin: 0;
@@ -1238,7 +1242,7 @@ div.ri-x {
 }
 #rs-total {
     font-weight: bold;
-    /*font-size: 24px;*/
+    font-size: 16px;
 }
 div#taxes-label {
     display: inline-block;
@@ -1598,7 +1602,7 @@ div#taxes-label {
         font-size: 14px;
     }
     .pc-label {
-        font-size: 50px;
+        font-size: 40px;
     }
 }
 

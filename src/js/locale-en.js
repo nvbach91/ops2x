@@ -41,9 +41,9 @@ var GLocalEN = {
     reg_logout                 : "Close register",
     reg_cp                     : "Control Panel",
     reg_checkout               : "CHECKOUT",
-    reg_items                  : "item",
-    
-    
+    reg_items                  : "item",    
+  //reg_item                   : "položka",
+  //reg_item_plural            : "položky",    
     reg_total                  : "Total",
     reg_park                   : "Park Sale",
     reg_discard                : "Discard Sale",
@@ -51,7 +51,45 @@ var GLocalEN = {
     reg_pay                    : "Pay",
     reg_individual_price       : "Individual Price",
     reg_individual_discount    : "Individual Discount",
-    reg_individual_details     : "Details"    
+    reg_individual_details     : "Details", 
+    
+    pay_payment                : "Payment",
+    pay_quick_cash             : "Quick cash payment",
+    pay_tendered               : "Amount tendered",
+    pay_change                 : "Change: ",
+    pay_confirm                : "CONFIRM PAYMENT",    
+    
+    receipt_preview            : "Receipt Preview",
+    receipt_copy               : "Receipt Copy",
+    receipt_tin                : "TIN:",
+    receipt_vat                : "VAT:",
+    receipt_receipt            : "Receipt #",
+    receipt_total_items        : "Total items:",
+    receipt_subtotal           : "Subtotal:",
+    receipt_round              : "Round:",
+    receipt_total_amount       : "Total amount:",
+    receipt_tendered           : "Tendered:",
+    receipt_change             : "Change:",
+    receipt_vat_summary        : "VAT summary",
+    receipt_rate               : "Rate",
+    receipt_net                : "Net",
+    receipt_tax                : "Tax",
+    receipt_total              : "Total",
+    receipt_checked            : "Checked: ",
+    
+    pay_complete               : "Sale complete!",
+    pay_issue_change           : "Issue change of ",
+    pay_print_receipt          : "Print receipt",
+    pay_email_receipt          : "Email receipt",
+    pay_done                   : "DONE",
+    
+    details_title              : "Product Details",  
+    details_name               : "Name: ",  
+    details_price              : "Price: ",  
+    details_group              : "Group: ",  
+    details_tax                : "Tax: ",  
+    details_tags               : "Tags: ",  
+    details_description        : "Description: "  
 };
 
 

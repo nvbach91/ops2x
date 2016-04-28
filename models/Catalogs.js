@@ -10,8 +10,6 @@ var Catalogs = new Schema({
             price: String,
             group: String,
             tax: Number
-            //tags: [String],
-            //desc: String
         }
     ]
 });

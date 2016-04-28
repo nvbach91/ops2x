@@ -101,7 +101,7 @@ function generateNewUser(newUserId, newEmail, password) {
         password: utils.hash(password),
         activated: false,
         password_pending: "no"/*,
-        session_token: "no"*/
+         session_token: "no"*/
     };
 }
 ;
@@ -200,77 +200,24 @@ function generateDefaultButtons(newUserId) {
                 name: "Common",
                 quickSales: [
                     {
-                        bg: "334C60",
-                        desc: "Black round bread baked in Czech",
-                        tax: 15,
-                        group: "Food",
-                        price: "19.00",
-                        text: "Brown Bread",
-                        tags: [
-                            "baked",
-                            "whole"
-                        ]
+                        ean: "0",
+                        bg: "334C60"
                     },
                     {
-                        bg: "334C60",
-                        desc: "A regular roll bread made in Czech",
-                        tax: 15,
-                        group: "Food",
-                        price: "3.00",
-                        text: "Roll Bread",
-                        tags: [
-                            "baked",
-                            "wheat"
-                        ]
+                        ean: "1",
+                        bg: "334C60"
                     },
                     {
-                        bg: "334C60",
-                        desc: "A common small white bread",
-                        tax: 15,
-                        group: "Food",
-                        price: "3.00",
-                        text: "Round Bread",
-                        tags: [
-                            "baked",
-                            "wheat"
-                        ]
+                        ean: "2",
+                        bg: "334C60"
                     },
                     {
-                        bg: "334C60",
-                        desc: "Baked butter flavored croissant",
-                        tax: 15,
-                        group: "Food",
-                        price: "12.00",
-                        text: "Croissant",
-                        tags: [
-                            "baked",
-                            "wheat",
-                            "sweet"
-                        ]
+                        ean: "3",
+                        bg: "334C60"
                     },
                     {
-                        bg: "334C60",
-                        desc: "3.00 CZK for a beer bottle",
-                        tax: 0,
-                        group: "Uncategorized",
-                        price: "3.00",
-                        text: "Beer Bottle",
-                        tags: [
-                            "refund",
-                            "bottle"
-                        ]
-                    },
-                    {
-                        bg: "334C60",
-                        desc: "Refund 3.00 CZK for a beer bottle",
-                        tax: 0,
-                        group: "Uncategorized",
-                        price: "-3.00",
-                        text: "Refund Bottle",
-                        tags: [
-                            "refund",
-                            "bottle"
-                        ]
+                        ean: "4",
+                        bg: "334C60"
                     }
                 ]
             },
@@ -278,33 +225,21 @@ function generateDefaultButtons(newUserId) {
                 name: "Beverages",
                 quickSales: [
                     {
-                        bg: "334C60",
-                        desc: "Sample description",
-                        group: "Food",
-                        price: "17.00",
-                        tags: [
-                            "Demo",
-                            "Sample"
-                        ],
-                        tax: 15,
-                        text: "Sample"
+                        ean: "5",
+                        bg: "334C60"
+                    },
+                    {
+                        ean: "6",
+                        bg: "334C60"
                     }
                 ]
             },
             {
-                name: "Tab 3",
+                name: "Trending",
                 quickSales: [
                     {
-                        bg: "334C60",
-                        desc: "Sample 3",
-                        group: "Drinks",
-                        price: "25.00",
-                        tags: [
-                            "Demo",
-                            "Sample"
-                        ],
-                        tax: 21,
-                        text: "Sample 3"
+                        ean: "7",
+                        bg: "334C60"
                     }
                 ]
             }
@@ -315,7 +250,64 @@ function generateDefaultButtons(newUserId) {
 function generateDefaultCatalog(newUserId) {
     return {
         userId: newUserId,
-        articles: []
+        articles: [
+            {
+                ean: "0",
+                name: "Sample 0",
+                price: "14.00",
+                group: "Grouper",
+                tax: 21
+            },
+            {
+                ean: "1",
+                name: "Sample 1",
+                price: "33.00",
+                group: "Grouper",
+                tax: 0
+            },
+            {
+                ean: "2",
+                name: "Sample 2",
+                price: "29.00",
+                group: "Grouper",
+                tax: 10
+            },
+            {
+                ean: "3",
+                name: "Sample 3",
+                price: "30.00",
+                group: "Grouper",
+                tax: 10
+            },
+            {
+                ean: "4",
+                name: "Sample 4",
+                price: "99.00",
+                group: "Grouper",
+                tax: 21
+            },
+            {
+                ean: "5",
+                name: "Sample 5",
+                price: "139.00",
+                group: "Grouper",
+                tax: 10
+            },
+            {
+                ean: "6",
+                name: "Sample 6",
+                price: "3.00",
+                group: "Grouper",
+                tax: 10
+            },
+            {
+                ean: "7",
+                name: "Sample 7",
+                price: "9.00",
+                group: "Sample 8",
+                tax: 21
+            }
+        ]
     };
 }
 ;

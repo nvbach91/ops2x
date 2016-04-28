@@ -81,6 +81,8 @@ var pos = require('./routes/mod/pos');
 var plu = require('./routes/mod/plu');
 var pluimport = require('./routes/mod/pluimport');
 var salegroups = require('./routes/mod/salegroups');
+var tabs = require('./routes/mod/tabs');
+var quicksales = require('./routes/mod/quicksales');
 var addsale = require('./routes/mod/addsale');
 var mailreceipt = require('./routes/mod/mailreceipt');
 app.use('/mod', ensureAuthenticated);
@@ -91,6 +93,8 @@ app.use('/mod', pos);
 app.use('/mod', plu);
 app.use('/mod', pluimport);
 app.use('/mod', salegroups);
+app.use('/mod', tabs);
+app.use('/mod', quicksales);
 app.use('/mod', addsale);
 app.use('/mod', mailreceipt);
 

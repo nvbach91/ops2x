@@ -12,7 +12,7 @@
    height="600"
    id="svg2"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="Flag_of_the_Czech_Republic.svg">
+   sodipodi:docname="cs.svg">
   <metadata
      id="metadata14">
     <rdf:RDF>
@@ -21,7 +21,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
