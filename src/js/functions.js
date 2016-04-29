@@ -1010,6 +1010,9 @@ App.renderWebRegister = function () {
             t.addClass("close");            
         }
         App.keyboard.slideToggle(App.getAnimationTime(), function () {
+            if (App.keyboard.is(":visible")){
+                App.keyboard.css("display", "flex");
+            }
             App.jSaleList.animate({
                 scrollTop: App.jSaleList[0].scrollHeight
             }, App.getAnimationTime());
@@ -1575,6 +1578,7 @@ App.renderSignin = function () {
 
         t.find("#password").val("");
     });
+    $("#username").focus();
 };
 
 // render signup
@@ -1765,7 +1769,7 @@ App.createControlPanel = function () {
                 <div class="cp-item" id="plu-settings">Edit PLU Articles</div>\
                 <div class="cp-item" id="sgs-settings">Edit Sale Groups</div>\
                 <div class="cp-item" id="tab-settings">Edit Quick Sale Tabs</div>\
-                <div class="cp-item" id="qss-settings">Edit Quick Sales</div>\
+                <div class="cp-item" id="qss-settings">Edit Quick Sale Buttons</div>\
                 <div class="cp-item" id="rec-settings">Edit Receipt</div>';
     }
     App.cpBody.append($(cpContent));
@@ -1985,6 +1989,11 @@ App.requestModifyItem = function (url, data, button) {
                 case "/mod/tabs" :
                     App.buttons.tabs = resp.msg;
                     App.renderQuickSales();
+                    break;                    
+                case "/mod/quicksales" :
+                    App.buttons.tabs = resp.msg;
+                    App.renderQuickSalesSettings();
+                    App.renderQuickSales();
                     break;
                 default:
             }
@@ -2043,7 +2052,7 @@ App.generateModItemFormDOM = function (type, item) {
             hiddenFields = ["_id"];
             break;
         case "tabs":
-            disabledFields = ["number"];
+            disabledFields = ["number", "buttons"];
             break;
         default:
     }
@@ -2112,7 +2121,7 @@ App.generateModItemFormDOM = function (type, item) {
                 
                 } else if(keys[i] === "tab") {
                 // ATTENTION!!!    
-                dom +=     '<select id="tab-numbers">';
+                dom +=     '<select id="tab-numbers" current-tab="' + item[keys[i]].value + '">';
                 var tabs = App.buttons.tabs;
                 for (var j = 0; j < tabs.length; j++){
                     dom +=     '<option tab-number="' + (j + 1) + '"' + ((j + 1) === item[keys[i]].value ? ' selected' : '') + '>' + (j + 1) + ' - ' + tabs[j].name + '</option>';    
@@ -2120,12 +2129,16 @@ App.generateModItemFormDOM = function (type, item) {
                 dom +=     '</select>';
                 
                 } else if (keys[i] === "bg") {
-                     dom += '<div class="colpicker" \
-                                placeholder="' + keys[i].toUpperCase() + '">' 
-                                + item[keys[i]].value + '</div>';
+                     dom += '<input class="colpicker" \
+                                placeholder="' + keys[i].toUpperCase() 
+                                + '" value="' + item[keys[i]].value + '">';
                 } else {
+                var qsEAN = "";
+                if (keys[i] === "ean" && isQS) {
+                    qsEAN = 'current-ean="' + item[keys[i]].value + '"';
+                }
                 var validator = item[keys[i]].valid.toString().replace(/[\/^$]/g, "");
-                dom +=     '<input class="" \
+                dom +=     '<input ' + qsEAN + 'class="" \
                                    type="text" \
                                    pattern="' + validator + '" \
                                    title="' + item[keys[i]].title + '" \
@@ -2163,9 +2176,14 @@ App.bindModSettings = function (modFormContainer, modifyUrl) {
     var submitted = null;
     modFormContainer.find("form.mod-item").submit(function (e) {
         e.preventDefault();
-        var data = submitted.dataFunction(submitted.requestType, submitted.button);
-        App.requestModifyItem(modifyUrl, data, submitted.button);
-    });       
+        if (submitted.dataFunction === App.getMiQuickSalesUpdateData
+                && App.catalog.articles.binaryIndexOf("ean", submitted.button.parents().eq(1).find("input[placeholder='EAN']").val()) === -1) {
+            App.showWarning("Article with this EAN doesn't exist");
+        } else {
+            var data = submitted.dataFunction(submitted.requestType, submitted.button);
+            App.requestModifyItem(modifyUrl, data, submitted.button);
+        }
+    });
     var modifier = modFormContainer.find(".modifier");
     modifier.find(".mi-header").click(function () {
         var t = $(this);
@@ -2245,7 +2263,7 @@ App.bindModSettings = function (modFormContainer, modifyUrl) {
                 modItem.find("button.mi-remove").click(function () {
                     submitted = App.prepareSubmit(App.getMiSaleGroupUpdateData, $(this), "remove");
                 });
-                modItem.find("div[placeholder='BG']").each(function () {
+                modItem.find("input[placeholder='BG']").each(function () {
                     var t = $(this);
                     App.bindColpick(t);
                 });
@@ -2297,8 +2315,8 @@ App.bindModSettings = function (modFormContainer, modifyUrl) {
         case "/mod/quicksales":
             modFormContainer.find(".adder").click(function () {
                 var modItem = $(App.generateModItemFormDOM("quicksales", {
-                    tab: {title: "Tab number", valid: /^[1-5]$/, value: 1},
-                    ean: {title: "EAN code 1-13 digits", valid: /^\d{1,13}$/, value: "New Quick Sale Button"},
+                    tab: {title: "Tab number", valid: /^[1-5]$/, value: 0},
+                    ean: {title: "EAN code 1-13 digits", valid: /^\d{1,13}$/, value: 0},
                     bg: {title: "Background color", valid: /^[A-Fa-f0-9]{6}$/, value: "334C60"}
                 }));
                 modItem.submit(function (e) {
@@ -2318,7 +2336,11 @@ App.bindModSettings = function (modFormContainer, modifyUrl) {
                 modItem.find("button.mi-remove").click(function () {
                     submitted = App.prepareSubmit(App.getMiQuickSalesUpdateData, $(this), "remove");
                 });
-                modItem.hide().appendTo(modifier).slideDown(App.getAnimationTime());
+                modItem.find("input[placeholder='BG']").each(function () {
+                    var t = $(this);
+                    App.bindColpick(t);
+                });
+                modItem.hide().prependTo(modifier).slideDown(App.getAnimationTime());
             });
             modifier.find("button.mi-save").click(function () {
                 submitted = App.prepareSubmit(App.getMiQuickSalesUpdateData, $(this), "save");
@@ -2574,9 +2596,9 @@ App.renderPLUSettings = function () {
                 var item = App.catalog.articles[i];
                 var modItem = $(App.generateModItemFormDOM("plu", {
                     ean: {title: "1-13 digits", valid : /^\d{1,13}$/, value: item.ean},
-                    name: {title: "1-128 characters", valid : /^.{1,128}$/, value: item.name},
+                    name: {title: "1-128 characters", valid : /^[^"]{1,128}$/, value: item.name},
                     price: {title: "Example: 42.00", valid : /^\d{1,4}\.\d{2}$/, value: item.price},
-                    group: {title: "Max 128 characters", valid : /^.{0,128}$/, value: item.group},
+                    group: {title: "Max 128 characters", valid : /^[^"]{0,128}$/, value: item.group},
                     // ATTENTION!!! Handling this in calling function...
                     tax: {title: "", valid : /^(0|10|15|21)$/, value: item.tax}
                 }));                
@@ -2708,7 +2730,7 @@ App.renderSaleGroupsSettings = function () {
 
     var modFormContainer = App.cpBody.find(".mod-form");
     var modifyUrl = "/mod/salegroups";
-    modFormContainer.find("div[placeholder='BG']").each(function () {
+    modFormContainer.find("input[placeholder='BG']").each(function () {
         var t = $(this);
         App.bindColpick(t);
     });
@@ -2721,20 +2743,20 @@ App.getMiSaleGroupUpdateData = function (requestType, button) {
         requestType: requestType,
         tax     : miBody.find("select").find(":selected").val(),
         group   : miBody.find("input[placeholder='GROUP']").val(),
-        bg      : miBody.find("div[placeholder='BG']").text(),
+        bg      : miBody.find("input[placeholder='BG']").val(),
         _id     : miBody.find("input[placeholder='_ID']").val()
     };
 };
 
 App.bindColpick = function (t) {
     t.colpick({
-        color: t.text(),
+        color: t.val(),
         onSubmit: function (hsb, hex, rgb, el, bySetColor) {
-            t.text(hex.toUpperCase());
+            t.val(hex.toUpperCase()).change();
             $(el).colpickHide();
         },
         onChange: function (hsb, hex, rgb, el, bySetColor) {
-            t.text(hex.toUpperCase());
+            t.val(hex.toUpperCase()).change();
         }
     });
 };
@@ -2938,7 +2960,8 @@ App.renderTabsSettings = function () {
         var thisTab = tabs[i];
         tabDOM += App.generateModItemFormDOM("tabs", {
             number: {title: "Tab number", valid: /^[1-5]$/, value: i + 1},
-            name: {title: "Tab name 1-20 characters", valid: /^.{1,20}$/, value: thisTab.name}
+            name: {title: "Tab name 1-20 characters", valid: /^.{1,20}$/, value: thisTab.name},
+            buttons: {title: "Number of active buttons in this tab", valid: /^\d{1,2}$/, value: thisTab.quickSales.length}
         });
     }
     tabDOM += '</div>\
@@ -2975,6 +2998,7 @@ App.renderQuickSalesSettings = function () {
     for (var i = 0; i < tabs.length; i++) {
         var tab = tabs[i];
         var qss = tab.quickSales;
+        sgDOM += '<div class="tab-header hline">Tab ' + (i + 1) + ' - ' + tab.name + '</div>';
         for (var j = 0; j < qss.length; j++) {
             var qs = qss[j];
             sgDOM += App.generateModItemFormDOM("quicksales", {
@@ -2983,7 +3007,6 @@ App.renderQuickSalesSettings = function () {
                 bg: {title: "Background color", valid: /^[A-Fa-f0-9]{6}$/, value: qs.bg}
             });
         }
-        sgDOM += '<div class="hline"></div>';
     }
     sgDOM += '</div>\
             </div>';
@@ -2994,20 +3017,25 @@ App.renderQuickSalesSettings = function () {
 
     var modFormContainer = App.cpBody.find(".mod-form");
     var modifyUrl = "/mod/quicksales";
-    modFormContainer.find("div[placeholder='BG']").each(function () {
+    modFormContainer.find("input[placeholder='BG']").each(function () {
         var t = $(this);
         App.bindColpick(t);
     });
     App.bindModSettings(modFormContainer, modifyUrl);
+    modFormContainer.find("select").change(function () {
+        $(this).parents().eq(1).find(".mi-save").click();
+    });
 };
 
 App.getMiQuickSalesUpdateData = function (requestType, button) {
     var miBody = button.parents().eq(1);
     return {
-        requestType: requestType,
-        tab     : miBody.find("select").find(":selected").attr("tab-number"),
-        ean     : miBody.find("input[placeholder='EAN']").val(),
-        bg      : miBody.find("div[placeholder='BG']").text()
+        requestType     : requestType,
+        currentTab      : miBody.find("select").attr("current-tab"),
+        destinationTab  : miBody.find("select").find(":selected").attr("tab-number"),
+        currentEan      : miBody.find("input[placeholder='EAN']").attr("current-ean"),
+        newEan          : miBody.find("input[placeholder='EAN']").val(),
+        bg              : miBody.find("input[placeholder='BG']").val()
     };
 };
 

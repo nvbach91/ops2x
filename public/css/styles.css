@@ -365,6 +365,10 @@ div#cp-link {
     height: 40px;
     margin: auto;
 }
+.tab-header {
+    font-size: 14px;
+    color: #555;
+}
 .mi-header, .tw-header {
     background-color: #4A698A;
     font-size: 16px;
@@ -579,6 +583,7 @@ div#cp-link {
 #pos-settings {background-image: url('../img/ico/pos.svg');}
 #plu-settings {background-image: url('../img/ico/barcode.svg');}
 #sgs-settings {background-image: url('../img/ico/sg.svg');}
+#tab-settings {background-image: url('../img/ico/tabs.svg');}
 #qss-settings {background-image: url('../img/ico/qs.svg');}
 #rec-settings {background-image: url('../img/ico/receipt.svg');}
 input {
@@ -735,7 +740,7 @@ button#park-sale, button#discard-sale {
     margin: 0;
     flex-wrap: wrap;
     padding: 1px;
-    border-bottom: 1px solid #E8E8E8;
+    border-bottom: 4px solid #E8E8E8;
     overflow-x: auto;
     overflow-y: hidden;
     white-space: nowrap;
@@ -800,7 +805,7 @@ button#park-sale, button#discard-sale {
     overflow-x: auto;
     overflow-y: hidden;
     white-space: nowrap;
-    min-height: 70px;
+    min-height: 30px;
 }
 #tab-navs .tab-nav {
     font-size: 14px;
@@ -1606,7 +1611,10 @@ div#taxes-label {
     }
 }
 
-@media screen and (min-width: 720px){    
+@media screen and (min-width: 720px){
+    #tab-navs {
+        min-height: 30px;
+    }
     #go-back {
         background-size: 40px;
         line-height: 75px;
@@ -1671,10 +1679,15 @@ div#taxes-label {
     #sale-list input.si-quantity {
         width: 35px;
     }
-    #sale-groups, #tab-navs {
+    #tab-navs {
         overflow-x: visible;
         overflow-y: visible;
         display: flex;
+    }
+    #sale-groups {
+        overflow-x: auto;
+        overflow-y: auto; 
+        display: flex;       
     }
     #tab-navs .tab-nav {
         width: 33.33333%;

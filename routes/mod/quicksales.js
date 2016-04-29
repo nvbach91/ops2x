@@ -5,8 +5,10 @@ var utils = require('../../utils');
 router.post('/quicksales', function (req, res) {
     var validator = {
         requestType: /^(save|remove)$/,
-        tab: /^[1-5]$/,
-        ean: /^\d{1,13}$/,
+        currentTab: /^[0-5]$/,
+        destinationTab: /^[1-5]$/,
+        currentEan: /^\d{1,13}$/,
+        newEan: /^\d{1,13}$/,
         bg: /^[A-Fa-f0-9]{6}$/
     };
     if (!utils.isValidRequest(validator, req.body)) {
@@ -15,42 +17,44 @@ router.post('/quicksales', function (req, res) {
         var query = {userId: req.user._id};
         Buttons.findOne(query).select('tabs').exec().then(function (buttons) {
             var r = req.body;
-            var tabIndex = parseInt(r.tab) - 1;
+            var tabs = buttons.tabs;
+            var destinationQuickSales = tabs[parseInt(r.destinationTab) - 1].quickSales;
             if (r.requestType === 'save') {
-                var tabs = buttons.tabs;
-                var quickSales = tabs[tabIndex].quickSales;
-                var isFoundInTab = false;
-                var foundIndex = -1;
-                for (var i = 0; i < quickSales.length; i++) {
-                    var qs = quickSales[i];
-                    if (qs.ean === r.ean) {
-                        isFoundInTab = true;
-                        foundIndex = i;
+                if (r.currentTab === '0') { // save new quick sale button
+                    destinationQuickSales.push({
+                        ean: r.newEan,
+                        bg: r.bg
+                    });
+                } else if (r.destinationTab === r.currentTab) { // save existing button in the current tab
+                    for (var i = 0; i < destinationQuickSales.length; i++) {
+                        var qs = destinationQuickSales[i];
+                        if (qs.ean === r.currentEan) {
+                            qs.ean = r.newEan;
+                            qs.bg = r.bg;
+                            break;
+                        }
+                    }
+                } else { // move existing button to another tab
+                    var currentQuickSales = tabs[parseInt(r.currentTab) - 1].quickSales;
+                    for (var i = 0; i < currentQuickSales.length; i++) {
+                        var qs = currentQuickSales[i];
+                        if (qs.ean === r.currentEan) {
+                            qs.ean = r.newEan;
+                            qs.bg = r.bg;
+                            destinationQuickSales.push(qs);
+                            currentQuickSales.splice(i, 1);
+                            break;
+                        }
+                    }
+                }
+            } else { // remove the button from the destination tab
+                for (var i = 0; i < destinationQuickSales.length; i++) {
+                    var qs = destinationQuickSales[i];
+                    if (qs.ean === r.currentEan) {
+                        destinationQuickSales.splice(i, 1);
                         break;
                     }
                 }
-                if (isFoundInTab) {
-                    var thisQs = quickSales[foundIndex];
-                    thisQs.ean = r.ean;
-                    thisQs.bg = r.bg;
-
-                } else {
-                    for (var i = 0; i < tabs.length; i++) {
-                        var tab = tabs[i];
-                        var thisQuickSales = tab.quickSales;
-                        for (var j = 0; j < thisQuickSales.length; j++) {
-                            if (thisQuickSales[i].ean === r.ean) {
-                                thisQuickSales.splice(i, 1);
-                            }
-                        }
-                    }
-                    quickSales.push({
-                        ean: r.ean,
-                        bg: r.bg
-                    });
-                }
-            } else {
-
             }
 
             buttons.save().then(function (b) {
