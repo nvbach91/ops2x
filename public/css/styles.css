@@ -1467,6 +1467,7 @@ div#taxes-label {
     padding: 0 20px;
     width: 150px;
     height: 66px;   
+    line-height: 66px;   
     display: flex;
     justify-content: center;
 }

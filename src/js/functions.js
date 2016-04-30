@@ -839,10 +839,10 @@ App.init = function () {
             }
         }
         return true;
-    });
-    /*$(window).on("beforeunload", function () {
-     return "You are about to close this application. Any unsaved work will be lost!";
-     });*/
+    });/*
+    $(window).on("beforeunload", function () {
+        return "You are about to close this application. Any unsaved work will be lost!";
+    });*/
 };
 
 //
@@ -879,15 +879,17 @@ App.renderQuickSales = function () {
         for (var j = 0; j < quickSales.length; j++) {
             var qs = quickSales[j];
             var item = articles[articles.binaryIndexOf("ean", qs.ean)];
-            tabsContent +=
-                    '<div class="qs-item">\
+            if (item) {
+                tabsContent +=
+                        '<div class="qs-item">\
                         <button style="background-color:#' + qs.bg + '">' + item.name + '</button>\
                         <div class="qs-id">qs-t' + (i + 1) + "-" + j + '</div>\
                         <div class="qs-price">' + item.price + ' ' + App.settings.currency.symbol + '</div>\
                         <div class="qs-group">' + item.group + '</div>\
                         <div class="qs-tax">' + item.tax + '</div>\
                     </div>'
-                    ;
+                        ;
+            }
         }
         tabsContent += '</div>';
         tabNavsContent += '<div class="tab-nav'
@@ -1413,7 +1415,7 @@ App.renderDashBoard = function () {
                 '<div class="form-header">' + App.lang.dashboard_header + '</div>\
                 <form id="employee-login" action="">\
                     <div class="form-label">' + App.lang.dashboard_label + '</div>\
-                    <input id="employee-username" type="text" title="Employee username " placeholder="' + App.lang.dashboard_username + '">\
+                    <input id="employee-username" type="text" placeholder="' + App.lang.dashboard_username + '">\
                     <input id="employee-pin" type="password" placeholder="PIN">\
                     <input type="submit" value="OK">\
                 </form>');
@@ -1759,18 +1761,18 @@ App.renderForgot = function () {
 
 //--------------------------- CONTROL PANEL ----------------------------------//
 App.createControlPanel = function () {
-    var cpContent = '<div class="cp-item" id="sale-history">Sales History</div>';/*\
+    var cpContent = '<div class="cp-item" id="sale-history">' + App.lang.settings_sales_history + '</div>';/*\
                     <div class="cp-item" id="close-register">Close Register</div>';*/
     if (App.currentEmployee.role === "Admin") {
         cpContent +=
-                '<div class="cp-item" id="acc-settings">Account Settings</div>\
-                <div class="cp-item" id="sta-settings">Staff Settings</div>\
-                <div class="cp-item" id="pos-settings">Point of Sale Settings</div>\
-                <div class="cp-item" id="plu-settings">Edit PLU Articles</div>\
-                <div class="cp-item" id="sgs-settings">Edit Sale Groups</div>\
-                <div class="cp-item" id="tab-settings">Edit Quick Sale Tabs</div>\
-                <div class="cp-item" id="qss-settings">Edit Quick Sale Buttons</div>\
-                <div class="cp-item" id="rec-settings">Edit Receipt</div>';
+                '<div class="cp-item" id="acc-settings">' + App.lang.settings_account + '</div>\
+                <div class="cp-item" id="sta-settings">' + App.lang.settings_staff + '</div>\
+                <div class="cp-item" id="pos-settings">' + App.lang.settings_pos + '</div>\
+                <div class="cp-item" id="plu-settings">' + App.lang.settings_plu + '</div>\
+                <div class="cp-item" id="sgs-settings">' + App.lang.settings_sg + '</div>\
+                <div class="cp-item" id="tab-settings">' + App.lang.settings_tabs + '</div>\
+                <div class="cp-item" id="qss-settings">' + App.lang.settings_qs + '</div>\
+                <div class="cp-item" id="rec-settings">' + App.lang.settings_receipt + '</div>';
     }
     App.cpBody.append($(cpContent));
     App.bindControlPanel();
@@ -1820,7 +1822,7 @@ App.bindControlPanel = function () {
 };
 
 App.createGoBack = function (cb) {
-    return $('<div id="go-back">Go back</div>').click(function () {
+    return $('<div id="go-back">' + App.lang.settings_goback + '</div>').click(function () {
         if (cb) {
             cb();
         }
@@ -1833,9 +1835,9 @@ App.createGoBack = function (cb) {
 App.renderAccountSettings = function () {
     var accDOM =
             App.createCenterBox(false, 
-               '<div class="form-header">Account Settings</div>\
+               '<div class="form-header">' + App.lang.settings_account + '</div>\
                 <form id="change-password" action="" method="POST">\
-                    <div class="form-label">CHANGE YOUR PASSWORD</div>\
+                    <div class="form-label">' + App.lang.form_label_change_password + '</div>\
                     <input id="old-password" type="password" pattern=".{8,128}" title="Password must be at least 8 characters long" placeholder="OLD PASSWORD">\
                     <input id="new-password" type="password" pattern=".{8,128}" title="Password must be at least 8 characters long" placeholder="NEW PASSWORD">\
                     <input id="con-password" type="password" pattern=".{8,128}" title="Password must be at least 8 characters long" placeholder="CONFIRM PASSWORD">\
@@ -1898,18 +1900,18 @@ App.resetRequestButtons = function (modItem) {
         var t = $(this);
         t.removeClass("fail success");
         if (t.hasClass("mi-save")) {
-            t.find("span").text("Save");
+            t.find("span").text(App.lang.settings_save);
         } else if (t.hasClass("mi-remove")) {
-            t.find("span").text("Remove");
+            t.find("span").text(App.lang.settings_remove);
         }
     });
 };
 
 App.requestModifyItem = function (url, data, button) {   
     var isSaveRequestType = data.requestType === "save";
-    var requestPerformingMsg = isSaveRequestType ? "Saving" : "Removing";
-    var requestSuccessMsg = isSaveRequestType ? "Saved" : "Removed";
-    var requestFailMsg = isSaveRequestType ? "Save failed" : "Remove failed";
+    var requestPerformingMsg = isSaveRequestType ? App.lang.settings_saving : App.lang.settings_removing;
+    var requestSuccessMsg = isSaveRequestType ? App.lang.settings_saved : App.lang.settings_removed;
+    var requestFailMsg = App.lang.settings_failed;
     if (data.requestType === "import") {
         requestPerformingMsg = "Importing";
         requestSuccessMsg = "Imported";
@@ -2153,11 +2155,11 @@ App.generateModItemFormDOM = function (type, item) {
     }    
                 dom += '<div class="mi-control">\
                             <button class="mi-save">\
-                                <span>Save</span>\
+                                <span>' + App.lang.settings_save + '</span>\
                                 <div class="mi-loader"></div>\
                             </button>\
                             <button class="mi-remove" ' + ((isFirstAdmin || isReceipt || isPOS || isNewItem) ? 'disabled' : '') + '>\
-                                <span>Remove</span>\
+                                <span>' + App.lang.settings_remove + '</span>\
                                 <div class="mi-loader"></div>\
                             </button>\
                         </div>\
@@ -2177,8 +2179,9 @@ App.bindModSettings = function (modFormContainer, modifyUrl) {
     modFormContainer.find("form.mod-item").submit(function (e) {
         e.preventDefault();
         if (submitted.dataFunction === App.getMiQuickSalesUpdateData
-                && App.catalog.articles.binaryIndexOf("ean", submitted.button.parents().eq(1).find("input[placeholder='EAN']").val()) === -1) {
-            App.showWarning("Article with this EAN doesn't exist");
+                && App.catalog.articles.binaryIndexOf("ean", submitted.button.parents().eq(1).find("input[placeholder='EAN']").val()) === -1
+                && submitted.requestType === "save") {
+                App.showWarning("EAN not found in catalog");
         } else {
             var data = submitted.dataFunction(submitted.requestType, submitted.button);
             App.requestModifyItem(modifyUrl, data, submitted.button);
@@ -2316,7 +2319,7 @@ App.bindModSettings = function (modFormContainer, modifyUrl) {
             modFormContainer.find(".adder").click(function () {
                 var modItem = $(App.generateModItemFormDOM("quicksales", {
                     tab: {title: "Tab number", valid: /^[1-5]$/, value: 0},
-                    ean: {title: "EAN code 1-13 digits", valid: /^\d{1,13}$/, value: 0},
+                    ean: {title: "EAN code 1-13 digits", valid: /^\d{1,13}$/, value: "-"},
                     bg: {title: "Background color", valid: /^[A-Fa-f0-9]{6}$/, value: "334C60"}
                 }));
                 modItem.submit(function (e) {
@@ -2356,10 +2359,10 @@ App.bindModSettings = function (modFormContainer, modifyUrl) {
 //--------------------------- STAFF SETTINGS ---------------------------------//
 App.renderStaffSettings = function () {
     var staffDOM =
-               '<div class="form-header">Staff Settings</div>\
+               '<div class="form-header">' + App.lang.settings_staff + '</div>\
                 <div class="mod-form">\
                     <div class="form-row">\
-                        <div class="form-label">MANAGE YOUR TEAM</div>\
+                        <div class="form-label">' + App.lang.form_label_team + '</div>\
                         <div class="adder"></div>\
                     </div>\
                     <div class="modifier">';
@@ -2410,10 +2413,10 @@ App.findMaxEmployeeNumber = function (modifier) {
 App.renderReceiptSettings = function () {
     var receiptDOM =
             App.createCenterBox(true,
-                   '<div class="form-header">Receipt Settings</div>\
+                   '<div class="form-header">' + App.lang.settings_receipt + '</div>\
                     <div class="mod-form">\
                         <div class="form-row">\
-                            <div class="form-label">EDIT YOU RECEIPT</div>\
+                            <div class="form-label">' + App.lang.form_label_receipt + '</div>\
                         </div>\
                         <div class="modifier">'
                       + App.generateModItemFormDOM("receipt", {
@@ -2444,10 +2447,10 @@ App.getMiReceiptUpdateData = function (requestType, button) {
 App.renderPOSSettings = function () {
     var receiptDOM =
             App.createCenterBox(true,
-                    '<div class="form-header">Point of Sale Settings</div>\
+                    '<div class="form-header">' + App.lang.settings_pos + '</div>\
                     <div class="mod-form">\
                         <div class="form-row">\
-                            <div class="form-label">Configure your Cash Register</div>\
+                            <div class="form-label">' + App.lang.form_label_pos + '</div>\
                         </div>\
                         <div class="modifier">'
                     + App.generateModItemFormDOM("pos", {
@@ -2554,10 +2557,10 @@ App.downloadTextFile = function (filename, text) {
 
 App.renderPLUSettings = function () {
     var pluDOM =
-               '<div class="form-header">PLU Settings</div>\
+               '<div class="form-header">' + App.lang.settings_plu + '</div>\
                 <div class="mod-form">\
                     <div class="form-row">\
-                        <div class="form-label">MANAGE YOUR CATALOG</div>\
+                        <div class="form-label">' + App.lang.form_label_catalog + '</div>\
                     </div>\
                     <div class="form-row control">\
                         <button id="plu-import"><span>Import CSV</span><div class="mi-loader"></div></button>\
@@ -2581,12 +2584,9 @@ App.renderPLUSettings = function () {
     
     var modifier = modFormContainer.find(".modifier");
     var submitted = null;
-    modFormContainer.submit(function(e){
-        e.preventDefault();       
-    });
-    
     var pluInput = modFormContainer.find(".plu-searcher");
-    modFormContainer.find(".plu-search").click(function () {
+    modFormContainer.submit(function(e){
+        e.preventDefault();
         var searchEAN = pluInput.val();
         pluInput.val("");
         if (searchEAN) {
@@ -2649,7 +2649,7 @@ App.renderPLUSettings = function () {
                 modItem.hide().appendTo(modifier).slideDown(App.getAnimationTime());
             }
         }
-    });
+    });    
 
     var pluImportButton = modFormContainer.find("#plu-import").click(function () {
         pluImportInput.wrap("<form>").closest("form").get(0).reset();
@@ -2704,10 +2704,10 @@ App.getMiPluUpdateData = function (requestType, button) {
 //------------------------ SALE GROUPS SETTINGS ------------------------------//
 App.renderSaleGroupsSettings = function () {
     var sgDOM =
-            '<div class="form-header">Sale Groups Settings</div>\
+            '<div class="form-header">' + App.lang.settings_sg + '</div>\
                 <div class="mod-form">\
                     <div class="form-row">\
-                        <div class="form-label">MANAGE YOUR SALE GROUP BUTTONS</div>\
+                        <div class="form-label">' + App.lang.form_label_sg + '</div>\
                         <div class="adder"></div>\
                     </div>\
                     <div class="modifier">';
@@ -2765,7 +2765,7 @@ App.bindColpick = function (t) {
 App.renderSaleHistory = function () {
     var shDOM =
             App.createCenterBox(false, 
-                '<div class="form-header">Sale history</div>\
+                '<div class="form-header">' + App.lang.settings_sales_history + '</div>\
                 <div id="sale-history-container">\
                 </div>');
     App.cpBody.html(shDOM);
@@ -2775,12 +2775,12 @@ App.renderSaleHistory = function () {
     var container = App.cpBody.find("#sale-history-container");
     var receipts = App.sales.receipts;
     var receiptListDOM = '<div class="history-receipt hr-header">\
-                            <div class="hr-col">NUMBER</div>\
-                            <div class="hr-col">DATE</div>\
-                            <div class="hr-col">EMPLOYEE</div>\
-                            <div class="hr-col">TOTAL PAID</div>\
-                            <div class="hr-col">CONFIRMED</div>\
-                            <div class="hr-col">RECEIPT</div>\
+                            <div class="hr-col">' + App.lang.history_number + '</div>\
+                            <div class="hr-col">' + App.lang.history_date + '</div>\
+                            <div class="hr-col">' + App.lang.history_employee + '</div>\
+                            <div class="hr-col">' + App.lang.history_total + '</div>\
+                            <div class="hr-col">' + App.lang.history_confirmed + '</div>\
+                            <div class="hr-col">' + App.lang.history_receipt + '</div>\
                        </div>';
     for (var i = receipts.length - 1; i >= 0; i--) {
         var receipt = receipts[i];
@@ -2948,10 +2948,10 @@ App.renderReceipt = function (receiptObj, isCopy) {
 App.renderTabsSettings = function () {
     var tabs = App.buttons.tabs;
     var tabDOM =
-            '<div class="form-header">Quick Sale Tabs Settings</div>\
+            '<div class="form-header">' + App.lang.settings_tabs + '</div>\
              <div class="mod-form">\
                 <div class="form-row">\
-                   <div class="form-label">MANAGE YOUR QUICK SALE TABS</div>\
+                   <div class="form-label">' + App.lang.form_label_tabs + '</div>\
                    <div class="adder"></div>\
                 </div>\
                 <div class="mi-info">Warning: The content of the removed tab will also be removed</div>\
@@ -2987,10 +2987,10 @@ App.getMiTabsUpdateData = function (requestType, button) {
 App.renderQuickSalesSettings = function () {
     var tabs = App.buttons.tabs;
     var sgDOM =
-            '<div class="form-header">Quick Sale Settings</div>\
+            '<div class="form-header">' + App.lang.settings_qs + '</div>\
              <div class="mod-form">\
                 <div class="form-row">\
-                    <div class="form-label">MANAGE YOUR QUICK SALE BUTTONS</div>\
+                    <div class="form-label">' + App.lang.form_label_qs + '</div>\
                     <div class="adder"></div>\
                 </div>\
                 <div class="mi-info">Tip: Search your catalog for the item, then reference its EAN code here</div>\

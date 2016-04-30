@@ -60,7 +60,7 @@ var GLocalCS = {
     pay_confirm                : "POTVRDIT PLATBU",    
     
     receipt_preview            : "Náhled účtenky",
-    receipt_copy               : "Kopie",
+    receipt_copy               : "Kopie účtenky",
     receipt_tin                : "IČO:",
     receipt_vat                : "DIČ:",
     receipt_receipt            : "Účtenka č. ",
@@ -89,7 +89,42 @@ var GLocalCS = {
     details_group              : "Skupina: ",  
     details_tax                : "Sazba: ",  
     details_tags               : "Tagy: ",  
-    details_description        : "Popis: "
+    details_description        : "Popis: ",
+    
+    settings_goback            : "Zpět",
+    settings_sales_history     : "Historie prodejů",
+    settings_account           : "Nastavení účtu",
+    settings_staff             : "Nastavení personálu",
+    settings_pos               : "Nastavení pokladny",
+    settings_plu               : "Editace PLU",
+    settings_sg                : "Editace zbožních skupin",
+    settings_tabs              : "Editace záložek",
+    settings_qs                : "Editace rychlých tlačítek",
+    settings_receipt           : "Editace účtenky",
+    
+    form_label_change_password : "ZMĚNA HESLA",
+    form_label_team            : "NASTAVENÍ TÝMU",
+    form_label_receipt         : "ZMĚNA ÚČTENKY",
+    form_label_pos             : "KONFIGURACE POKLADNY",
+    form_label_catalog         : "ÚPRAVA KATALOGU",
+    form_label_sg              : "ÚPRAVA ZBOŽNÍCH SKUPIN",
+    form_label_tabs            : "ÚPRAVA ZÁLOŽEK",
+    form_label_qs              : "ÚPRAVA RYCHLÝCH TLAČÍTEK",
+    
+    settings_save              : "Uložit",
+    settings_saving            : "Ukládám",
+    settings_saved             : "Uloženo",
+    settings_remove            : "Odstranit",
+    settings_removing          : "Odstranuji",
+    settings_removed           : "Odstraněno",
+    settings_failed            : "Nezdařilo se",
+    
+    history_number             : "ČÍSLO",
+    history_date               : "DATUM A ČAS",
+    history_employee           : "OBSLUHA",
+    history_total              : "ZAPLACENO",
+    history_confirmed          : "POTVRZENO",
+    history_receipt            : "TISK"
 };
 
 

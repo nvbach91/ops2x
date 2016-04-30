@@ -51,7 +51,7 @@ var GLocalEN = {
     reg_pay                    : "Pay",
     reg_individual_price       : "Individual Price",
     reg_individual_discount    : "Individual Discount",
-    reg_individual_details     : "Details", 
+    reg_details                : "Details", 
     
     pay_payment                : "Payment",
     pay_quick_cash             : "Quick cash payment",
@@ -60,7 +60,7 @@ var GLocalEN = {
     pay_confirm                : "CONFIRM PAYMENT",    
     
     receipt_preview            : "Receipt Preview",
-    receipt_copy               : "Receipt Copy",
+    receipt_copy               : "RRECEIPT COPY",
     receipt_tin                : "TIN:",
     receipt_vat                : "VAT:",
     receipt_receipt            : "Receipt #",
@@ -89,7 +89,43 @@ var GLocalEN = {
     details_group              : "Group: ",  
     details_tax                : "Tax: ",  
     details_tags               : "Tags: ",  
-    details_description        : "Description: "  
+    details_description        : "Description: ",
+    
+    settings_goback            : "Go back",
+    settings_sales_history     : "Sales history",
+    settings_account           : "Account Settings",
+    settings_staff             : "Staff Settings",
+    settings_pos               : "Point of Sale Settings",
+    settings_plu               : "Edit PLU Articles",
+    settings_sg                : "Edit Sale Groups",
+    settings_tabs              : "Edit Quick Sale Tabs",
+    settings_qs                : "Edit Quick Sale Buttons",
+    settings_receipt           : "Edit Receipt",
+    
+    form_label_change_password : "CHANGE YOUR PASSWORD",
+    form_label_team            : "MANAGE YOUR TEAM",
+    form_label_receipt         : "EDIT YOUR RECEIPT",
+    form_label_pos             : "CONFIGURE YOUR CASH REGISTER",
+    form_label_catalog         : "MANAGE YOUR CATALOG",
+    form_label_sg              : "MANAGE YOUR SALE GROUP BUTTONS",
+    form_label_tabs            : "MANAGE YOUR QUICK SALE TABS",
+    form_label_qs              : "MANAGE YOUR QUICK SALE BUTTONS",
+    
+    settings_save              : "Save",
+    settings_saving            : "Saving",
+    settings_saved             : "Saved",
+    settings_remove            : "Remove",
+    settings_removing          : "Removing",
+    settings_removed           : "Removed",
+    settings_failed            : "Failed",
+    
+    history_number             : "NUMBER",
+    history_date               : "DATE",
+    history_employee           : "EMPLOYEE",
+    history_total              : "TOTAL PAID",
+    history_confirmed          : "CONFIRMED",
+    history_receipt            : "RECEIPT"
+    
 };
 
 
