@@ -52,7 +52,7 @@ router.post('/salegroups', function (req, res) {
                     if (sgsLength === b.saleGroups.length + 1) {
                         res.json({success: true, msg: {_id: reqSG._id}});
                     } else {
-                        res.json({success: false, msg: "Sale group wasn't removed"});
+                        res.json({success: false, msg: "Looks like you haven't saved it yet"});
                     }
                 }).catch(function (err) {
                     res.json({success: false, msg: err});
