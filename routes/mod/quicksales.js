@@ -7,7 +7,7 @@ router.post('/quicksales', function (req, res) {
         requestType: /^(save|remove)$/,
         currentTab: /^[0-5]$/,
         destinationTab: /^[1-5]$/,
-        currentEan: /^\d{1,13}$/,
+        currentEan: /^\-|\d{1,13}$/,
         newEan: /^\d{1,13}$/,
         bg: /^[A-Fa-f0-9]{6}$/
     };

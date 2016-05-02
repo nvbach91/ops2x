@@ -1,4 +1,4 @@
-var GLocalCS = {
+App.GLocalCS = {
     sign_in_header             : "Vítejte v OPS",
     sign_in_label              : "OTEVŘENÍ OBCHODU",
     sign_in_username           : "UŽIVATELSKÉ JMÉNO",
@@ -36,9 +36,9 @@ var GLocalCS = {
     dashboard_label            : "PŘIHLÁŠENÍ ZAMĚSTNANCE",
     dashboard_username         : "UŽIVATELSKÉ JMÉNO",
     
-    reg_open_cp                : "Otevřít ovládaví panel",
+    reg_open_cp                : "Otevřít ovládací panel",
     reg_mute                   : "Ztlumit zvuky",
-    reg_logout                 : "Zavřít pokladnu",
+    reg_logout                 : "Zamknout",
     reg_cp                     : "Ovládací panel",
     reg_checkout               : "POKLADNA",
     reg_items                  : "položek",
@@ -78,9 +78,11 @@ var GLocalCS = {
     receipt_checked            : "Obsluha: ",
     
     pay_complete               : "Transakce dokončena!",
+    pay_sync_failed            : "Tržba nebyla odeslána<br>Zřejmě spadlo spojení",
     pay_issue_change           : "Vráceno ",
     pay_print_receipt          : "Vytisknout účtenku",
-    pay_email_receipt          : "Poslat na mail",
+    pay_print_receipt_without  : "Vytisknout účtenku bez FIK",
+    pay_email_receipt          : "Odeslat mail",
     pay_done                   : "Hotovo",
     
     details_title              : "Informace o položce",  
@@ -93,6 +95,8 @@ var GLocalCS = {
     
     settings_goback            : "Zpět",
     settings_sales_history     : "Historie prodejů",
+    settings_close_register    : "Závěrka",
+    settings_off_history       : "Neodeslané prodeje",
     settings_account           : "Nastavení účtu",
     settings_staff             : "Nastavení personálu",
     settings_pos               : "Nastavení pokladny",
@@ -103,6 +107,7 @@ var GLocalCS = {
     settings_receipt           : "Editace účtenky",
     
     form_label_change_password : "ZMĚNA HESLA",
+    form_label_close_register  : "VYGENEROVAT DENNÍ ZÁVĚRKY",
     form_label_team            : "NASTAVENÍ TÝMU",
     form_label_receipt         : "ZMĚNA ÚČTENKY",
     form_label_pos             : "KONFIGURACE POKLADNY",
@@ -117,14 +122,38 @@ var GLocalCS = {
     settings_remove            : "Odstranit",
     settings_removing          : "Odstranuji",
     settings_removed           : "Odstraněno",
-    settings_failed            : "Nezdařilo se",
+    settings_failed            : "Nepodařilo se",
     
     history_number             : "ČÍSLO",
     history_date               : "DATUM A ČAS",
     history_employee           : "OBSLUHA",
     history_total              : "ZAPLACENO",
     history_confirmed          : "POTVRZENO",
-    history_receipt            : "TISK"
+    history_receipt            : "TISK",
+    history_yes                : "ANO",
+    history_no                 : "NE",
+    history_print              : "Vytisknout účtenku",
+    
+    info_close_register        : "Tip: Vyberte den pro generování finanční zprávy",
+    info_use_br                : "Tip: Použijte '&lt;br&gt;' jako nový řádek",
+    info_import                : "Pozor: Import přepíše stávající katalog!",
+    info_plu                   : "Tip: Nové PLU bude vyznačeno zeleně, existující modře",
+    info_tabs                  : "Pozor: Obsah odebrané záložky bude také smazán",
+    info_qs                    : "Tip: Pro vytváření vložte EAN kód zboží",
+    
+    ph_search_ean              : "EAN kód",
+    
+    misc_reason                : "Příčina: ",
+    misc_status                : "Status: ",
+    misc_password_changed      : "Heslo změněno",
+    misc_max_tabs              : "Nelze mít víc než 5 záložek",
+    misc_enter_price           : "Nejdřív zadejte cenu",
+    
+    report_receipts            : "ÚČTENEK",
+    report_takings             : "TRŽBY",
+    report_net                 : "NETTO",
+    report_vat                 : "DPH",
+    report_total_vat           : "DPH"
 };
 
 

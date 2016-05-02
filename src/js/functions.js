@@ -60,7 +60,8 @@ App.correctTime = function (s) {
     return s < 10 ? "0" + s : s;
 };
 
-App.createDateObject = function (s) {
+App.createDateObject = function (s, day) {
+    day = day ? day : "short";
     var now = null;
     if (s) {
         now = new Date(s);
@@ -68,7 +69,7 @@ App.createDateObject = function (s) {
         now = new Date();
     }
     return {
-        day: App.week[now.getDay()].short,
+        day: App.week[now.getDay()][day],
         date: App.correctTime(now.getDate()),
         month: App.correctTime(now.getMonth() + 1),
         year: App.correctTime(now.getFullYear()),
@@ -78,13 +79,18 @@ App.createDateObject = function (s) {
     };
 };
 
+App.getDay = function (s) {    
+    var d = App.createDateObject(s, "long");
+    return d.day + " " + d.date + "/" + d.month + "/" + d.year;
+};
+
 App.getDate = function (s) {
     var d = App.createDateObject(s);
     return d.day + " " + d.date + "/" + d.month + "/" + d.year + " " + d.hh + ":" + d.mm + ":" + d.ss;
 };
 
-App.getDatePrefix = function () {
-    var d = App.createDateObject();
+App.getDatePrefix = function (s) {
+    var d = App.createDateObject(s);
     return d.year + "" + d.month + "" + d.date;
 };
 
@@ -509,7 +515,7 @@ App.bindSaleGroups = function (sg) {
         if (lastItem.size() && t.attr("sg-id") !== lastItem.find(".si-id").text()
                 && App.isInRegistrySession/*.text() === "1"*/) {
             App.jPriceInput.val("");            
-            App.showWarning("You must enter a price");
+            App.showWarning(App.lang.misc_enter_price);
             return false;
         }
         var v = App.jPriceInput.val();
@@ -616,7 +622,7 @@ App.createWebRegisterDOM = function () {
                     <div id="cp-link" title="' + App.lang.reg_open_cp + '"></div>\
                     <div id="muter" title="' + App.lang.reg_mute + '"></div>\
                     <div id="profile">' + (App.currentEmployee.name || 'LOGIN') + '</div>\
-                    <div id="logout">' + App.lang.reg_logout + '</div>\
+                    <div id="logout" title="' + App.lang.reg_logout + '"></div>\
                 </div>\
              </nav>\
              <div id="control-panel">\
@@ -784,12 +790,15 @@ App.loadLocalStorage = function () {
     } else {
         App.saveLocale("en");
     }
+    if (!localStorage.hasOwnProperty("offlineSales")) {
+        localStorage.offlineSales = "[]";
+    } 
 };
 
 App.loadLocale = function () {
     switch (App.locale) {
         case "cs" :
-            App.lang = GLocalCS;
+            App.lang = App.GLocalCS;
             App.week = [
                 {short: "Ne", long: "Neděle"},
                 {short: "Po", long: "Pondělí"},
@@ -801,7 +810,7 @@ App.loadLocale = function () {
             ];
             break;
         default:
-            App.lang = GLocalEN;
+            App.lang = App.GLocalEN;
             App.week = [
                 {short: "Sun", long: "Sunday"},
                 {short: "Mon", long: "Monday"},
@@ -915,6 +924,66 @@ App.renderQuickSales = function () {
             tabQs.eq(index).addClass("activeTab");
         });
     });
+};
+
+App.generateEmailReceipt = function (currentReceiptObj) {
+    var emailReceipt = $("<div>").addClass("email-receipt");
+    var emailInput = $("<input>").attr("id", "email-input").focus(function () {
+        emailInput.removeClass("invalid");
+        if (emailInput.val() !== "@") {
+            emailInput.val("@");
+            emailInput.select();
+        }
+    }).val("@").appendTo(emailReceipt);
+    var sendEmailButton = $("<button>").attr("id", "email-send").text(App.lang.pay_email_receipt).click(function () {
+        var recipient = emailInput.val();
+        if (App.isValidEmail(recipient)) {
+            emailInput.prop("disabled", true);
+            sendEmailButton.prop("disabled", true);
+            currentReceiptObj.recipient = recipient;
+            currentReceiptObj.shop =
+                    App.settings.name + "\n"
+                    + App.settings.address.street + "\n"
+                    + App.settings.address.city + " "
+                    + App.settings.address.zip + " "
+                    + App.settings.address.country + "\n"
+                    + "TIN: " + App.settings.tin + "\n"
+                    + "VAT: " + App.settings.vat + "\n"
+                    + "Phone: " + App.settings.phone;
+            sendEmailButton.html('<div class="mi-loader loading"></div>');
+            $.ajax({
+                type: "POST",
+                url: "/mod/mailreceipt",
+                dataType: "json",
+                data: currentReceiptObj
+            }).done(function (resp) {
+                if (resp.success) {
+                    sendEmailButton.html("Email sent");
+                    sendEmailButton.addClass("sent");
+                } else {
+                    sendEmailButton.html("Email could not be sent. Try again");
+                    sendEmailButton.prop("disabled", false);
+                    emailInput.prop("disabled", false);
+                    console.log(resp);
+                }
+            }).fail(function (resp) {
+                sendEmailButton.html("Email could not be sent. Try again");
+                sendEmailButton.prop("disabled", false);
+                emailInput.prop("disabled", false);
+                console.log(resp);
+            });
+            //App.sendMailReceipt($(this), emailInput, recipient, currentReceipt);
+        } else {
+            emailInput.addClass("invalid").val("Invalid email");
+        }
+    }).appendTo(emailReceipt);
+    return emailReceipt;
+};
+
+App.saveLocalSale = function (sale){
+    var offlineSales = JSON.parse(localStorage.offlineSales);
+    offlineSales.push(sale);
+    localStorage.offlineSales = JSON.stringify(offlineSales);
 };
 
 // render web register view
@@ -1230,56 +1299,7 @@ App.renderWebRegister = function () {
                             window.print();
                             receiptPrinted = true;
                         }).appendTo(payment);
-                        var emailReceipt = $("<div>").addClass("email-receipt").appendTo(payment);
-                        var emailInput = $("<input>").attr("id", "email-input").focus(function () {
-                            emailInput.removeClass("invalid");
-                            if (emailInput.val() !== "@") {
-                                emailInput.val("@");
-                                emailInput.select();
-                            }
-                        }).val("@").appendTo(emailReceipt);
-                        var sendEmailButton = $("<button>").attr("id", "email-send").text(App.lang.pay_email_receipt).click(function () {
-                            var recipient = emailInput.val();
-                            if (App.isValidEmail(recipient)) {
-                                emailInput.prop("disabled", true);
-                                sendEmailButton.prop("disabled", true);
-                                currentReceiptObj.recipient = recipient;
-                                currentReceiptObj.shop =
-                                        App.settings.name + "\n"
-                                        + App.settings.address.street + "\n"
-                                        + App.settings.address.city + " "
-                                        + App.settings.address.zip + " "
-                                        + App.settings.address.country + "\n"
-                                        + "TIN: " + App.settings.tin + "\n"
-                                        + "VAT: " + App.settings.vat + "\n"
-                                        + "Phone: " + App.settings.phone;
-                                sendEmailButton.html('<div class="mi-loader loading"></div>');
-                                $.ajax({
-                                    type: "POST",
-                                    url: "/mod/mailreceipt",
-                                    dataType: "json",
-                                    data: currentReceiptObj
-                                }).done(function (resp) {
-                                    if (resp.success) {
-                                        sendEmailButton.html("Email sent");
-                                        sendEmailButton.addClass("sent");
-                                    } else {
-                                        sendEmailButton.html("Email could not be sent. Try again");                                    
-                                        sendEmailButton.prop("disabled", false);
-                                        emailInput.prop("disabled", false);
-                                        console.log(resp);
-                                    }
-                                }).fail(function (resp) {
-                                    sendEmailButton.html("Email could not be sent. Try again");                                    
-                                    sendEmailButton.prop("disabled", false);
-                                    emailInput.prop("disabled", false);
-                                    console.log(resp);
-                                });
-                                //App.sendMailReceipt($(this), emailInput, recipient, currentReceipt);
-                            } else {
-                                emailInput.addClass("invalid").val("Invalid email");
-                            }
-                        }).appendTo(emailReceipt);
+                        var emailReceipt = App.generateEmailReceipt(currentReceiptObj);
                         emailReceipt.appendTo(payment);
                         //payment.append(paymentComplete);
                         $("<button>").attr("id", "done-payment").text(App.lang.pay_done).click(function () {
@@ -1295,9 +1315,29 @@ App.renderWebRegister = function () {
                         console.log(resp);
                     }
                 }).fail(function (resp) {
-                    App.closeCurtain();
-                    console.log(resp);
-                    App.showWarning("Sale sync failed: " + resp.status);
+                    paymentBody.addClass("failed");
+
+                    payment.children().remove();
+                    App.discardSale(true);
+                    $("<div>").addClass("pc-label").html(App.lang.pay_sync_failed).appendTo(payment);
+                    if (App.changeAmount !== "0.00") {
+                        $("<div>").addClass("pc-change").text(App.lang.pay_issue_change + App.changeAmount + " " + App.settings.currency.symbol).appendTo(payment);
+                    }
+                    $("<button>").attr("id", "print-receipt").text(App.lang.pay_print_receipt_without).click(function () {
+                        window.print();
+                        receiptPrinted = true;
+                    }).appendTo(payment);
+                    //payment.append(paymentComplete);
+                    $("<button>").attr("id", "done-payment").text(App.lang.pay_done).click(function () {
+                        if (!receiptPrinted) {
+                            window.print();
+                        }
+                        App.closeCurtain();
+                        App.jPriceInput.focus();
+                    }).appendTo(payment);
+                    App.saveLocalSale(currentReceiptObj);
+                    //currentReceiptObj.items = JSON.parse(currentReceiptObj.items);
+                    //App.sales.receipts.push(currentReceiptObj);                    
                 });
             }
         }).appendTo(payment);
@@ -1532,10 +1572,14 @@ App.renderSignin = function () {
             App.saveLocale("cs");
         }
         if (!t.hasClass("active")) {
+            var currentUsername = $("#username").val();
+            var currentPassword = $("#password").val();
             t.addClass("active");
             t.siblings().removeClass("active");     
             App.loadLocale();
             App.renderSignin();
+            $("#username").val(currentUsername);
+            $("#password").val(currentPassword);
         }
     });
     var form = $("#sign-in");
@@ -1761,8 +1805,9 @@ App.renderForgot = function () {
 
 //--------------------------- CONTROL PANEL ----------------------------------//
 App.createControlPanel = function () {
-    var cpContent = '<div class="cp-item" id="sale-history">' + App.lang.settings_sales_history + '</div>';/*\
-                    <div class="cp-item" id="close-register">Close Register</div>';*/
+    var cpContent = '<div class="cp-item" id="sale-history">' + App.lang.settings_sales_history + '</div>\
+                    <div class="cp-item" id="off-history">' + App.lang.settings_off_history + '</div>\
+                    <div class="cp-item" id="close-register">' + App.lang.settings_close_register + '</div>';
     if (App.currentEmployee.role === "Admin") {
         cpContent +=
                 '<div class="cp-item" id="acc-settings">' + App.lang.settings_account + '</div>\
@@ -1786,10 +1831,11 @@ App.bindControlPanel = function () {
             case "sale-history":
                 t.click(App.renderSaleHistory);
                 break;
+            case "off-history":
+                t.click(App.renderOffHistory);
+                break;
             case "close-register":
-                t.click(function () {
-                    t.text("Not available");
-                });
+                t.click(App.renderCloseRegister);
                 break;
             case "acc-settings":
                 t.click(App.renderAccountSettings);
@@ -1874,7 +1920,7 @@ App.renderAccountSettings = function () {
         }).done(function (resp) {
             App.closeCurtain();
             if (resp.passwordChanged === true) {
-                App.showWarning("Password was successfully changed");
+                App.showWarning(App.lang.misc_password_changed);
             } else {
                 App.showWarning(resp.msg);
             }
@@ -2016,12 +2062,12 @@ App.requestModifyItem = function (url, data, button) {
         } else {
             loader.removeClass("loading");
             button.addClass("fail");
-            span.html(requestFailMsg + "<br>Reason: " + resp.msg);
+            span.html(requestFailMsg + "<br>" + App.lang.misc_reason + ": " + resp.msg);
         }
     }).fail(function (resp) {
         loader.removeClass("loading");
         button.addClass("fail");
-        span.html(requestFailMsg + "<br>Status: " + resp.status + " " + resp.responseText);
+        span.html(requestFailMsg + "<br>" + App.lang.misc_status + ": " + resp.status + " " + resp.responseText);
         if (resp.status === 0) {
             App.closeCurtain();
             App.showWarning("Network error. Server may be down or your internet connection is lost");
@@ -2039,7 +2085,7 @@ App.generateModItemFormDOM = function (type, item) {
             disabledFields = ["number"];
             break;
         case "receipt":
-            info = "Tip: Use '&lt;br&gt;' to add new lines";
+            info = App.lang.info_use_br;
             break;
         case "pos":
             break;
@@ -2135,12 +2181,12 @@ App.generateModItemFormDOM = function (type, item) {
                                 placeholder="' + keys[i].toUpperCase() 
                                 + '" value="' + item[keys[i]].value + '">';
                 } else {
-                var qsEAN = "";
+                var current_EAN = "";
                 if (keys[i] === "ean" && isQS) {
-                    qsEAN = 'current-ean="' + item[keys[i]].value + '"';
+                    current_EAN = 'current-ean="' + item[keys[i]].value + '"';
                 }
                 var validator = item[keys[i]].valid.toString().replace(/[\/^$]/g, "");
-                dom +=     '<input ' + qsEAN + 'class="" \
+                dom +=     '<input ' + current_EAN + 'class="" \
                                    type="text" \
                                    pattern="' + validator + '" \
                                    title="' + item[keys[i]].title + '" \
@@ -2155,12 +2201,16 @@ App.generateModItemFormDOM = function (type, item) {
     }    
                 dom += '<div class="mi-control">\
                             <button class="mi-save">\
-                                <span>' + App.lang.settings_save + '</span>\
-                                <div class="mi-loader"></div>\
+                                <div class="mi-button-wrap">\
+                                    <span>' + App.lang.settings_save + '</span>\
+                                    <div class="mi-loader"></div>\
+                                </div>\
                             </button>\
                             <button class="mi-remove" ' + ((isFirstAdmin || isReceipt || isPOS || isNewItem) ? 'disabled' : '') + '>\
-                                <span>' + App.lang.settings_remove + '</span>\
-                                <div class="mi-loader"></div>\
+                                <div class="mi-button-wrap">\
+                                    <span>' + App.lang.settings_remove + '</span>\
+                                    <div class="mi-loader"></div>\
+                                </div>\
                             </button>\
                         </div>\
                     </div>\
@@ -2282,7 +2332,7 @@ App.bindModSettings = function (modFormContainer, modifyUrl) {
         case "/mod/tabs":           
             modFormContainer.find(".adder").click(function () {
                 if (App.buttons.tabs.length >= 5) {
-                    App.showWarning("The maximum number of tabs is 5");
+                    App.showWarning(App.lang.misc_max_tabs);
                 } else {
                     var modItem = $(App.generateModItemFormDOM("tabs", {
                         number: {title: "Tab number", valid: /^\d{1,13}$/, value: App.buttons.tabs.length + 1},
@@ -2324,8 +2374,14 @@ App.bindModSettings = function (modFormContainer, modifyUrl) {
                 }));
                 modItem.submit(function (e) {
                     e.preventDefault();
-                    var data = submitted.dataFunction(submitted.requestType, submitted.button);
-                    App.requestModifyItem(modifyUrl, data, submitted.button);
+                    if (submitted.dataFunction === App.getMiQuickSalesUpdateData
+                            && App.catalog.articles.binaryIndexOf("ean", submitted.button.parents().eq(1).find("input[placeholder='EAN']").val()) === -1
+                            && submitted.requestType === "save") {
+                        App.showWarning("EAN not found in catalog");
+                    } else {
+                        var data = submitted.dataFunction(submitted.requestType, submitted.button);
+                        App.requestModifyItem(modifyUrl, data, submitted.button);
+                    }
                 });
                 modItem.find("input").change(function () {
                     App.resetRequestButtons(modItem);
@@ -2563,15 +2619,20 @@ App.renderPLUSettings = function () {
                         <div class="form-label">' + App.lang.form_label_catalog + '</div>\
                     </div>\
                     <div class="form-row control">\
-                        <button id="plu-import"><span>Import CSV</span><div class="mi-loader"></div></button>\
+                        <button id="plu-import">\
+                            <div class="mi-button-wrap">\
+                                <span>Import CSV</span>\
+                                <div class="mi-loader"></div>\
+                            </div>\
+                        </button>\
                         <input type="file" id="plu-import-input" accept=".csv"/>\
                         <button id="plu-export">Export CSV</button>\
                     </div>\
-                    <div class="mi-info">Warning: Import will overwrite the current catalog!</div>\
+                    <div class="mi-info">' + App.lang.info_import + '</div>\
                     <div class="hline"></div>\
-                    <div class="mi-info">Tip: New PLU will be highlighted green if the EAN code is not found</div>\
+                    <div class="mi-info">' + App.lang.info_plu + '</div>\
                     <form class="form-row control">\
-                        <input class="plu-searcher" placeholder="SEARCH EAN CODE" pattern="\\d{1,13}" title="EAN must have 1-13 digits">\
+                        <input class="plu-searcher" placeholder="' + App.lang.ph_search_ean + '" pattern="\\d{1,13}" title="EAN must have 1-13 digits">\
                         <button class="plu-search">Search / Add</button>\
                     </form>\
                     <div class="modifier"></div>\
@@ -2658,8 +2719,7 @@ App.renderPLUSettings = function () {
     });
     var pluImportInput = modFormContainer.find("#plu-import-input");
     pluImportInput.change(function (e) {
-        var files = e.target.files;
-        var file = files[0];
+        var file = e.target.files[0];
         var size = file.size;
         var reader = new FileReader();
         reader.onload = function () {
@@ -2761,6 +2821,155 @@ App.bindColpick = function (t) {
     });
 };
 
+//------------------------ RENDER OFFLINE SALE HISTORY -----------------------//
+App.renderCloseRegister = function () {
+    var receipts = App.sales.receipts;
+    var crDOM =
+            '<div class="form-header">' + App.lang.settings_close_register + '</div>\
+             <div class="mod-form">\
+                <div class="form-row">\
+                   <div class="form-label">' + App.lang.form_label_close_register + '</div>\
+                </div>\
+                <div class="mi-info">' + App.lang.info_close_register + '</div>\
+                <div class="modifier">';
+    var dayGroups = {};
+    var lastPrefix = "";
+    for (var i = receipts.length - 1; i >= 0; i--) {
+        var receipt = receipts[i];
+        var date = new Date(receipt.date);
+        var prefix = App.getDatePrefix(date);
+        
+        if (lastPrefix !== prefix) {
+            dayGroups[prefix] = [];
+            lastPrefix = prefix;
+        }
+        dayGroups[prefix].push(receipt);
+    }
+    var dgKeys = Object.keys(dayGroups);
+    for (var i = dgKeys.length - 1; i >= 0; i--) {
+        var key = dgKeys[i];
+        var dayReceipts = dayGroups[key];
+        var takings = 0;
+        var net = {0: 0, 10: 0, 15: 0, 21: 0};
+        var vat = {0: 0, 10: 0, 15: 0, 21: 0};
+        for (var j = 0; j < dayReceipts.length; j++) {
+            var dayReceipt = dayReceipts[j];
+            var receiptItems = dayReceipt.items;
+            for (var k = 0; k < receiptItems.length; k++) {
+                var receiptItem = receiptItems[k];
+                var thisTotal = parseFloat(receiptItem.price) * receiptItem.quantity;
+                takings += thisTotal;
+                var thisVat = thisTotal * receiptItem.tax_rate / 100;
+                net[receiptItem.tax_rate] += thisTotal - thisVat;
+                vat[receiptItem.tax_rate] += thisVat;
+            }
+        }
+        var totalVat = vat[0] + vat[10] + vat[15] + vat[21];
+        crDOM += '<form class="mod-item">'
+                + '  <div class="mi-header">' + App.getDay(dayReceipts[0].date) + '</div>'
+                + '  <div class="mi-body hidden">'
+                + '    <div class="mi-row">'
+                + '      <div class="mi-row-label">' + App.lang.report_receipts + '</div>'
+                + '      <input disabled value="' + dayReceipts.length + '">'
+                + '    </div>'
+                + '    <div class="mi-row">'
+                + '      <div class="mi-row-label">' + App.lang.report_takings + '</div>'
+                + '      <input disabled value="' + takings.formatMoney() + '">'
+                + '    </div>'
+                + '    <div class="mi-row">'
+                + '      <div class="mi-row-label">' + App.lang.report_total_vat + '</div>'
+                + '      <input disabled value="' + totalVat.formatMoney() + '">'
+                + '    </div>';
+        var netKeys = Object.keys(net);
+        for (var j = netKeys.length - 1; j >= 0; j--) {
+            var netKey = netKeys[j];
+            crDOM +=
+                      '    <div class="mi-row">'
+                    + '      <div class="mi-row-label">' + App.lang.report_net + ' ' + netKey + '</div>'
+                    + '      <input disabled value="' + net[netKey].formatMoney() + '">'
+                    + '    </div>'
+                    + '    <div class="mi-row">'
+                    + '      <div class="mi-row-label">' + App.lang.report_vat + ' ' + netKey + '</div>'
+                    + '      <input disabled value="' + vat[netKey].formatMoney() + '">'
+                    + '    </div>';
+        }
+        crDOM += '  </div>'
+                + '</form>';
+    }
+    crDOM += '</div>\
+             </div>';
+    App.cpBody.html(App.createCenterBox(true, crDOM));
+    App.cpBody.find(".center-box").prepend(App.createGoBack());
+    
+    App.cpBody.find(".mi-header").click(function(){
+        $(this).next(".mi-body").slideToggle(App.getAnimationTime());
+    }); 
+    
+};
+
+//------------------------ RENDER OFFLINE SALE HISTORY -----------------------//
+App.renderOffHistory = function () {
+    var shDOM =
+            App.createCenterBox(false, 
+                '<div class="form-header">' + App.lang.settings_off_history + '</div>\
+                <div id="off-history-container">\
+                </div>');
+    App.cpBody.html(shDOM);
+    
+    App.cpBody.find(".center-box").prepend(App.createGoBack());
+    
+    var container = App.cpBody.find("#off-history-container");
+    var offlineReceipts = JSON.parse(localStorage.offlineSales);
+    for (var i = 0; i < offlineReceipts.length; i++) {
+        var offlineReceipt = offlineReceipts[i];
+        offlineReceipt.items = JSON.parse(offlineReceipt.items);
+    }
+    var receiptListDOM = '<div class="history-receipt hr-header">\
+                            <div class="hr-col">' + App.lang.history_number + '</div>\
+                            <div class="hr-col">' + App.lang.history_date + '</div>\
+                            <div class="hr-col">' + App.lang.history_employee + '</div>\
+                            <div class="hr-col">' + App.lang.history_total + '</div>\
+                            <div class="hr-col">' + App.lang.history_confirmed + '</div>\
+                            <div class="hr-col">' + App.lang.history_receipt + '</div>\
+                       </div>';
+    for (var i = offlineReceipts.length - 1; i >= 0; i--) {
+        var receipt = offlineReceipts[i];
+        var receiptTotal = 0;
+        var items = receipt.items;
+        for(var j = 0; j < items.length; j++) {
+            receiptTotal += (parseFloat(items[j].price) * items[j].quantity);
+        }
+        receiptListDOM += 
+                '<div class="history-receipt hr-row">\
+                    <div class="hr-col hr-index">' + i + '</div>\
+                    <div class="hr-col">' + receipt.number + '</div>\
+                    <div class="hr-col">' + App.getDate(receipt.date) + '</div>\
+                    <div class="hr-col">' + receipt.clerk + '</div>\
+                    <div class="hr-col">' + receiptTotal.formatMoney() + ' ' + App.settings.currency.symbol + '</div>\
+                    <div class="hr-col">' + (receipt.confirmed ? App.lang.history_yes : App.lang.history_no) + '</div>\
+                    <div class="hr-col hr-print" title="' + App.lang.history_print + '"></div>\
+                </div>';
+    }
+
+    container.append(receiptListDOM);
+    container.find(".hr-print").click(function () {
+        var t = $(this);
+        var receiptIndex = parseInt(t.parent().find(".hr-index").text());
+
+        var paymentBody = $("<div>").addClass("pb-body");
+        var container = $("<div>").addClass("receipt-container");
+
+        container.append(App.renderReceipt(offlineReceipts[receiptIndex], true));
+        paymentBody.append(container);
+
+        App.jPrinterCopyReceipt = $("<div id='payment-box'></div>").append(paymentBody);
+
+        App.showInCurtain(App.jPrinterCopyReceipt);
+
+        window.print();
+    });
+};
+
 //------------------------ RENDER SALE HISTORY -------------------------------//
 App.renderSaleHistory = function () {
     var shDOM =
@@ -2796,8 +3005,8 @@ App.renderSaleHistory = function () {
                     <div class="hr-col">' + App.getDate(receipt.date) + '</div>\
                     <div class="hr-col">' + receipt.clerk + '</div>\
                     <div class="hr-col">' + receiptTotal.formatMoney() + ' ' + App.settings.currency.symbol + '</div>\
-                    <div class="hr-col">' + (receipt.confirmed ? "YES" : "NO") + '</div>\
-                    <div class="hr-col hr-print" title="Print this receipt"></div>\
+                    <div class="hr-col">' + (receipt.confirmed ? App.lang.history_yes : App.lang.history_no) + '</div>\
+                    <div class="hr-col hr-print" title="' + App.lang.history_print + '"></div>\
                 </div>';
     }
 
@@ -2954,7 +3163,7 @@ App.renderTabsSettings = function () {
                    <div class="form-label">' + App.lang.form_label_tabs + '</div>\
                    <div class="adder"></div>\
                 </div>\
-                <div class="mi-info">Warning: The content of the removed tab will also be removed</div>\
+                <div class="mi-info">' + App.lang.info_tabs + '</div>\
                 <div class="modifier">';
     for (var i = 0; i < tabs.length; i++) {
         var thisTab = tabs[i];
@@ -2993,7 +3202,7 @@ App.renderQuickSalesSettings = function () {
                     <div class="form-label">' + App.lang.form_label_qs + '</div>\
                     <div class="adder"></div>\
                 </div>\
-                <div class="mi-info">Tip: Search your catalog for the item, then reference its EAN code here</div>\
+                <div class="mi-info">' + App.lang.info_qs+ '</div>\
                 <div class="modifier">';
     for (var i = 0; i < tabs.length; i++) {
         var tab = tabs[i];

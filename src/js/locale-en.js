@@ -1,4 +1,4 @@
-var GLocalEN = {
+App.GLocalEN = {
     sign_in_header             : "Welcome to OPS",
     sign_in_label              : "OPEN YOUR STORE",
     sign_in_username           : "USERNAME",
@@ -38,7 +38,7 @@ var GLocalEN = {
     
     reg_open_cp                : "Open control panel",
     reg_mute                   : "Mute beep sound",
-    reg_logout                 : "Close register",
+    reg_logout                 : "Lock",
     reg_cp                     : "Control Panel",
     reg_checkout               : "CHECKOUT",
     reg_items                  : "item",    
@@ -78,8 +78,10 @@ var GLocalEN = {
     receipt_checked            : "Checked: ",
     
     pay_complete               : "Sale complete!",
+    pay_sync_failed            : "Sale is not sent<br>Internet connection is lost",
     pay_issue_change           : "Issue change of ",
     pay_print_receipt          : "Print receipt",
+    pay_print_receipt_without  : "Print receipt without FIK",
     pay_email_receipt          : "Email receipt",
     pay_done                   : "DONE",
     
@@ -93,6 +95,8 @@ var GLocalEN = {
     
     settings_goback            : "Go back",
     settings_sales_history     : "Sales history",
+    settings_close_register    : "Close register",
+    settings_off_history       : "Offline Sales",
     settings_account           : "Account Settings",
     settings_staff             : "Staff Settings",
     settings_pos               : "Point of Sale Settings",
@@ -103,6 +107,7 @@ var GLocalEN = {
     settings_receipt           : "Edit Receipt",
     
     form_label_change_password : "CHANGE YOUR PASSWORD",
+    form_label_close_register  : "MAKE DAILY REPORTS",
     form_label_team            : "MANAGE YOUR TEAM",
     form_label_receipt         : "EDIT YOUR RECEIPT",
     form_label_pos             : "CONFIGURE YOUR CASH REGISTER",
@@ -124,8 +129,31 @@ var GLocalEN = {
     history_employee           : "EMPLOYEE",
     history_total              : "TOTAL PAID",
     history_confirmed          : "CONFIRMED",
-    history_receipt            : "RECEIPT"
+    history_receipt            : "PRINT",
+    history_yes                : "YES",
+    history_no                 : "NO",
+    history_print              : "Print this receipt",
     
+    info_close_register        : "Tip: Choose a day to generate report",
+    info_use_br                : "Tip: Use '&lt;br&gt;' to add new lines",
+    info_import                : "Warning: Import will overwrite the current catalog!",
+    info_plu                   : "Tip: New PLU will be highlighted green",
+    info_tabs                  : "Warning: The content of the removed tab will also be removed",
+    info_qs                    : "Tip: Search your catalog for the item, then reference its EAN code here",
+    
+    ph_search_ean              : "SEARCH EAN CODE",
+    
+    misc_reason                : "Reason: ",
+    misc_status                : "Status: ",
+    misc_password_changed      : "Password changed",
+    misc_max_tabs              : "Cannot have more than 5 tabs",
+    misc_enter_price           : "You must enter a price",
+    
+    report_receipts            : "RECEIPTS",
+    report_takings             : "TAKINGS",
+    report_net                 : "NET",
+    report_vat                 : "VAT",
+    report_total_vat           : "VAT"
 };
 
 

@@ -96,7 +96,7 @@ form, .mod-form {
     flex-direction: column;
 }
 .mod-form {
-    max-height: 480px;
+    max-height: 500px;
 }
 form select {
     padding: 5px 20px;
@@ -268,6 +268,12 @@ div#cp-link {
     text-indent: 20px;
     background-image: url("../img/ico/userwhite.svg");    
 }
+div#logout {
+    padding: 0 20px;
+    background-position: center;
+    background-size: 15px;
+    background-image: url("../img/ico/power.svg");
+}
 #control-panel {
     z-index: 1;
     display: flex;
@@ -290,10 +296,17 @@ div#cp-link {
     max-width: 640px;
     margin-bottom: 10px;
     background-image: url("../img/ico/goback.svg");
-    background-position: 20px;
+    background-position: 10px;
     background-repeat: no-repeat;
-    background-size: 20px;
-    line-height: 40px;
+    background-size: 30px;
+    line-height: 50px;
+    /*----ATTENTION----*/
+    text-indent: 30px;
+    position: absolute;
+    width: 120px;
+    top: 0;
+    left: 0;
+    background-color: transparent;
 }
 #go-back:hover {
     background-color: #334C60;
@@ -428,7 +441,11 @@ div#cp-link {
     margin: 5px;
     display: flex;
 }
-.mi-control span {
+.mi-button-wrap {
+    display: flex;
+    width: 100%;
+}
+.mi-button-wrap span {
     margin: auto;
 }
 .mi-remove {
@@ -456,6 +473,7 @@ div#cp-link {
 }
 #plu-import {
     display: flex;
+    align-items: center;
 }
 #plu-import .loading {
     margin: 0 0 0 10px;
@@ -464,12 +482,13 @@ div#cp-link {
     position: absolute;
     top: -9999px;
 }
-#sale-history-container {
+#sale-history-container, #off-history-container {
     margin-top: 5px;
     font-size: 14px;
     width: 100%;
     max-width: 1024px;
-    overflow-x: auto;
+    overflow: auto;
+    max-height: 480px;
 }
 .hr-col:first-child {
     border-left: 5px solid transparent;
@@ -522,9 +541,9 @@ div#cp-link {
     justify-content: space-between;
 }
 #main.blur {
-    -webkit-filter: blur(1px);
+    /*-webkit-filter: blur(1px);
     -moz-filter: blur(1px);
-    filter: blur(1px);
+    filter: blur(1px);*/
 }
 #cp-header {
     display: flex;
@@ -572,7 +591,7 @@ div#cp-link {
     line-height: 50px;
     width: 100%;
     max-width: 320px;
-    margin: 5px auto;
+    margin: 4px auto;
     background-size: 25px;
     background-position: 20px center;
     background-repeat: no-repeat;
@@ -581,6 +600,7 @@ div#cp-link {
     background-color: #425B71;
 }
 #sale-history {background-image: url('../img/ico/history.svg');}
+#off-history {background-image: url('../img/ico/offline.svg');}
 #close-register {background-image: url('../img/ico/closeregister.svg');}
 #acc-settings {background-image: url('../img/ico/userwhite.svg');}
 #sta-settings {background-image: url('../img/ico/staff.svg');}
@@ -1161,6 +1181,9 @@ button.db-close:before, button.pb-close:before, button.wb-close:before {
 .pb-body.done {
     background-color: #FFF;    
 }
+.pb-body.failed {
+    background-color: #FDEFD9;    
+}
 .receipt-container {
     margin: 0 auto;
     padding: 10px 20px;
@@ -1444,7 +1467,7 @@ div#taxes-label {
     font-size: 28px;
 }
 .pc-label:before {
-    content: "\2713";
+    /*content: "\2713";*/
 }
 .pc-change {
     font-size: 18px;
@@ -1620,10 +1643,6 @@ div#taxes-label {
     #tab-navs {
         min-height: 30px;
     }
-    #go-back {
-        background-size: 40px;
-        line-height: 75px;
-    }
     #paycalc {
         min-height: 75px;
     }
@@ -1641,6 +1660,7 @@ div#taxes-label {
         order: 2;
         width: 640px;
         justify-content: center;
+        align-items: center;
     }
     #cash-input {
         padding: 5px 10px;
@@ -1654,7 +1674,7 @@ div#taxes-label {
         order: 1;
         display: flex;
         padding: 5px 20px 30px 20px;
-        margin: initial;
+        margin: 0;
     }
     .receipt-body {
         max-height: none;
@@ -1679,7 +1699,7 @@ div#taxes-label {
     #col-2 {
         order: 2;
         padding: 0 4px 0 2px;
-        margin-top: initial;
+        margin-top: 0;
     }
     #sale-list input.si-quantity {
         width: 35px;
@@ -1919,7 +1939,7 @@ div#taxes-label {
     }
     .pb-body {
         flex-direction: column;
-        background-color: transparent;
+        background-color: #FFF !important;
     }
     .company-name, .address-1, .address-2, .tin, .vat, #receipt-number, .receipt-custom-header {
         display: block;
