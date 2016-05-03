@@ -5,7 +5,7 @@ https://nvbach91@bitbucket.org/nvbach91/ops2x.git
 ```
 
 # Latest updates #
-* Preview version is now online. [Link](https://ops2x-62687.onmodulus.net/)
+* Preview version is now online. [https://ops2x-62687.onmodulus.net/](https://ops2x-62687.onmodulus.net/)
 * https server is available with self signed key for testing, see Run Project for details
 
 # README #
@@ -119,3 +119,42 @@ npm install -g modulus
 * ~~implement sale history~~
 * ~~implement settings module~~
 * ~~add keyboard shortcuts~~
+
+## User guide ##
+### Printer setup ###
+* buy a thermal receipt printer and install its driver, buy a 80mm width type
+* open you web browser (try to use Chrome lads)
+* CTRL+P to open print dialog and set printer to the thermal printer
+* change margins to none and you're good to go
+
+### Barcode scanner setup ###
+* plug you scanner to a free USB port
+
+### Accounts ###
+* register an account
+* login with that account
+* open cash register with "Admin" and PIN "0000"
+* go to settings and create a new employee
+
+### Sale ###
+* use you keyboard to enter prices, you can tap Numpad Enter to call price input, then use sale group buttons to add it to checkout
+* use virtual keyboard to enter prices, then use sale group buttons to add it to checkout
+* use quick sale buttons to instantly register a common item
+* use barcode scanner to instantly register an item from the catalog
+* once done registering click on Pay and then enter the amount tendered and click DONE or click Print first then click DONE
+
+### Catalog ###
+* go to settings and open Edit PLU
+* now you can import a plaintext CSV file, use export to get an example of the file format
+* you can use the search button to look for codes, existing codes are highlighted blue, and non-existing codes are highlighted green
+
+### Checkout ###
+* you can manipulate the checkout by clicking on each item to change their name, price and quantity
+
+### Quick Sale Buttons ###
+* go to settings quick sale buttons and set your quick sale tabs up
+* each item is referenced from the catalog, so you must use items you have already created in the catalog
+* you can have max 5 tabs
+
+### Daily stats ###
+* this is not the best but you can see your daily sale takings aggregates 
