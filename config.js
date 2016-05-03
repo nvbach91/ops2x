@@ -1,12 +1,12 @@
 var config = {
-    //host: 'http://localhost:7000',
-    //mongodb_host: 'mongodb://127.0.0.1/testx',
+    host: 'http://localhost:7000',
+    mongodb_host: 'mongodb://127.0.0.1/testx',
     
     // when deploying to a new host you must change the host field
     // as well as the mongo uri
     
-    host: 'https://ops2x-62687.onmodulus.net',
-    mongodb_host: 'mongodb://suchuser:suchpass@waffle.modulusmongo.net:27017/rywopO4x',
+    //host: 'https://ops2x-62687.onmodulus.net',
+    //mongodb_host: 'mongodb://suchuser:suchpass@waffle.modulusmongo.net:27017/rywopO4x',
 
     companyName: 'EnterpriseApps',
     // when changing mail service, follow the EAUTH instructions from the service provider
