@@ -848,9 +848,9 @@ App.init = function () {
             }
         }
         return true;
-    });/*
-    $(window).on("beforeunload", function () {
-        return "You are about to close this application. Any unsaved work will be lost!";
+    });
+    /*$(window).on("beforeunload", function () {
+        return App.lang.onbeforeunload;
     });*/
 };
 
@@ -861,7 +861,7 @@ App.renderSaleGroupsButtons = function () {
     var nSgs = currentSaleGroups.length;
     for (var i = 0; i < nSgs; i++) {
         sgContent += $("<button>", {
-            class: "sg",
+            "class": "sg",
             "sg-id": "sg" + i,
             "sg-tax": currentSaleGroups[i].tax,
             "sg-group": currentSaleGroups[i].group,

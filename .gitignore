@@ -6,5 +6,6 @@ bower_components/
 *.css.map
 build/
 public/js/build.js
+public/js/build.min.js
 dist/
 maps/

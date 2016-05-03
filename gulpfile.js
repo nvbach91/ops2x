@@ -20,8 +20,8 @@ gulp.task('scripts', function () {
         'src/js/locale-cs.js'
     ]).pipe(plumber())
             .pipe(concat('build.js'))
-            //.pipe(rename({suffix: '.min'}))
-            //.pipe(uglify())
+            .pipe(rename({suffix: '.min'}))
+            .pipe(uglify())
             .pipe(gulp.dest('public/js'))
             .pipe(reload({stream: true}));
 });

@@ -95,7 +95,7 @@ App.GLocalEN = {
     
     settings_goback            : "Go back",
     settings_sales_history     : "Sales history",
-    settings_close_register    : "Close register",
+    settings_close_register    : "Reports",
     settings_off_history       : "Offline Sales",
     settings_account           : "Account Settings",
     settings_staff             : "Staff Settings",
@@ -153,7 +153,9 @@ App.GLocalEN = {
     report_takings             : "TAKINGS",
     report_net                 : "NET",
     report_vat                 : "VAT",
-    report_total_vat           : "VAT"
+    report_total_vat           : "VAT",
+    
+    onbeforeunload             : "You are about to close this application. Any unsaved work will be lost!"
 };
 
 

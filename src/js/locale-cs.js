@@ -153,7 +153,9 @@ App.GLocalCS = {
     report_takings             : "TRŽBY",
     report_net                 : "NETTO",
     report_vat                 : "DPH",
-    report_total_vat           : "DPH"
+    report_total_vat           : "DPH",
+    
+    onbeforeunload             : "Opravdu si přejete zavřít aplikaci? Všechna neuložená data budou ztracena"
 };
 
 

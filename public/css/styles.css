@@ -2,10 +2,10 @@
  *   Created on : Jan 28, 2016, 12:24:53 PM
  *   Author     : Nguyen Viet Bach
  */
-@font-face {
+/*@font-face {
     font-family: "Open Sans";
     src: url("../font/OpenSans.ttf");
-}
+}*/
 ::-webkit-scrollbar {
     width: 6px;
     cursor: pointer;
