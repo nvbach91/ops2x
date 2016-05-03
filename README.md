@@ -7,7 +7,6 @@ https://nvbach91@bitbucket.org/nvbach91/ops2x.git
 # Latest updates #
 * Preview version is now online. [Link](https://ops2x-62687.onmodulus.net/)
 * https server is available with self signed key for testing, see Run Project for details
-* A remote MongoDB server is avaiable for testing. See Project Setup for details
 
 # README #
 
@@ -57,7 +56,8 @@ $ npm install
 
 * Note: If you see red problems and warnings regarding socket.io (and freak out because you're not familiar with NodeJS), the project should still work and can be started, but if you want a clean installation with no errors and warnings, check [this solution](https://github.com/npm/npm/issues/9563#issuecomment-142666465)
 
-### Database (optional) ###
+### Database ###
+* you can skip this part if you already have a MongoDB running somewhere
 * configure default database path and run database service
 ```
 $ mkdir C:/data/db/
@@ -94,14 +94,24 @@ rs
 
 ## Deployment on modulus ##
 * go grab an account on [Modulus](https://modulus.io)
+* create a Node.js project and a MongoDB instance in your account
 * install modulus with npm, follow the instructions on modulus
 ```
 npm install -g modulus
 ```
+* change the host and mongo uri in the ``config.js`` file
 * type ``modulus login`` and provide credentials
-* navigate to project root folder and type ``modulus deploy`` - easy, isn't it?
+* navigate to project root folder and type ``modulus deploy``
 
 ## Todos ##
 * offline mode + resync 
 * rebuild settings interface
 * complex business model
+* ~~add virtual keyboard~~
+* ~~resite pay button~~
+* ~~add manual product name input~~
+* ~~EAN PLU in price input?~~
+* ~~add quickSale categories (tabs)~~
+* ~~implement sale history~~
+* ~~implement settings module~~
+* ~~add keyboard shortcuts~~
