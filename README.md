@@ -8,6 +8,15 @@ https://nvbach91@bitbucket.org/nvbach91/ops2x.git
 * Preview version is now online. [https://ops2x-62687.onmodulus.net/](https://ops2x-62687.onmodulus.net/)
 * https server is available with self signed key for testing, see Run Project for details
 
+# Quick start #
+```
+$ git clone https://nvbach91@bitbucket.org/nvbach91/ops2x.git
+$ cd ./ops2x  # navigate to project root
+$ npm install # install project dependencies
+$ mongod      # open a new CMD and start mongod on localhost:27017
+$ npm run dev # this will fire up the project
+```
+
 # README #
 
 This readme will guide you through the project setup for development
