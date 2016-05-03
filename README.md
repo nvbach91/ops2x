@@ -1,4 +1,11 @@
+# Project home #
+* I recommend you go to the git repository for because of updates and stuff
+```
+https://nvbach91@bitbucket.org/nvbach91/ops2x.git
+```
+
 # Latest updates #
+* Preview version is now online. [Link](https://ops2x-62687.onmodulus.net/)
 * https server is available with self signed key for testing, see Run Project for details
 * A remote MongoDB server is avaiable for testing. See Project Setup for details
 
@@ -30,7 +37,7 @@ $ mongod --version
 ```
 \* you might want to add MongoDB's bin to you system's PATH
 
-* Instead of installing a local MongoDB you can connect to a remote server. By default, the project assumes you choose to use a local MongoDB instance. Check line ``14`` in ``~/ops2x/app.js`` in case you don't want to install MongoDB and use the remote one instead.
+* Instead of installing a local MongoDB you can connect to a remote server. By default, the project assumes you choose to use a local MongoDB instance. Chnage file ``~/ops2x/config.js`` accordingly
 
 * navigate to project folder to continue
 ```
@@ -60,52 +67,20 @@ $ mongod
 ```
 $ mongod --dbpath C:/path/to/your/database/directory/
 ```
-* populate the database with provided databasedump folder using mongorestore, the database name must be 'test'
-```
-# run mongod if not yet started
-$ mongorestore --db test ./databasedump/test/
-```
-* verify your restore with
+* open mongo shell and create a database with the same name as in your config file
 ```
 $ mongo
-> show dbs
-local 0.000GB
-test  0.000GB
-> use test
-switched to db test
-> show collections
-catalogs
-settings
-users
-> db.users.find().pretty()
-{
-        "_id" : ObjectId("56d0c91ae54d691539c9e7c4"),
-        "email" : "guest",
-        "password" : "e1a928ad6fae2646ddee08a99..."
-}
+> use testx
 ```
 
 ## Run project ##
 * the following commands will run project tasks to start the server and open your system's default web browser and navigate you to the app
-* if your browser does not start, manually open the app at localhost:7000
+* if your browser does not start, manually open the app at ``localhost:7000``
 
 ```
-# run tasks with http server
-$ npm start
-or
-$ gulp
-```
-
-```
-# run tasks with https server
-$ npm run https
-or
-$ gulp --https
-```
-
-* login for user guest
-```
-username: "guest", password: "tseug"
+$ npm run dev       # run in development mode
+$ npm run devhttps  # run in development mode with https
+$ npm start         # run in normal mode, this is used as the basic start command in production
 ```
 
 * project tasks include watch task with live reload which automatically restarts the server when server files change, and inject client scripts when client files change
@@ -118,11 +93,6 @@ rs
 * BrowserSync is awesome! Open multiple browsers, i.e. on you phone, table and desktop and navigate to the app and watch BrowserSync show off!
 
 ## Todos ##
-* ~~add virtual keyboard~~
-* ~~resite pay button~~
-* ~~add manual product name input~~
-* ~~EAN PLU in price input?~~
-* ~~add quickSale categories (tabs)~~
-* implement sale history
-* implement settings module
-* add keyboard shortcuts module
+* offline mode + resync 
+* rebuild settings interface
+* complex business model
