@@ -13,7 +13,7 @@ var config = {
     mail_transport: {
         service: 'Gmail',
         auth: {
-            // this should be changed, create your own gmail account then enable low safety on that account
+            // this should be changed, create your own gmail account then enable less secure apps on that account
             user: 'info.enterpriseapps@gmail.com',
             pass: 'trello2015'
         }

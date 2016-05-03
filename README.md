@@ -28,7 +28,7 @@ $ node -v
 $ npm -v
 ```
 
-* MongoDB (optional)
+* MongoDB
 * install from https://www.mongodb.org/downloads
 * check your installation with 
 ```
@@ -55,6 +55,10 @@ $ npm install
 ```
 
 * Note: If you see red problems and warnings regarding socket.io (and freak out because you're not familiar with NodeJS), the project should still work and can be started, but if you want a clean installation with no errors and warnings, check [this solution](https://github.com/npm/npm/issues/9563#issuecomment-142666465)
+
+### Mail service ###
+* create a gmail account and enable less secure apps
+* in file ``config.js`` replace it with your gmail account and password
 
 ### Database ###
 * you can skip this part if you already have a MongoDB running somewhere
