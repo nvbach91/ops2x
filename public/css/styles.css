@@ -582,6 +582,7 @@ div#logout {
 #cp-body {
     display: flex;
     flex-direction: column;
+    overflow: auto;
 }
 .cp-item {    
     cursor: pointer;
