@@ -92,6 +92,15 @@ rs
 
 * BrowserSync is awesome! Open multiple browsers, i.e. on you phone, table and desktop and navigate to the app and watch BrowserSync show off!
 
+## Deployment on modulus ##
+* go grab an account on [Modulus](https://modulus.io)
+* install modulus with npm, follow the instructions on modulus
+```
+npm install -g modulus
+```
+* type ``modulus login`` and provide credentials
+* navigate to project root folder and type ``modulus deploy`` - easy, isn't it?
+
 ## Todos ##
 * offline mode + resync 
 * rebuild settings interface
