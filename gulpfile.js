@@ -62,7 +62,7 @@ gulp.task('nodemon', function (cb) {
     var started = false;
     nodemon({
         script: 'bin/www.http' + (argv.https ? 's' : '') + '.js',
-        ignore: ['src/js/*.js', 'public/js/build.js']
+        ignore: ['src/js/*.js', 'public/js/build.js', 'public/js/build.min.js']
     }).on('start', function () {
         if (!started) {
             cb();

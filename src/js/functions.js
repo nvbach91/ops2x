@@ -110,8 +110,14 @@ App.sortByEAN = function (a, b) {
 App.beep = function () {
     if (!App.isMuted) {
         App.beeper.pause();
-        App.beeper.currentTime = 0;
-        App.beeper.play();
+        if (App.beeper.readyState > 0) {
+            App.beeper.currentTime = 0;
+        }
+        var p = App.beeper.play();
+        if (p && (typeof Promise !== "undefined") && p instanceof Promise) {
+            p.catch(function (err) {
+            });
+        }
     }
 };
 
@@ -993,7 +999,7 @@ App.renderWebRegister = function () {
     App.bindKeyboard();
     App.jMain = $("#main");
     App.jSiPlaceholder = $("#si-placeholder");
-    App.beeper = new Audio("../sound/beep2.mp3");
+    App.beeper = new Audio("/sound/beep2.mp3");
     App.jKc = $("#kc");
     App.jSaleList = $("#sale-list");
     App.jPriceInput = $("#price-input");
