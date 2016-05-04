@@ -46,6 +46,12 @@ var ensureAuthenticated = function (req, res, next) {
         res.sendStatus(401);
     }
 };
+var noCache = function (req, res, next) {
+    res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+    res.header('Expires', '-1');
+    res.header('Pragma', 'no-cache');
+    next();
+};
 
 var index = require('./routes/index');
 var signup = require('./routes/signup');
@@ -68,6 +74,8 @@ var settings = require('./routes/api/settings');
 var buttons = require('./routes/api/buttons');
 var catalog = require('./routes/api/catalog');
 var sales = require('./routes/api/sales');
+
+app.use('/api', noCache);
 app.use('/api', ensureAuthenticated);
 app.use('/api', settings);
 app.use('/api', buttons);

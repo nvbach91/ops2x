@@ -2659,8 +2659,8 @@ App.renderPLUSettings = function () {
                 var modItem = $(App.generateModItemFormDOM("plu", {
                     ean: {title: "1-13 digits", valid : /^\d{1,13}$/, value: item.ean},
                     name: {title: "1-128 characters", valid : /^[^"]{1,128}$/, value: item.name},
-                    price: {title: "Example: 42.00", valid : /^\d{1,4}\.\d{2}$/, value: item.price},
-                    group: {title: "Max 128 characters", valid : /^[^"]{0,128}$/, value: item.group},
+                    price: {title: "Example: 42.00", valid : /^\d{1,5}\.\d{2}$/, value: item.price},
+                    group: {title: "1-50 characters", valid : /^[^"]{1,50}$/, value: item.group},
                     // ATTENTION!!! Handling this in calling function...
                     tax: {title: "", valid : /^(0|10|15|21)$/, value: item.tax}
                 }));                
@@ -2685,9 +2685,9 @@ App.renderPLUSettings = function () {
             } else {
                 var modItem = $(App.generateModItemFormDOM("newplu", {
                     ean: {title: "1-13 digits", valid : /^\d{1,13}$/, value: searchEAN},
-                    name: {title: "1-128 characters", valid : /^.{1,128}$/, value: ""},
-                    price: {title: "Example: 42.00", valid : /^\d{1,4}\.\d{2}$/, value: ""},
-                    group: {title: "Max 128 characters", valid : /^.{0,128}$/, value: ""},
+                    name: {title: "1-128 characters", valid : /^[^"]{1,128}$/, value: ""},
+                    price: {title: "Example: 42.00", valid : /^\d{1,5}\.\d{2}$/, value: ""},
+                    group: {title: "1-50 characters", valid : /^[^"]{1,50}$/, value: ""},
                     // ATTENTION!!! Handling this in calling function...
                     tax: {title: "", valid : /^(0|10|15|21)$/, value: App.settings.tax_rates[0]}
                 }));
