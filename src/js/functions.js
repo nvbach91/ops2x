@@ -2022,6 +2022,7 @@ App.requestModifyItem = function (url, data, button) {
                 case "/mod/pluimport" :
                     App.catalog = resp.msg;
                     App.catalog.articles.sort(App.sortByEAN);
+                    App.renderQuickSales();
                     break;
                 case "/mod/salegroups" :
                     var currentSG = App.buttons.saleGroups;
