@@ -2303,7 +2303,7 @@ App.bindModSettings = function (modFormContainer, modifyUrl) {
             modFormContainer.find(".adder").click(function () {
                 var modItem = $(App.generateModItemFormDOM("salegroups", {
                     tax: {title: "1-50 characters", valid: /^(0|10|15|21)$/, value: 15},
-                    group: {title: "1-50 characters", valid: /^.{1,50}$/, value: "New Group"},
+                    group: {title: "1-50 characters", valid: /^[^"]{1,50}$/, value: "New Group"},
                     bg: {title: "Background color", valid: /^[A-Fa-f0-9]{6}$/, value: "BB5151"},
                     _id: {title: "24 \\w", valid: /^\w{24}$/, value: "new sg"}
                 }));
@@ -2571,7 +2571,7 @@ App.checkAndTrimPluImportCSV = function (csv, lineSeparator, valueDelimiter) {
         }
     }
     var result = validHeaders.join(";");
-    var validLine = [/^\d{1,13}$/, /^.{1,128}$/, /^\d{1,5}\.\d{2}$/, /^.{0,128}$/, /^(0|10|15|21)$/];
+    var validLine = [/^\d{1,13}$/, /^.{1,128}$/, /^\-?\d{1,5}\.\d{2}$/, /^.{0,128}$/, /^(0|10|15|21)$/];
     var eanSet = [];               
     //var result = [];
 
@@ -2784,7 +2784,7 @@ App.renderSaleGroupsSettings = function () {
         var saleGroup = saleGroups[i];
         sgDOM += App.generateModItemFormDOM("salegroups", {
             tax: {title: "1-50 characters", valid: /^(0|10|15|21)$/, value: saleGroup.tax},
-            group: {title: "1-50 characters", valid: /^.{1,50}$/, value: saleGroup.group},
+            group: {title: "1-50 characters", valid: /^[^"]{1,50}$/, value: saleGroup.group},
             bg: {title: "Background color", valid: /^[A-Fa-f0-9]{6}$/, value: saleGroup.bg},
             _id: {title: "24 \\w", valid: /^(\w{24}|new sg)$/, value: saleGroup._id}
         });

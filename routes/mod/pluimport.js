@@ -61,7 +61,7 @@ function checkPluData(csv, lineSeparator, valueDelimiter) {
         }
     }
     var result = validHeaders.join(";");
-    var validLine = [/^\d{1,13}$/, /^.{1,128}$/, /^\d{1,5}\.\d{2}$/, /^[^"]{1,50}$/, /^(0|10|15|21)$/];
+    var validLine = [/^\d{1,13}$/, /^.{1,128}$/, /^\-?\d{1,5}\.\d{2}$/, /^[^"]{1,50}$/, /^(0|10|15|21)$/];
     var eanSet = [];
     //var result = [];
 

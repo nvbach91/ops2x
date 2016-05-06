@@ -8,7 +8,7 @@ router.post('/plu', function (req, res) {
         ean: /^\d{1,13}$/,
         name: /^[^"]{1,128}$/,
         price: /^\-?\d{1,5}\.\d{2}$/,
-        group: /^[^"]{0,128}$/,
+        group: /^[^"]{1,50}$/,
         tax: /^(0|10|15|21)$/
     };
     if (req.body.name === 'New PLU') {        
