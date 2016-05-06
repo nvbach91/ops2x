@@ -7,7 +7,7 @@ router.post('/plu', function (req, res) {
         requestType: /^(save|remove)$/,
         ean: /^\d{1,13}$/,
         name: /^[^"]{1,128}$/,
-        price: /^\d{1,5}\.\d{2}$/,
+        price: /^\-?\d{1,5}\.\d{2}$/,
         group: /^[^"]{0,128}$/,
         tax: /^(0|10|15|21)$/
     };

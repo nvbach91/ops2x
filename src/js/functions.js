@@ -2017,6 +2017,7 @@ App.requestModifyItem = function (url, data, button) {
                             articles.splice(articleIndex, 1);
                         }
                     }
+                    App.renderQuickSales();
                     break;
                 case "/mod/pluimport" :
                     App.catalog = resp.msg;
@@ -2665,7 +2666,7 @@ App.renderPLUSettings = function () {
                 var modItem = $(App.generateModItemFormDOM("plu", {
                     ean: {title: "1-13 digits", valid : /^\d{1,13}$/, value: item.ean},
                     name: {title: "1-128 characters", valid : /^[^"]{1,128}$/, value: item.name},
-                    price: {title: "Example: 42.00", valid : /^\d{1,5}\.\d{2}$/, value: item.price},
+                    price: {title: "Example: 42.00", valid : /^\-?\d{1,5}\.\d{2}$/, value: item.price},
                     group: {title: "1-50 characters", valid : /^[^"]{1,50}$/, value: item.group},
                     // ATTENTION!!! Handling this in calling function...
                     tax: {title: "", valid : /^(0|10|15|21)$/, value: item.tax}
@@ -2692,7 +2693,7 @@ App.renderPLUSettings = function () {
                 var modItem = $(App.generateModItemFormDOM("newplu", {
                     ean: {title: "1-13 digits", valid : /^\d{1,13}$/, value: searchEAN},
                     name: {title: "1-128 characters", valid : /^[^"]{1,128}$/, value: ""},
-                    price: {title: "Example: 42.00", valid : /^\d{1,5}\.\d{2}$/, value: ""},
+                    price: {title: "Example: 42.00", valid : /^\-?\d{1,5}\.\d{2}$/, value: ""},
                     group: {title: "1-50 characters", valid : /^[^"]{1,50}$/, value: ""},
                     // ATTENTION!!! Handling this in calling function...
                     tax: {title: "", valid : /^(0|10|15|21)$/, value: App.settings.tax_rates[0]}
