@@ -991,9 +991,9 @@ App.saveLocalSale = function (sale){
 
 // render web register view
 App.renderWebRegister = function () {    
-    /*$(window).on("beforeunload", function () {
+    $(window).on("beforeunload", function () {
         return App.lang.onbeforeunload;
-    });*/
+    });
     App.closeCurtain();
     App.createWebRegisterDOM();
     App.bindKeyboard();
@@ -1281,6 +1281,7 @@ App.renderWebRegister = function () {
             t.off();
             if (!t.hasClass("disabled")) {
                 clearInterval(App._receiptTimeInterval);
+                t.html('<div class="mi-loader loading"></div>');
 
                 currentReceiptObj.date = new Date();
                 currentReceiptObj.items = JSON.stringify(currentReceiptObj.items);
@@ -1316,6 +1317,7 @@ App.renderWebRegister = function () {
                             App.jPriceInput.focus();
                         }).appendTo(payment);
                     } else {
+                        t.text(App.lang.pay_confirm);
                         App.closeCurtain();
                         App.showWarning("Server refused to sync");
                         console.log(resp);

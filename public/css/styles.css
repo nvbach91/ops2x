@@ -92,7 +92,6 @@ form {
     display: flex;
 }
 form, .mod-form {
-    /*overflow-y: auto;*/
     background-color: #fff;
     padding: 0px 20px;
     width: 100%;
@@ -2028,4 +2027,10 @@ div#taxes-label {
     height: 15px;    
     width: 15px;
     margin: 0;
+}
+
+#cash-confirm .mi-loader.loading {      
+    height: 25px;    
+    width: 25px;
+    margin: auto;
 }
