@@ -991,9 +991,9 @@ App.saveLocalSale = function (sale){
 
 // render web register view
 App.renderWebRegister = function () {    
-    $(window).on("beforeunload", function () {
+    /*$(window).on("beforeunload", function () {
         return App.lang.onbeforeunload;
-    });
+    });*/
     App.closeCurtain();
     App.createWebRegisterDOM();
     App.bindKeyboard();
@@ -1440,8 +1440,8 @@ App.renderWebRegister = function () {
 };
 
 //
-App.createCenterBox = function (scrollable, content) {
-    return '<div class="center-box' + (scrollable ? ' scrollable' : '') + '">'
+App.createCenterBox = function (content, center) {
+    return '<div class="center-box' + (center ? center : '') + '">'
             + content
             + '</div>';
 };
@@ -1458,14 +1458,14 @@ App.renderDashBoard = function () {
                     <div id="sign-out">' + App.lang.dashboard_sign_out + '</div>\
                 </div>\
              </nav>'
-            + App.createCenterBox(false,    
+            + App.createCenterBox(   
                 '<div class="form-header">' + App.lang.dashboard_header + '</div>\
                 <form id="employee-login" action="">\
                     <div class="form-label">' + App.lang.dashboard_label + '</div>\
                     <input id="employee-username" type="text" placeholder="' + App.lang.dashboard_username + '">\
                     <input id="employee-pin" type="password" placeholder="PIN">\
                     <input type="submit" value="OK">\
-                </form>');
+                </form>', ' center');
     App.jAppContainer.html(dashBoardDOM);
     var form = $("#employee-login");
     var employeeUsername = form.find("#employee-username");
@@ -1550,7 +1550,7 @@ App.isValidEmail = function (email) {
 App.renderSignin = function () {
     App.closeCurtain();
     var signinDOM = 
-            App.createCenterBox(false,
+            App.createCenterBox(
                '<div class="form-header">' + App.lang.sign_in_header + '</div>\
                 <form id="sign-in" action="" method="POST">\
                     <div class="form-row">\
@@ -1568,7 +1568,7 @@ App.renderSignin = function () {
                         <div id="forgot">' + App.lang.sign_in_forgot + '</div>\
                     </div>\
                 </form>\
-                <div class="form-footer">Powered by EnterpriseApps</div>');
+                <div class="form-footer">Powered by EnterpriseApps</div>', ' center');
     
     App.jAppContainer.html(signinDOM);
     $("#lang-switch").find(".lang").click(function () {
@@ -1637,7 +1637,7 @@ App.renderSignin = function () {
 // render signup
 App.renderSignup = function () {
     var signupDOM =
-            App.createCenterBox(true,
+            App.createCenterBox(
                '<div class="form-header">' + App.lang.sign_up_header + '</div>\
                 <form id="sign-up" action="" method="POST">\
                     <div class="form-label">' + App.lang.sign_up_label + '</div>\
@@ -1725,7 +1725,7 @@ App.renderSignup = function () {
 // render forgot
 App.renderForgot = function () {    
     var forgotDOM =
-            App.createCenterBox(false,
+            App.createCenterBox(
                '<div class="form-header">' + App.lang.forgot_header + '</div>\
                 <form id="reset-password" action="" method="POST">\
                     <div class="form-label">' + App.lang.forgot_label + '</div>\
@@ -1736,7 +1736,7 @@ App.renderForgot = function () {
                         <div id="signin">' + App.lang.forgot_back + '</div>\
                     </div>\
                 </form>\
-                <div class="form-footer">Powered by EnterpriseApps</div>');
+                <div class="form-footer">Powered by EnterpriseApps</div>', ' center');
     App.jAppContainer.html(forgotDOM);
 
     var form = $("#reset-password");
@@ -1887,7 +1887,7 @@ App.createGoBack = function (cb) {
 //--------------------------- ACCOUNT SETTINGS -------------------------------//
 App.renderAccountSettings = function () {
     var accDOM =
-            App.createCenterBox(false, 
+            App.createCenterBox(
                '<div class="form-header">' + App.lang.settings_account + '</div>\
                 <form id="change-password" action="" method="POST">\
                     <div class="form-label">' + App.lang.form_label_change_password + '</div>\
@@ -2443,7 +2443,7 @@ App.renderStaffSettings = function () {
     }
     staffDOM +=    '</div>\
                 </div>';
-    App.cpBody.html(App.createCenterBox(true, staffDOM));
+    App.cpBody.html(App.createCenterBox(staffDOM));
     App.cpBody.find(".center-box").prepend(App.createGoBack());
 
     var modFormContainer = App.cpBody.find(".mod-form");     
@@ -2477,7 +2477,7 @@ App.findMaxEmployeeNumber = function (modifier) {
 //------------------------- RECEIPT SETTINGS ---------------------------------//
 App.renderReceiptSettings = function () {
     var receiptDOM =
-            App.createCenterBox(true,
+            App.createCenterBox(
                    '<div class="form-header">' + App.lang.settings_receipt + '</div>\
                     <div class="mod-form">\
                         <div class="form-row">\
@@ -2511,7 +2511,7 @@ App.getMiReceiptUpdateData = function (requestType, button) {
 //--------------------------- POS SETTINGS -----------------------------------//
 App.renderPOSSettings = function () {
     var receiptDOM =
-            App.createCenterBox(true,
+            App.createCenterBox(
                     '<div class="form-header">' + App.lang.settings_pos + '</div>\
                     <div class="mod-form">\
                         <div class="form-row">\
@@ -2646,7 +2646,7 @@ App.renderPLUSettings = function () {
                     </form>\
                     <div class="modifier"></div>\
                 </form>';
-    App.cpBody.html(App.createCenterBox(true, pluDOM));
+    App.cpBody.html(App.createCenterBox(pluDOM));
     App.cpBody.find(".center-box").prepend(App.createGoBack());
 
     var modFormContainer = App.cpBody.find(".mod-form");     
@@ -2792,7 +2792,7 @@ App.renderSaleGroupsSettings = function () {
     }
     sgDOM += '</div>\
                 </div>';
-    App.cpBody.html(App.createCenterBox(true, sgDOM));
+    App.cpBody.html(App.createCenterBox(sgDOM));
     App.cpBody.find(".center-box").prepend(App.createGoBack(function () {
         $(".colpick.colpick_full").remove();
     }));
@@ -2907,7 +2907,7 @@ App.renderCloseRegister = function () {
     }
     crDOM += '</div>\
              </div>';
-    App.cpBody.html(App.createCenterBox(true, crDOM));
+    App.cpBody.html(App.createCenterBox(crDOM));
     App.cpBody.find(".center-box").prepend(App.createGoBack());
     
     App.cpBody.find(".mi-header").click(function(){
@@ -2919,7 +2919,7 @@ App.renderCloseRegister = function () {
 //------------------------ RENDER OFFLINE SALE HISTORY -----------------------//
 App.renderOffHistory = function () {
     var shDOM =
-            App.createCenterBox(false, 
+            App.createCenterBox(
                 '<div class="form-header">' + App.lang.settings_off_history + '</div>\
                 <div id="off-history-container">\
                 </div>');
@@ -2982,7 +2982,7 @@ App.renderOffHistory = function () {
 //------------------------ RENDER SALE HISTORY -------------------------------//
 App.renderSaleHistory = function () {
     var shDOM =
-            App.createCenterBox(false, 
+            App.createCenterBox(
                 '<div class="form-header">' + App.lang.settings_sales_history + '</div>\
                 <div id="sale-history-container">\
                 </div>');
@@ -3184,7 +3184,7 @@ App.renderTabsSettings = function () {
     }
     tabDOM += '</div>\
              </div>';
-    App.cpBody.html(App.createCenterBox(true, tabDOM));
+    App.cpBody.html(App.createCenterBox(tabDOM));
     App.cpBody.find(".center-box").prepend(App.createGoBack());
 
     var modFormContainer = App.cpBody.find(".mod-form");
@@ -3228,7 +3228,7 @@ App.renderQuickSalesSettings = function () {
     }
     sgDOM += '</div>\
             </div>';
-    App.cpBody.html(App.createCenterBox(true, sgDOM));
+    App.cpBody.html(App.createCenterBox(sgDOM));
     App.cpBody.find(".center-box").prepend(App.createGoBack(function () {
         $(".colpick.colpick_full").remove();
     }));
