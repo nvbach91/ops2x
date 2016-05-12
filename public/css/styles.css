@@ -324,6 +324,9 @@ div#logout {
     flex-direction: row;
     padding: 0;
 }
+.form-row:first-child {
+    padding: 10px 0;
+}
 .plu-searcher {    
     margin: 0 5px 0 0;
     border: 1px solid #CACACA;
@@ -490,8 +493,8 @@ div#logout {
     font-size: 14px;
     width: 100%;
     max-width: 1024px;
-    overflow: auto;
-    max-height: 480px;
+    /*overflow: auto;
+    max-height: 480px;*/
 }
 .hr-col:first-child {
     border-left: 5px solid transparent;
