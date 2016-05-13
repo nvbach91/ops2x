@@ -9,3 +9,9 @@ public/js/build.js
 public/js/build.min.js
 dist/
 maps/
+
+# Ignore IIS Deployment #
+#######################
+server.js
+iisnode/
+web.config
