@@ -72,3 +72,5 @@ gulp.task('nodemon', function (cb) {
 });
 
 gulp.task('default', ['scripts', 'css', 'browser-sync', 'watch']);
+
+gulp.task('build', ['scripts']);
