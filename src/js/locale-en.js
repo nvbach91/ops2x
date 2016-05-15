@@ -148,6 +148,7 @@ App.GLocalEN = {
     misc_password_changed      : "Password changed",
     misc_max_tabs              : "Cannot have more than 5 tabs",
     misc_enter_price           : "You must enter a price",
+    misc_plu_not_found         : "PLU not found",
     
     report_receipts            : "RECEIPTS",
     report_takings             : "TAKINGS",

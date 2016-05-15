@@ -148,6 +148,7 @@ App.GLocalCS = {
     misc_password_changed      : "Heslo změněno",
     misc_max_tabs              : "Nelze mít víc než 5 záložek",
     misc_enter_price           : "Nejdřív zadejte cenu",
+    misc_plu_not_found         : "PLU neexistuje",
     
     report_receipts            : "ÚČTENEK",
     report_takings             : "TRŽBY",

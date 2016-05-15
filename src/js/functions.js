@@ -234,8 +234,9 @@ App.checkPriceInput = function (e) {
         App.jPriceInput.blur();
         return true;
     }
+    var jpiVal = App.jPriceInput.val();
     if (e.keyCode === 13) { // allow enter 
-        if (App.jPriceInput.val().length) {
+        if (jpiVal.length) {
             App.jPriceInput.blur();
         }
         return true;
@@ -244,7 +245,7 @@ App.checkPriceInput = function (e) {
         return true;
     }
     if (e.keyCode === 109 || e.keyCode === 189 || e.keyCode === 173) { // check for multiple dashes
-        if (App.jPriceInput.val().length > 0) {
+        if (jpiVal.length > 0) {
             return false;
         }
         return true;
@@ -255,24 +256,25 @@ App.checkPriceInput = function (e) {
         return false;
     }
     // allow asterisk for scanner multiplication
-    // do not allow more than 99*
+    // do not allow more than 999*
     if (e.keyCode === 106) {
-        if (App.jPriceInput.val().length === 0 || App.jPriceInput.val().length > 3) {
+        if (jpiVal.length === 0 || jpiVal.length > 3) {
             return false;
         }
-        if (App.jPriceInput.val().indexOf("*") < 0) {
+        if (jpiVal.indexOf("*") < 0) {
             //p.attr("maxlength", 9);
             return true;
         }
         return false;
     }
     if (e.keyCode === 110) {        
-        if (App.jPriceInput.val().length === 0) {
+        if (jpiVal.length === 0) {
             return false;
         }
-        if (App.jPriceInput.val().indexOf(".") < 0) {
+        if (jpiVal.indexOf(".") < 0) {
             //p.attr("maxlength", 9);
-            return true;
+            App.jPriceInput.val(jpiVal + ".");
+            return false;
         }
         return false;
     }
@@ -1395,7 +1397,7 @@ App.renderWebRegister = function () {
                 App.jPriceInput.val(item.price);
             } else {
                 //t.addClass("not-found");
-                t.attr("placeholder", "PLU not found");
+                t.attr("placeholder", App.lang.misc_plu_not_found);
                 //App.makeWarning("This EAN " + filter + " is not defined");
             }
             t.val("");
