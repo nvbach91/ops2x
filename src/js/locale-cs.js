@@ -37,6 +37,7 @@ App.GLocalCS = {
     dashboard_username         : "UŽIVATELSKÉ JMÉNO",
     
     reg_open_cp                : "Otevřít ovládací panel",
+    reg_close_sg               : "Zavřít zbožní skupiny",
     reg_mute                   : "Ztlumit zvuky",
     reg_logout                 : "Zamknout",
     reg_cp                     : "Ovládací panel",

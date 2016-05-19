@@ -37,6 +37,7 @@ App.GLocalEN = {
     dashboard_username         : "USERNAME",
     
     reg_open_cp                : "Open control panel",
+    reg_close_sg               : "Close sale groups",
     reg_mute                   : "Mute beep sound",
     reg_logout                 : "Lock",
     reg_cp                     : "Control Panel",

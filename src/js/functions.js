@@ -628,6 +628,7 @@ App.createWebRegisterDOM = function () {
                 <div id="brand">EnterpriseApps</div>\
                 <div id="menu-top">\
                     <div id="cp-link" title="' + App.lang.reg_open_cp + '"></div>\
+                    <div id="toggle-sg" title="' + App.lang.reg_close_sg + '"></div>\
                     <div id="muter" title="' + App.lang.reg_mute + '"></div>\
                     <div id="profile">' + (App.currentEmployee.name || 'LOGIN') + '</div>\
                     <div id="logout" title="' + App.lang.reg_logout + '"></div>\
@@ -793,6 +794,12 @@ App.loadLocalStorage = function () {
         localStorage.isMuted = false;
         App.isMuted = false;
     }
+    if (localStorage.hasOwnProperty("isClosedSG")) {
+        App.isClosedSG = localStorage.isClosedSG === "true";
+    } else {
+        localStorage.isClosedSG = false;
+        App.isClosedSG = false;
+    }
     if (localStorage.hasOwnProperty("locale")) {
         App.locale = localStorage.locale;
     } else {
@@ -875,6 +882,9 @@ App.renderSaleGroupsButtons = function () {
         }).prop("outerHTML");
     }
     App.sg.html(sgContent);
+    if (App.isClosedSG) {
+        App.sg.hide();
+    }
     App.bindSaleGroups(App.sg);
 };
 
@@ -993,9 +1003,9 @@ App.saveLocalSale = function (sale){
 
 // render web register view
 App.renderWebRegister = function () {    
-    $(window).on("beforeunload", function () {
+    /*$(window).on("beforeunload", function () {
         return App.lang.onbeforeunload;
-    });
+    });*/
     App.closeCurtain();
     App.createWebRegisterDOM();
     App.bindKeyboard();
@@ -1039,7 +1049,7 @@ App.renderWebRegister = function () {
             App.isMuted = true;
         }
     });
-    
+
     // reset checkout
     var jDiscardSale = $("#discard-sale");
     jDiscardSale.click(function () {
@@ -1062,6 +1072,24 @@ App.renderWebRegister = function () {
     // generate sale groups
     App.sg = $("#sale-groups");
     App.renderSaleGroupsButtons();
+
+    var sgToggler = $("#toggle-sg");
+    if (App.isClosedSG) {
+        sgToggler.addClass("closed");
+    }
+    sgToggler.click(function () {
+        var t = $(this);
+        if (t.hasClass("closed")) {
+            t.removeClass("closed");
+            localStorage.isClosedSG = false;
+            App.isClosedSG = false;
+        } else {
+            t.addClass("closed");
+            localStorage.isClosedSG = true;
+            App.isClosedSG = true;
+        }
+        App.sg.slideToggle(App.getAnimationTime());
+    });
 
     // generate quicksale tabs
     App.renderQuickSales();
