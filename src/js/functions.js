@@ -534,7 +534,7 @@ App.bindSaleGroups = function (sg) {
         var price = a >= 0 ? v.slice(a + 1, v.length) : v;
         if (price.length === 0 || parseInt(price) === 0 || v === "-") {
             App.jPriceInput.val("");
-            App.showWarning("You must enter a price");
+            App.showWarning(App.lang.misc_enter_price);
             return false;
         }
         var mult = App.getMultiplicationNumber();
