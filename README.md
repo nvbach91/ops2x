@@ -114,7 +114,11 @@ npm install -g modulus
 ```
 * change the host and mongo uri in the ``config.js`` file
 * type ``modulus login`` and provide credentials
-* navigate to project root folder and type ``modulus deploy``
+* navigate to project root folder and type 
+```
+npm run build   #concat and build application scripts
+modulus deploy  #deploy to modulus
+```
 
 ## Todos ##
 * offline mode + resync 
