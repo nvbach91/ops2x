@@ -233,6 +233,8 @@ nav {
     display: flex;
 }
 #menu-top > div { 
+    position: relative;
+    overflow: hidden;
     padding: 0 10px;
     text-align: center;
     cursor: pointer;
@@ -378,7 +380,7 @@ div#logout {
 .adder:hover {
     background-color: #334C60;
 }
-.mod-item, .tab-wrap {
+.mod-item {
     margin: 5px 0;
     padding: 0;
 }
@@ -398,15 +400,14 @@ div#logout {
     font-size: 14px;
     color: #555;
 }
-.mi-header, .tw-header {
+.mi-header {
+    position: relative;
+    overflow: hidden;
     background-color: #4A698A;
     font-size: 16px;
     padding: 10px;
     cursor: pointer;
     border-radius: 3px;
-}
-.tw-body {
-    padding-left: 20px;
 }
 .mi-header.new-item {    
     background-color: #65C365;
@@ -417,7 +418,7 @@ div#logout {
 .mi-body {
     padding: 10px;
 }
-.mi-body.hidden, .tw-body.hidden {
+.mi-body.hidden {
     display: none;
 }
 .mi-info, .form-instruction {
@@ -719,6 +720,7 @@ input {
     border-right: 1px solid #E8E8E8;
 }
 button {
+    position: relative;
     overflow: hidden;
     cursor: pointer;
     border: none;
@@ -869,6 +871,10 @@ button#park-sale, button#discard-sale {
 }
 #tab-navs .tab-nav:hover {
     background-color: #E4644B;
+}
+.tn-label {
+    overflow: hidden;
+    position: relative;
 }
 #sale-list {
     margin-bottom: 1px;
@@ -1060,6 +1066,7 @@ button#btnm.activePLU:before {
 }
 #pay {
     position: relative;
+    overflow: hidden;
     cursor: pointer;
     color: #fff;
     display: flex;
@@ -1485,7 +1492,7 @@ div#taxes-label {
 .pc-change {
     font-size: 18px;
 }
-.email-receipt {    
+.email-receipt {  
     width: 99%;
     max-width: 420px;
     display: flex;
@@ -1503,6 +1510,8 @@ div#taxes-label {
     border: 1px solid #ccc;
 }
 #email-send {
+    position: relative;
+    overflow: hidden;
     font-size: 16px;
     padding: 0 20px;
     width: 150px;
@@ -2042,4 +2051,42 @@ div#taxes-label {
     height: 25px;    
     width: 25px;
     margin: auto;
+}
+
+/* ANDROID CLICK EFFECT */
+@keyframes clickeffect {
+    from {
+        opacity: 0.7;
+        transform: scale(0);
+    }
+    to {
+        opacity: 0;
+        transform: scale(2);
+    }
+}
+
+@-webkit-keyframes clickeffect {
+    from {
+        opacity: 0.7;
+        transform: scale(0);
+    }
+    to {
+        opacity: 0;
+        transform: scale(2);
+    }
+}
+
+div.effect {
+    display: block;
+    z-index: 3;
+    margin: -100px;
+    width: 200px;
+    height: 200px;
+    border-radius: 100px;
+    position: absolute;
+    background: rgba(255, 255, 255, 0.5);
+    transform: scale(0);
+    pointer-events: none;
+    animation: clickeffect 1s ease;
+    -webkit-animation: clickeffect 1s ease;
 }

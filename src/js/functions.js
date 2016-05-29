@@ -514,76 +514,82 @@ App.incrementLastItem = function (lastItem) {
 // binds salegroups button events
 App.bindSaleGroups = function (sg) {
     // Clicking on sale-group buttons adds an item to the sale list
-    sg.find("button").click(function () {
+    sg.find("button").each(function () {
         var t = $(this);
-        // do not register an item of different group while price input is the same
-        // user must type the same price for another sale group
-        // reset the price input and play error sound
-        var lastItem = App.jSaleList.find(".sale-item.last");
-        if (lastItem.size() && t.attr("sg-id") !== lastItem.find(".si-id").text()
-                && App.isInRegistrySession/*.text() === "1"*/) {
-            App.jPriceInput.val("");            
-            App.showWarning(App.lang.misc_enter_price);
-            return false;
-        }
-        var v = App.jPriceInput.val();
+        App.bindClickEffect(t);
+        t.click(function () {
+            // do not register an item of different group while price input is the same
+            // user must type the same price for another sale group
+            // reset the price input and play error sound
+            var lastItem = App.jSaleList.find(".sale-item.last");
+            if (lastItem.size() && t.attr("sg-id") !== lastItem.find(".si-id").text()
+                    && App.isInRegistrySession/*.text() === "1"*/) {
+                App.jPriceInput.val("");
+                App.showWarning(App.lang.misc_enter_price);
+                return false;
+            }
+            var v = App.jPriceInput.val();
 
-        // extract price and multiplication number
-        v = v.replace(/[\s]+/g, "");
-        var a = v.indexOf("*");
-        var price = a >= 0 ? v.slice(a + 1, v.length) : v;
-        if (price.length === 0 || parseInt(price) === 0 || v === "-") {
-            App.jPriceInput.val("");
-            App.showWarning(App.lang.misc_enter_price);
-            return false;
-        }
-        var mult = App.getMultiplicationNumber();
+            // extract price and multiplication number
+            v = v.replace(/[\s]+/g, "");
+            var a = v.indexOf("*");
+            var price = a >= 0 ? v.slice(a + 1, v.length) : v;
+            if (price.length === 0 || parseInt(price) === 0 || v === "-") {
+                App.jPriceInput.val("");
+                App.showWarning(App.lang.misc_enter_price);
+                return false;
+            }
+            var mult = App.getMultiplicationNumber();
 
-        var sign = "";
-        if (price.charAt(0) === "-") {
-            price = price.slice(1);
-            sign = "-";
-        }
-        var correctValue = App.correctPrice(price);
-        if (!correctValue) {
-            App.jPriceInput.val("");
-            return false;
-        }
+            var sign = "";
+            if (price.charAt(0) === "-") {
+                price = price.slice(1);
+                sign = "-";
+            }
+            var correctValue = App.correctPrice(price);
+            if (!correctValue) {
+                App.jPriceInput.val("");
+                return false;
+            }
 
-        price = App.correctPrice(price);
-        App.jPriceInput.val(sign + price);
+            price = App.correctPrice(price);
+            App.jPriceInput.val(sign + price);
 
-        var id = t.attr("sg-id");
-        var name = t.text();
-        var group = t.attr("sg-group");
-        var tax = t.attr("sg-tax");
-        var tags = t.attr("sg-group");
-        var desc = t.text();
-        App.addItemToCheckout(id, "", name, price, group, tax, tags, desc, mult);
-        App.isInRegistrySession = true/*.text("1")*/;
-        App.justUsedScanner = false;
+            var id = t.attr("sg-id");
+            var name = t.text();
+            var group = t.attr("sg-group");
+            var tax = t.attr("sg-tax");
+            var tags = t.attr("sg-group");
+            var desc = t.text();
+            App.addItemToCheckout(id, "", name, price, group, tax, tags, desc, mult);
+            App.isInRegistrySession = true/*.text("1")*/;
+            App.justUsedScanner = false;
+        });
     });
 };
 
 // binds quicksales button events
 App.bindQuickSales = function (qs) {
     // bind quick sale buttons
-    qs.find(".qs-item").click(function () {
+    qs.find(".qs-item").each(function () {
         var t = $(this);
-        var price = t.find(".qs-price").text().replace(/[^\-\d\.]/g, "");
-        var mult = App.getMultiplicationNumber();
-        App.jPriceInput.val(price);
-        var name = t.find("button").text();//
-        var id = t.find(".qs-id").text();
-        var tax = t.find(".qs-tax").text();
-        var group = t.find(".qs-group").text();
-        var tags = t.find(".qs-tags").text();
-        var desc = t.find(".qs-desc").text();
+        App.bindClickEffect(t.find("button"));
+        t.click(function () {
+            var price = t.find(".qs-price").text().replace(/[^\-\d\.]/g, "");
+            var mult = App.getMultiplicationNumber();
+            App.jPriceInput.val(price);
+            var name = t.find("button").text();//
+            var id = t.find(".qs-id").text();
+            var tax = t.find(".qs-tax").text();
+            var group = t.find(".qs-group").text();
+            var tags = t.find(".qs-tags").text();
+            var desc = t.find(".qs-desc").text();
 
-        App.addItemToCheckout(id, "", name, price, group, tax, tags, desc, mult);
+            App.addItemToCheckout(id, "", name, price, group, tax, tags, desc, mult);
 
-        App.isInRegistrySession = true/*.text("1")*/;
-        App.justUsedScanner = false;
+            App.isInRegistrySession = true/*.text("1")*/;
+            App.justUsedScanner = false;
+        });
     });
 };
 
@@ -918,7 +924,7 @@ App.renderQuickSales = function () {
         tabsContent += '</div>';
         tabNavsContent += '<div class="tab-nav'
                 + (i === 0 ? ' activeTab' : '')
-                + '">' + tabs[i].name + '</div>';
+                + '"><div class="tn-label">' + tabs[i].name + '</div></div>';
     }
     tabsContainer.append(tabsContent);
     App.bindQuickSales(tabsContainer);
@@ -928,6 +934,7 @@ App.renderQuickSales = function () {
     var tabNavs = tabNavsContainer.find(".tab-nav");
     tabNavs.each(function (index) {
         var t = $(this);
+        App.bindClickEffect(t.find(".tn-label"));
         t.click(function () {
             tabNavs.each(function () {
                 $(this).removeClass("activeTab");
@@ -992,6 +999,8 @@ App.generateEmailReceipt = function (currentReceiptObj) {
             emailInput.addClass("invalid").val("Invalid email");
         }
     }).appendTo(emailReceipt);
+    
+    App.bindClickEffect(sendEmailButton);
     return emailReceipt;
 };
 
@@ -1102,7 +1111,7 @@ App.renderWebRegister = function () {
         App.jControlPanel.removeClass("visible");
     });
 
-    $("#kb-toggle").click(function () {
+    var jKbToggle = $("#kb-toggle").click(function () {
         /*if (App.jSaleList.find(".sale-item").size()) {
             App.recalculateTotalCost();
             App.jPayAmount.addClass("checked");
@@ -1129,7 +1138,7 @@ App.renderWebRegister = function () {
     
     var currentReceiptObj = null;
     // bind pay button to proceed to payment, generate payment box
-    $("#pay").click(function () {
+    var jPay = $("#pay").click(function () {
         if (App.jSaleList.find(".sale-item").size() < 1) {
             return false;
         }
@@ -1306,7 +1315,7 @@ App.renderWebRegister = function () {
 
         var receiptPrinted = false;
 
-        $("<button>").attr("id", "cash-confirm").text(App.lang.pay_confirm).click(function () {
+        var cashConfirm = $("<button>").attr("id", "cash-confirm").text(App.lang.pay_confirm).click(function () {
             var t = $(this);
             t.off();
             if (!t.hasClass("disabled")) {
@@ -1339,13 +1348,14 @@ App.renderWebRegister = function () {
                         var emailReceipt = App.generateEmailReceipt(currentReceiptObj);
                         emailReceipt.appendTo(payment);
                         //payment.append(paymentComplete);
-                        $("<button>").attr("id", "done-payment").text(App.lang.pay_done).click(function () {
+                        var donePayment = $("<button>").attr("id", "done-payment").text(App.lang.pay_done).click(function () {
                             if (!receiptPrinted) {
                                 window.print();
                             }
                             App.closeCurtain();
                             App.jPriceInput.focus();
                         }).appendTo(payment);
+                        App.bindClickEffect(donePayment);
                     } else {
                         t.text(App.lang.pay_confirm);
                         App.closeCurtain();
@@ -1378,7 +1388,9 @@ App.renderWebRegister = function () {
                     //App.sales.receipts.push(currentReceiptObj);                    
                 });
             }
-        }).appendTo(payment);
+        });
+        App.bindClickEffect(cashConfirm);
+        cashConfirm.appendTo(payment);
         payment.appendTo(paymentBody);
         $("<div>").addClass("receipt-container").append(receipt).appendTo(paymentBody);
 
@@ -1458,6 +1470,13 @@ App.renderWebRegister = function () {
     $("#logout").click(function () {
         $(window).off("beforeunload");
         App.renderDashBoard();
+    });
+    
+    App.bindClickEffect(jDiscardSale);
+    App.bindClickEffect(jPay);
+    App.bindClickEffect(jKbToggle);
+    $("#menu-top > div").each(function(){
+        App.bindClickEffect($(this));
     });
     /*
      dropDown.html(createFoundItem(item.name, item.price));
@@ -2279,10 +2298,13 @@ App.bindModSettings = function (modFormContainer, modifyUrl) {
         }
     });
     var modifier = modFormContainer.find(".modifier");
-    modifier.find(".mi-header").click(function () {
+    modifier.find(".mi-header").each(function () {
         var t = $(this);
-        t.next(".mi-body").slideToggle(App.getAnimationTime());
-    });    
+        App.bindClickEffect(t);
+        t.click(function () {
+            t.next(".mi-body").slideToggle(App.getAnimationTime());
+        });
+    });
     modifier.find("input").change(function () {
         App.resetRequestButtons($(this).parents().eq(1));
     });
@@ -2941,10 +2963,14 @@ App.renderCloseRegister = function () {
              </div>';
     App.cpBody.html(App.createCenterBox(crDOM));
     App.cpBody.find(".center-box").prepend(App.createGoBack());
-    
-    App.cpBody.find(".mi-header").click(function(){
-        $(this).next(".mi-body").slideToggle(App.getAnimationTime());
-    }); 
+
+    App.cpBody.find(".mi-header").each(function () {
+        var t = $(this);
+        App.bindClickEffect(t);
+        t.click(function () {
+            t.next(".mi-body").slideToggle(App.getAnimationTime());
+        });
+    });
     
 };
 
@@ -3289,3 +3315,18 @@ App.getMiQuickSalesUpdateData = function (requestType, button) {
     };
 };
 
+
+//------------------------ ANDROID CLICK EFFECT ------------------------------//
+App.bindClickEffect = function (el) {
+    el.mousedown(function (e) {
+        var x = (e.offsetX === undefined) ? e.layerX : e.offsetX;
+        var y = (e.offsetY === undefined) ? e.layerY : e.offsetY;
+        var effect = $("<div>");
+        effect.addClass("effect");
+        effect.css({top: y + "px", left: x + "px"});
+        el.append(effect);
+        setTimeout(function () {
+            effect.remove();
+        }, 1000);
+    });
+};
