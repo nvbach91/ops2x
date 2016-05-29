@@ -720,71 +720,74 @@ App.bindKeyboard = function () {
     App.keyboard = $("#keyboard");
     var btnPLU = App.keyboard.find("#btnp");
     var btnMul = App.keyboard.find("#btnm");
-    App.keyboard.find("button").click(function () {
-        if (App.isInRegistrySession/*.text() === "1"*/) {
-            App.isInRegistrySession = false/*.text("0")*/;
-            App.jPriceInput.val("");
-        }
+    App.keyboard.find("button").each(function () {
         var t = $(this);
-        var id = t.attr("id");
-        var isPluActive = btnPLU.hasClass("activePLU");
-        var activeInput = isPluActive ? App.jSearchBox : App.jPriceInput;
-        var inputMaxlength = isPluActive ? 13 : 9;
-        var p = activeInput.val();
-        switch (id) {
-            case "btnp": //PLU
-                if (!isPluActive) { // turn on PLU input and turn off Price input
-                    btnPLU.addClass("activePLU");
-                    App.jLiveSearch.addClass("activePLU");
-                    App.jPriceInput.hide();
-                    btnMul.text("OK").addClass("activePLU");
-                    activeInput.val("");
-                    activeInput = App.jSearchBox;
-                    activeInput.focus();
-                } else { // turn off PLU input and turn on Price input
-                    btnPLU.removeClass("activePLU");
-                    App.jLiveSearch.removeClass("activePLU");
-                    App.jPriceInput.show();
-                    btnMul.text("").removeClass("activePLU");
-                    activeInput.val("");
-                    activeInput = App.jPriceInput;
-                }
-                break;
-            case "btnm": //multiplication symbol or confirm PLU
-                if (isPluActive) {
-                    App.jSearchBox.trigger(App.simulateEnterKeyup());
-                } else {
-                    if (p.length > 0 && p.length <= 3 && p.indexOf("*") < 0 && p !== "-") {
-                        activeInput.val(p + "*");
+        App.bindClickEffect(t);
+        t.click(function () {
+            if (App.isInRegistrySession/*.text() === "1"*/) {
+                App.isInRegistrySession = false/*.text("0")*/;
+                App.jPriceInput.val("");
+            }
+            var id = t.attr("id");
+            var isPluActive = btnPLU.hasClass("activePLU");
+            var activeInput = isPluActive ? App.jSearchBox : App.jPriceInput;
+            var inputMaxlength = isPluActive ? 13 : 9;
+            var p = activeInput.val();
+            switch (id) {
+                case "btnp": //PLU
+                    if (!isPluActive) { // turn on PLU input and turn off Price input
+                        btnPLU.addClass("activePLU");
+                        App.jLiveSearch.addClass("activePLU");
+                        App.jPriceInput.hide();
+                        btnMul.text("OK").addClass("activePLU");
+                        activeInput.val("");
+                        activeInput = App.jSearchBox;
+                        activeInput.focus();
+                    } else { // turn off PLU input and turn on Price input
+                        btnPLU.removeClass("activePLU");
+                        App.jLiveSearch.removeClass("activePLU");
+                        App.jPriceInput.show();
+                        btnMul.text("").removeClass("activePLU");
+                        activeInput.val("");
+                        activeInput = App.jPriceInput;
                     }
-                }
-                break;
-            case "btnn": //negative symbol
-                if (!isPluActive) {
-                    if (p.length === 0) {
-                        activeInput.val("-");
+                    break;
+                case "btnm": //multiplication symbol or confirm PLU
+                    if (isPluActive) {
+                        App.jSearchBox.trigger(App.simulateEnterKeyup());
+                    } else {
+                        if (p.length > 0 && p.length <= 3 && p.indexOf("*") < 0 && p !== "-") {
+                            activeInput.val(p + "*");
+                        }
                     }
-                }
-                break;
-            case "btnc": //clear
-                activeInput.val("");
-                break;
-            case "btnb": //backspace
-                if (p.length > 0) {
-                    activeInput.val(p.slice(0, -1));
-                }
-                break;
-            case "btndot": // decimal point
-                if (p.length > 0 && p.indexOf(".") < 0) {
-                    activeInput.val(p + ".");
-                }
-                break;
-            default: //numbers
-                if ((p + t.text()).length <= inputMaxlength) {
-                    activeInput.val(p + t.text());
-                }
-        }
-        App.beep();
+                    break;
+                case "btnn": //negative symbol
+                    if (!isPluActive) {
+                        if (p.length === 0) {
+                            activeInput.val("-");
+                        }
+                    }
+                    break;
+                case "btnc": //clear
+                    activeInput.val("");
+                    break;
+                case "btnb": //backspace
+                    if (p.length > 0) {
+                        activeInput.val(p.slice(0, -1));
+                    }
+                    break;
+                case "btndot": // decimal point
+                    if (p.length > 0 && p.indexOf(".") < 0) {
+                        activeInput.val(p + ".");
+                    }
+                    break;
+                default: //numbers
+                    if ((p + t.text()).length <= inputMaxlength) {
+                        activeInput.val(p + t.text());
+                    }
+            }
+            App.beep();
+        });
     });
 };
 
@@ -1012,9 +1015,9 @@ App.saveLocalSale = function (sale){
 
 // render web register view
 App.renderWebRegister = function () {    
-    /*$(window).on("beforeunload", function () {
+    $(window).on("beforeunload", function () {
         return App.lang.onbeforeunload;
-    });*/
+    });
     App.closeCurtain();
     App.createWebRegisterDOM();
     App.bindKeyboard();
