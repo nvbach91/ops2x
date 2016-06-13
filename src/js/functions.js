@@ -742,7 +742,7 @@ App.bindKeyboard = function () {
                         btnMul.text("OK").addClass("activePLU");
                         activeInput.val("");
                         activeInput = App.jSearchBox;
-                        activeInput.focus();
+                        //activeInput.focus();
                     } else { // turn off PLU input and turn on Price input
                         btnPLU.removeClass("activePLU");
                         App.jLiveSearch.removeClass("activePLU");
