@@ -1386,7 +1386,7 @@ App.renderWebRegister = function () {
                             window.print();
                         }
                         App.closeCurtain();
-                        App.jPriceInput.focus();
+                        //App.jPriceInput.focus();
                     }).appendTo(payment);
                     App.saveLocalSale(currentReceiptObj);
                     //currentReceiptObj.items = JSON.parse(currentReceiptObj.items);
@@ -1442,7 +1442,7 @@ App.renderWebRegister = function () {
             } else {
                 //t.addClass("not-found");
                 t.attr("placeholder", App.lang.misc_plu_not_found);
-                //App.makeWarning("This EAN " + filter + " is not defined");
+                App.showWarning(App.lang.misc_plu_not_found + ": <strong>" + needle + "</strong>");
             }
             t.val("");
         } else if (e.keyCode === 27) {
@@ -1466,9 +1466,12 @@ App.renderWebRegister = function () {
             App.justUsedScanner = false;
         }, App._timeBetweenConsecutiveScannings);
         App.closeCurtain();
-        App.jSearchBox.val(s);
-        App.jSearchBox.trigger(App.simulateEnterKeyup());
-        App.isInRegistrySession = true/*.text("1")*/;
+        if (!App.jControlPanel.hasClass("visible")){
+            App.jSearchBox.val(s);
+            App.jSearchBox.trigger(App.simulateEnterKeyup());
+            App.isInRegistrySession = true/*.text("1")*/;
+            App.jPriceInput.blur();
+        }
     });
 
     $("#logout").click(function () {

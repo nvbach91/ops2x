@@ -1758,6 +1758,7 @@ div#taxes-label {
     }
     #tab-navs {
         flex-wrap: nowrap;
+        min-height: 70px;
     }
     .sg, .qs-item button {
         font-size: 12px;
