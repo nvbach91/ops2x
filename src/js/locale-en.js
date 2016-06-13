@@ -150,6 +150,11 @@ App.GLocalEN = {
     misc_max_tabs              : "Cannot have more than 5 tabs",
     misc_enter_price           : "You must enter a price",
     misc_plu_not_found         : "PLU not found",
+    misc_invalid_email         : "Invalid email",
+    misc_old_password          : "OLD PASSWORD",
+    misc_new_password          : "NEW PASSWORD",
+    misc_con_password          : "CONFIRM PASSWORD",
+    misc_submit                : "SUBMIT",
     
     report_receipts            : "RECEIPTS",
     report_takings             : "TAKINGS",

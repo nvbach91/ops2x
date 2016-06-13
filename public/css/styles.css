@@ -796,6 +796,7 @@ button#park-sale, button#discard-sale {
     border-left-color: #fff;
 }
 #tabs {
+    overflow: auto;
     flex-grow: 1;
     background-color: #fff;
 }
@@ -1730,8 +1731,7 @@ div#taxes-label {
         width: 35px;
     }
     #tab-navs {
-        overflow-x: visible;
-        overflow-y: visible;
+        overflow: visible;
         display: flex;
     }
     #sale-groups {

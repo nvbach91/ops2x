@@ -999,7 +999,7 @@ App.generateEmailReceipt = function (currentReceiptObj) {
             });
             //App.sendMailReceipt($(this), emailInput, recipient, currentReceipt);
         } else {
-            emailInput.addClass("invalid").val("Invalid email");
+            emailInput.addClass("invalid").val(App.lang.misc_invalid_email);
         }
     }).appendTo(emailReceipt);
     
@@ -1032,7 +1032,9 @@ App.renderWebRegister = function () {
     App.jCheckoutLabel = $("#checkout-label");
     App.jLiveSearch = $("#live-search");
     App.jControlPanel = $("#control-panel");
-
+    
+    App.catalog.articles.sort(App.sortByEAN);
+    
     App.cpBody = App.jControlPanel.find("#cp-body");
     App.createControlPanel();
     // call numpad on mobile devices // temporary disabled because of decimal point ATTENTION!!!!
@@ -1320,8 +1322,8 @@ App.renderWebRegister = function () {
 
         var cashConfirm = $("<button>").attr("id", "cash-confirm").text(App.lang.pay_confirm).click(function () {
             var t = $(this);
-            t.off();
             if (!t.hasClass("disabled")) {
+                t.off();
                 clearInterval(App._receiptTimeInterval);
                 t.html('<div class="mi-loader loading"></div>');
 
@@ -1356,7 +1358,7 @@ App.renderWebRegister = function () {
                                 window.print();
                             }
                             App.closeCurtain();
-                            App.jPriceInput.focus();
+                            //App.jPriceInput.focus();
                         }).appendTo(payment);
                         App.bindClickEffect(donePayment);
                     } else {
@@ -1400,7 +1402,7 @@ App.renderWebRegister = function () {
         paymentBody.appendTo(paymentBox);
 
         App.showInCurtain(paymentBox);
-        App.jCashInput.focus();
+        //App.jCashInput.focus();
         App.beep();
     });
 
@@ -1410,7 +1412,6 @@ App.renderWebRegister = function () {
     for (var i = 0; i < App.nArticles; i++) {
         articles[i].id = i;
     }
-    articles.sort(App.sortByEAN);
     App.jSearchBox = App.jLiveSearch.find("#search");
     App.jSearchBox.keyup(function (e) {
         var t = $(this);
@@ -1945,10 +1946,10 @@ App.renderAccountSettings = function () {
                '<div class="form-header">' + App.lang.settings_account + '</div>\
                 <form id="change-password" action="" method="POST">\
                     <div class="form-label">' + App.lang.form_label_change_password + '</div>\
-                    <input id="old-password" type="password" pattern=".{8,128}" title="Password must be at least 8 characters long" placeholder="OLD PASSWORD">\
-                    <input id="new-password" type="password" pattern=".{8,128}" title="Password must be at least 8 characters long" placeholder="NEW PASSWORD">\
-                    <input id="con-password" type="password" pattern=".{8,128}" title="Password must be at least 8 characters long" placeholder="CONFIRM PASSWORD">\
-                    <input type="submit" value="SUBMIT">\
+                    <input id="old-password" type="password" pattern=".{8,128}" title="Password must be at least 8 characters long" placeholder="' + App.lang.misc_old_password + '">\
+                    <input id="new-password" type="password" pattern=".{8,128}" title="Password must be at least 8 characters long" placeholder="' + App.lang.misc_new_password + '">\
+                    <input id="con-password" type="password" pattern=".{8,128}" title="Password must be at least 8 characters long" placeholder="' + App.lang.misc_con_password + '">\
+                    <input type="submit" value="' + App.lang.misc_submit + '">\
                 </form>');
     App.cpBody.html(accDOM);
 
@@ -2809,7 +2810,7 @@ App.renderPLUSettings = function () {
         var result = "ean;name;price;group;tax";
         for (var i = 0; i < articlesLength; i++) {
             var article = articles[i];
-            result += "\n" + article.ean + ";" + article.name + ";" + article.price + ";" + article.group + ";" + article.tax;
+            result += "\r\n" + article.ean + ";" + article.name + ";" + article.price + ";" + article.group + ";" + article.tax;
         }
         App.downloadTextFile("catalog.csv", result);
     });
