@@ -328,6 +328,9 @@ App.showInCurtain = function (show) {
 // parses the multiplication number in the price input for multiple checkout
 App.getMultiplicationNumber = function () {
     var m = App.jPriceInput.val().replace(/[\s\.]+/g, "");
+    if (m === "-") {
+        return -1;
+    }
     if (!m.match(/^\-?[1-9](\d+)?\*(\d+)?$/g)) {
         return 1;
     }
@@ -1414,39 +1417,10 @@ App.renderWebRegister = function () {
     }
     App.jSearchBox = App.jLiveSearch.find("#search");
     App.jSearchBox.keyup(function (e) {
-        var t = $(this);
         if (e.keyCode === 13) {
-            var needle = t.val();
-            var i = articles.binaryIndexOf("ean", needle);
-            if (i >= 0) {
-                var item = articles[i];
-                var mult = App.getMultiplicationNumber();
-                App.addItemToCheckout(
-                        item.id,
-                        item.ean,
-                        item.name,
-                        item.price,
-                        item.group,
-                        item.tax,
-                        item.tags,
-                        item.desc,
-                        // multiplication number
-                        mult
-                        );
-                t.removeClass("not-found");
-                t.attr("placeholder", "PLU");
-
-                App.isInRegistrySession = false/*.text("0")*/;
-                App.jPriceInput.blur();
-                App.jPriceInput.val(item.price);
-            } else {
-                //t.addClass("not-found");
-                t.attr("placeholder", App.lang.misc_plu_not_found);
-                App.showWarning(App.lang.misc_plu_not_found + ": <strong>" + needle + "</strong>");
-            }
-            t.val("");
-        } else if (e.keyCode === 27) {
-            t.blur();
+            App.addPluItem(App.jSearchBox.val());
+        } if (e.keyCode === 27) {
+            App.jSearchBox.blur();
         }
     }).keydown(function (e) {
         e.stopPropagation();
@@ -1467,10 +1441,8 @@ App.renderWebRegister = function () {
         }, App._timeBetweenConsecutiveScannings);
         App.closeCurtain();
         if (!App.jControlPanel.hasClass("visible")){
-            App.jSearchBox.val(s);
-            App.jSearchBox.trigger(App.simulateEnterKeyup());
+            App.addPluItem(s);
             App.isInRegistrySession = true/*.text("1")*/;
-            App.jPriceInput.blur();
         }
     });
 
@@ -1495,6 +1467,39 @@ App.renderWebRegister = function () {
      dropDown.html("");
      dropDown.removeClass("visible");
      });*/
+};
+
+App.addPluItem = function (s) {
+    var t = App.jSearchBox;
+    var needle = s;
+    var i = App.catalog.articles.binaryIndexOf("ean", needle);
+    if (i >= 0) {
+        var item = App.catalog.articles[i];
+        var mult = App.getMultiplicationNumber();
+        App.addItemToCheckout(
+                item.id,
+                item.ean,
+                item.name,
+                item.price,
+                item.group,
+                item.tax,
+                item.tags,
+                item.desc,
+                // multiplication number
+                mult
+                );
+        t.removeClass("not-found");
+        t.attr("placeholder", "PLU");
+
+        App.isInRegistrySession = false/*.text("0")*/;
+        App.jPriceInput.blur();
+        App.jPriceInput.val(item.price);
+    } else {
+        //t.addClass("not-found");
+        t.attr("placeholder", App.lang.misc_plu_not_found);
+        App.showWarning(App.lang.misc_plu_not_found + ": <strong>" + needle + "</strong>");
+    }
+    t.val("");
 };
 
 //
