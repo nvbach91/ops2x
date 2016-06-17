@@ -1027,8 +1027,11 @@ button.si-remove:hover {
 .keyboard > button:hover {
     background-color: #E8E8E8;
 }
-button#btnb:before, button#pbtnb:before  {
-    content: "\232b";
+button#btnb, button#pbtnb {
+    background-image: url('../img/ico/backspace.svg');
+    background-size: 30px;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 button#btnp.activePLU {
     background-color: #E4644B;
