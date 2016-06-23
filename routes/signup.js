@@ -136,7 +136,8 @@ function generateDefaultSettings(newUserId, request) {
         ],
         receipt: {
             header: "Your receipt",
-            footer: "Thank you for stopping by!"
+            footer: "Thank you for stopping by!",
+            width: 80
         }
     };
 }

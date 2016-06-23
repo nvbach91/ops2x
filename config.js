@@ -5,7 +5,7 @@ var config = {
     // when deploying to a new host you must change the host field
     // as well as the mongo uri
     
-    host: 'https://ops2x-62687.onmodulus.net',
+    host: 'http://kouzelnakasa.cz',
     mongodb_host: 'mongodb://127.0.0.1:27017/dev',    
     
     companyName: 'EnterpriseApps',
