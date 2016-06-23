@@ -1,4 +1,5 @@
 var config = require('../config');
+var template = require('../template');
 var router = require('express').Router();
 var Users = require('../models/Users');
 var utils = require('../utils');
@@ -10,7 +11,7 @@ router.post('/forgot', function (req, res) {
         if (!user) {
             res.json({success: false, msg: 'Account ' + newEmail + ' does not exist'});
         } else {
-            utils.mailer.sendMail(config.generateForgotMail(newEmail, user._id.valueOf(), token), function (error, info) {
+            utils.mailer.sendMail(template.generateForgotMail(newEmail, user._id.valueOf(), token), function (error, info) {
                 if (error) {
                     console.log(error);
                     res.json({success: false, msg: error});

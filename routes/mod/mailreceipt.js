@@ -1,6 +1,7 @@
 var router = require('express').Router();
 var utils = require('../../utils');
 var config = require('../../config');
+var template = require('../../template');
 
 router.post('/mailreceipt', function (req, res) {
     var newReceipt = req.body;
@@ -12,7 +13,7 @@ router.post('/mailreceipt', function (req, res) {
         items: JSON.parse(newReceipt.items),
         tendered: parseFloat(newReceipt.tendered)
     };
-    utils.mailer.sendMail(config.generateReceiptMail(newReceipt.recipient, newReceiptObj), function (error, info) {
+    utils.mailer.sendMail(template.generateReceiptMail(newReceipt.recipient, newReceiptObj), function (error, info) {
         if (error) {
             res.json({success: false, msg: error});
             console.log(error);

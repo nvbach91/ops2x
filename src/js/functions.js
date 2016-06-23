@@ -1036,6 +1036,7 @@ App.renderWebRegister = function () {
     App.jLiveSearch = $("#live-search");
     App.jControlPanel = $("#control-panel");
     
+    App.receiptWidth = " width-" + App.settings.receipt.width + "mm";
     App.catalog.articles.sort(App.sortByEAN);
     
     App.cpBody = App.jControlPanel.find("#cp-body");
@@ -1400,7 +1401,7 @@ App.renderWebRegister = function () {
         App.bindClickEffect(cashConfirm);
         cashConfirm.appendTo(payment);
         payment.appendTo(paymentBody);
-        $("<div>").addClass("receipt-container").append(receipt).appendTo(paymentBody);
+        $("<div>").addClass("receipt-container" + App.receiptWidth).append(receipt).appendTo(paymentBody);
 
         paymentBody.appendTo(paymentBox);
 
@@ -2054,6 +2055,7 @@ App.requestModifyItem = function (url, data, button) {
                     break;
                 case "/mod/receipt" :
                     App.receipt = resp.msg;
+                    App.receiptWidth = " width-" + App.receipt.width + "mm";
                     break;
                 case "/mod/pos" :
                     App.settings = resp.msg;
@@ -2252,6 +2254,13 @@ App.generateModItemFormDOM = function (type, item) {
                      dom += '<input class="colpicker" \
                                 placeholder="' + keys[i].toUpperCase() 
                                 + '" value="' + item[keys[i]].value + '">';
+                } else if(keys[i] === "width") {
+                // ATTENTION!!!    
+                    dom += '<select id="receipt-width">';
+                    dom += '<option' + (App.receipt.width === 58 ? ' selected' : '') + '>58</option>';
+                    dom += '<option' + (App.receipt.width === 80 ? ' selected' : '') + '>80</option>';
+                    dom += '</select>';
+                
                 } else {
                 var current_EAN = "";
                 if (keys[i] === "ean" && isQS) {
@@ -2552,7 +2561,8 @@ App.renderReceiptSettings = function () {
                         <div class="modifier">'
                       + App.generateModItemFormDOM("receipt", {
                         header: {title: "Max 256 characters", valid : /^.{0,256}$/, value: App.receipt.header},
-                        footer: {title: "Max 256 characters", valid : /^.{0,256}$/, value: App.receipt.footer}
+                        footer: {title: "Max 256 characters", valid : /^.{0,256}$/, value: App.receipt.footer},
+                        width:  {title: "58 or 80 mm width", valid : /^58|80$/, value: App.receipt.width}
                       })  
                       + '</div>\
                     </div>');
@@ -2570,7 +2580,8 @@ App.getMiReceiptUpdateData = function (requestType, button) {
     return {
         requestType: requestType,
         header: miBody.find("input[placeholder='HEADER']").val(),
-        footer: miBody.find("input[placeholder='FOOTER']").val()
+        footer: miBody.find("input[placeholder='FOOTER']").val(),
+        width: miBody.find("select").find(":selected").val()
     };
 };
 
@@ -3036,7 +3047,7 @@ App.renderOffHistory = function () {
         var receiptIndex = parseInt(t.parent().find(".hr-index").text());
 
         var paymentBody = $("<div>").addClass("pb-body");
-        var container = $("<div>").addClass("receipt-container");
+        var container = $("<div>").addClass("receipt-container" + App.receiptWidth);
 
         container.append(App.renderReceipt(offlineReceipts[receiptIndex], true));
         paymentBody.append(container);
@@ -3095,7 +3106,7 @@ App.renderSaleHistory = function () {
         var receiptIndex = parseInt(t.parent().find(".hr-index").text());
 
         var paymentBody = $("<div>").addClass("pb-body");
-        var container = $("<div>").addClass("receipt-container");
+        var container = $("<div>").addClass("receipt-container" + App.receiptWidth);
 
         container.append(App.renderReceipt(receipts[receiptIndex], true));
         paymentBody.append(container);
@@ -3227,7 +3238,7 @@ App.renderReceipt = function (receiptObj, isCopy) {
     $("<div>").addClass("receipt-gratitude").text(App.receipt.footer).appendTo(receipt);
 
     //creating receipt footer
-    $("<div>").addClass("receipt-footer").text("EnterpriseApps").appendTo(receipt);
+    $("<div>").addClass("receipt-footer").text("Powered by EnterpriseApps").appendTo(receipt);
     
     return receipt;    
 };

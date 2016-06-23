@@ -1,4 +1,5 @@
 var config = require('../config');
+var template = require('../template');
 var utils = require('../utils');
 var router = require('express').Router();
 var Users = require('../models/Users');
@@ -50,7 +51,7 @@ router.post('/signup', function (req, res) {
                 return newSales.save();
             }).then(function (s) {
                 console.log('Sales    created: ' + s.userId);
-                utils.mailer.sendMail(config.generateSignupMail(newEmail, newUserId.valueOf()), function (error, info) {
+                utils.mailer.sendMail(template.generateSignupMail(newEmail, newUserId.valueOf()), function (error, info) {
                     if (error) {
                         return console.log(error);
                     }

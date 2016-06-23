@@ -1301,7 +1301,7 @@ div.ri-x {
 }
 #rs-total {
     font-weight: bold;
-    font-size: 16px;
+    font-size: 14px;
 }
 div#taxes-label {
     display: inline-block;
@@ -1956,51 +1956,51 @@ div#taxes-label {
     html, body {
         font-family: "Open Sans", sans-serif;
     }
-    nav, #control-panel, #main, .pb-header, #payment {
+    nav, #control-panel, #main, .pb-header, #payment, .preview {
         display: none;
     }
     #curtain {
         padding: 0;
     }
-    #payment-box, .receipt {
-        border-radius: initial;
-        box-shadow: none;
-    }
     .pb-body {
         flex-direction: column;
-        background-color: #FFF !important;
+        background-color: #fff !important;
     }
-    .company-name, .address-1, .address-2, .tin, .vat, #receipt-number, .receipt-custom-header {
-        display: block;
-    }
-    .preview {
-        display: none;
-    }
-    .receipt-container {
-        max-width: 270px;
-        margin: 0;
+    .receipt-container {               
+        padding: 0 40px 0 10px;
         min-width: 0;
-        padding: 0 0 0 5px;
-    }
-    .receipt-item {
-        font-size: 12px;
-        padding: 0;
-    }
-    .receipt-item > div {
+        max-width: none;
         width: 100%;
     }
-    div.ri-n {
-        flex-grow: 1;
-        width: 100%;
+    .receipt-container.width-58mm {        
+        padding: 0 115px 0 10px;
+    } 
+    .width-58mm .ri-p{
+        width: 70px;
     }
-    div.ri-q {
-        flex-grow: 0;
+    .width-58mm .ri-q {
         width: 25px;
     }
-    div.ri-tt {
-        width: 60px;
-        padding-right: 0px;
-        flex-grow: 1;
+    .receipt {
+        padding: 0;
+        box-shadow: none;
+    }  
+    .receipt:after {
+        content: initial;
+    }  
+    .company-name, .address-1, .address-2, 
+    .tin, .vat, #receipt-number, .receipt-custom-header {
+        display: block;
+    }    
+    .receipt-footer {
+        display: block;
+        line-height: 25px;
+        font-size: 12px;
+    }
+    .receipt-gratitude {
+        font-style: italic;
+        display: block;
+        font-size: 12px;
     }
     .receipt-body {
         height: auto;
@@ -2012,23 +2012,6 @@ div#taxes-label {
         margin: 5px 0 5px 5px;
         border-top: 1px solid #000;
         border-bottom: 1px solid #000;
-    }
-    .receipt-gratitude {
-        font-style: italic;
-        display: block;
-        font-size: 12px;
-    }
-    .receipt-footer {
-        display: block;
-        line-height: 25px;
-        font-size: 12px;
-        background-image: url("../img/logob.svg");
-        background-size: 25px;
-        background-position: 60px;
-        background-repeat: no-repeat;
-    }
-    .receipt:after {
-        content: initial;
     }
 }
 

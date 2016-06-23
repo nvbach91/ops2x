@@ -64,7 +64,7 @@ App.GLocalCS = {
     receipt_copy               : "Kopie účtenky",
     receipt_tin                : "IČO:",
     receipt_vat                : "DIČ:",
-    receipt_receipt            : "Účtenka č. ",
+    receipt_receipt            : "Daňový doklad ",
     receipt_total_items        : "Celkem položek:",
     receipt_subtotal           : "Mezisoučet:",
     receipt_round              : "Zaokrouhlení:",

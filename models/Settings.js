@@ -28,7 +28,8 @@ var Settings = new Schema({
     ],
     receipt: {
         header: String,
-        footer: String
+        footer: String,
+        width: Number
     }
 });
 
