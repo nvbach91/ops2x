@@ -213,6 +213,9 @@ form [type="submit"]:hover {
 .lang.cs {    
     background-image: url("../img/flag/cs.svg");
 }
+.lang.vi {    
+    background-image: url("../img/flag/vi.svg");
+}
 .lang.active, .lang:hover {
     opacity: 1;
     filter: gray; /* IE6-9 */

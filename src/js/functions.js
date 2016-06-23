@@ -836,6 +836,18 @@ App.loadLocale = function () {
                 {short: "So", long: "Sobota"}
             ];
             break;
+        case "vi" :
+            App.lang = App.GLocalVI;
+            App.week = [
+                {short: "Ne", long: "Neděle"},
+                {short: "Po", long: "Pondělí"},
+                {short: "Út", long: "Úterý"},
+                {short: "St", long: "Středa"},
+                {short: "Čt", long: "Čtvrtek"},
+                {short: "Pá", long: "Pátek"},
+                {short: "So", long: "Sobota"}
+            ];
+            break;
         default:
             App.lang = App.GLocalEN;
             App.week = [
@@ -1620,8 +1632,9 @@ App.renderSignin = function () {
                     <div class="form-row">\
                         <div class="form-label">' + App.lang.sign_in_label + '</div>\
                         <div id="lang-switch">\
-                            <div class="lang en' + (App.locale === "en" ? ' active' : '') + '" title="Use English"></div>\
-                            <div class="lang cs' + (App.locale === "cs" ? ' active' : '') + '" title="Use Czech"></div>\
+                            <div class="lang en' + (App.locale === "en" ? ' active' : '') + '" title="English"></div>\
+                            <div class="lang cs' + (App.locale === "cs" ? ' active' : '') + '" title="Česky"></div>\
+                            <div class="lang vi' + (App.locale === "vi" ? ' active' : '') + '" title="Tiếng Việt"></div>\
                         </div>\
                     </div>\
                     <input id="username" type="text" placeholder="' + App.lang.sign_in_username + '">\
@@ -1641,6 +1654,8 @@ App.renderSignin = function () {
             App.saveLocale("en");
         } else if (t.hasClass("cs")) {
             App.saveLocale("cs");
+        } else if (t.hasClass("vi")) {
+            App.saveLocale("vi");
         }
         if (!t.hasClass("active")) {
             var currentUsername = $("#username").val();

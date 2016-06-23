@@ -17,7 +17,8 @@ gulp.task('scripts', function () {
         'src/js/Item.js',
         'src/js/main.js',
         'src/js/locale-en.js',
-        'src/js/locale-cs.js'
+        'src/js/locale-cs.js',
+        'src/js/locale-vi.js'
     ]).pipe(plumber())
             .pipe(concat('build.js'))
             .pipe(rename({suffix: '.min'}))
