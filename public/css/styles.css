@@ -506,8 +506,14 @@ div#logout {
     font-size: 14px;
     width: 100%;
     max-width: 1024px;
+    text-align: center;
     /*overflow: auto;
     max-height: 480px;*/
+}
+.sh-next {
+    width: 200px;
+    padding: 20px 0;
+    margin: 20px 0;
 }
 .hr-col:first-child {
     border-left: 5px solid transparent;

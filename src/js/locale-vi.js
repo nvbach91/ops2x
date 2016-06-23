@@ -96,6 +96,7 @@ App.GLocalVI = {
     
     settings_goback            : "Go back",
     settings_sales_history     : "Sales history",
+    settings_next_10_receipts  : "Next 10 receipts",
     settings_close_register    : "Reports",
     settings_off_history       : "Offline Sales",
     settings_account           : "Account Settings",

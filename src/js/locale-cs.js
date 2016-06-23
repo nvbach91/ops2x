@@ -95,7 +95,8 @@ App.GLocalCS = {
     details_description        : "Popis: ",
     
     settings_goback            : "Zpět",
-    settings_sales_history     : "Historie prodejů",
+    settings_sales_history     : "Historie prodejů",    
+    settings_next_10_receipts  : "Dalších 10",
     settings_close_register    : "Závěrka",
     settings_off_history       : "Neodeslané prodeje",
     settings_account           : "Nastavení účtu",

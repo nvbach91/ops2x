@@ -1598,7 +1598,7 @@ App.initDashBoard = function () {
             $.getJSON("/api/buttons", function (buttons) {
                 App.buttons = buttons;
             }),
-            $.getJSON("/api/sales", function (sales) {
+            $.post("/api/sales", function (sales) {
                 App.sales = sales;
             })
             ).then(function () {
@@ -3116,6 +3116,19 @@ App.renderSaleHistory = function () {
     }
 
     container.append(receiptListDOM);
+    
+    $("<button>").text(App.lang.settings_next_10_receipts).addClass("sh-next").click(function () {
+        $.ajax({
+            type: "post",
+            url: "/api/sales",
+            data: {nReceivedReceipts: App.sales.receipts.length},
+            dataType: "json"
+        }).done(function (res) {
+            App.sales.receipts = res.receipts.concat(App.sales.receipts);
+            App.renderSaleHistory();
+        });
+    }).appendTo(container);
+    
     container.find(".hr-print").click(function () {
         var t = $(this);
         var receiptIndex = parseInt(t.parent().find(".hr-index").text());
