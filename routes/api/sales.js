@@ -3,7 +3,7 @@ var Sales = require('../../models/Sales');
 
 router.post('/sales', function (req, res) {
     var query = {userId: req.user._id};
-    var options = {__v: 0, _id: 0, userId: 0, 'receipts._id': 0};
+    var options = {__v: 0, _id: 0, userId: 0, 'receipts._id': 0, 'receipts.items._id': 0};
     var nReceivedReceipts = req.body.nReceivedReceipts ? parseInt(req.body.nReceivedReceipts) : 0;
     Sales.aggregate().match(query).project({receiptSize: {$size: "$receipts"}}).exec().then(function (results) {
         var actualNumberOfReceipts = results[0].receiptSize;

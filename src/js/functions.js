@@ -1176,7 +1176,7 @@ App.renderWebRegister = function () {
                 })).appendTo(paymentBox);
         var paymentBody = $("<div>").addClass("pb-body");
         var lastReceipt = App.sales.receipts[App.sales.receipts.length - 1];
-        var lastReceiptNumber = lastReceipt ? lastReceipt.number : 0;
+        var lastReceiptNumber = lastReceipt ? lastReceipt.number : -1;
         currentReceiptObj = {
             number: parseInt(lastReceiptNumber) + 1,
             date: null,

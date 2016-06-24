@@ -532,7 +532,10 @@ div#logout {
     margin: 0px;
     max-width: 200px;
     min-width: 100px;
-    width: 100%;
+    width: 100%;    
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 .hr-header .hr-col {
     padding: 0;
