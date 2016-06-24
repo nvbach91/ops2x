@@ -3106,7 +3106,7 @@ App.renderSaleHistory = function () {
         receiptListDOM += 
                 '<div class="history-receipt hr-row">\
                     <div class="hr-col hr-index">' + i + '</div>\
-                    <div class="hr-col">' + receipt.number + '</div>\
+                    <div class="hr-col">' + receipt.number.slice(0,8) + '<em class="rec-number">' + receipt.number.slice(8,receipt.number.length) + '</em></div>\
                     <div class="hr-col">' + App.getDate(receipt.date) + '</div>\
                     <div class="hr-col">' + receipt.clerk + '</div>\
                     <div class="hr-col">' + receiptTotal.formatMoney() + ' ' + App.settings.currency.symbol + '</div>\

@@ -522,6 +522,9 @@ div#logout {
     display: flex;
     justify-content: center;
 }
+.rec-number {
+    color: #f36767;
+}
 .hr-col {
     padding: 10px 0;
     flex-grow: 1;
