@@ -5,7 +5,7 @@ var Sales = new Schema({
     userId: {type: Schema.ObjectId, index: {unique: true}},
     receipts: [
         {
-            number: String,
+            number: Number,
             date: Date,
             clerk: String,
             items: [

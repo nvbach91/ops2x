@@ -1175,9 +1175,10 @@ App.renderWebRegister = function () {
                     App.closeCurtain();
                 })).appendTo(paymentBox);
         var paymentBody = $("<div>").addClass("pb-body");
-        
+        var lastReceipt = App.sales.receipts[App.sales.receipts.length - 1];
+        var lastReceiptNumber = lastReceipt ? lastReceipt.number : 0;
         currentReceiptObj = {
-            number: App.getDatePrefix() + App.sales.receipts.length,
+            number: parseInt(lastReceiptNumber) + 1,
             date: null,
             clerk: App.currentEmployee.name,
             items: [],
@@ -3106,7 +3107,7 @@ App.renderSaleHistory = function () {
         receiptListDOM += 
                 '<div class="history-receipt hr-row">\
                     <div class="hr-col hr-index">' + i + '</div>\
-                    <div class="hr-col">' + receipt.number.slice(0,8) + '<em class="rec-number">' + receipt.number.slice(8,receipt.number.length) + '</em></div>\
+                    <div class="hr-col"><span class="rec-number">' + receipt.number + '</span></div>\
                     <div class="hr-col">' + App.getDate(receipt.date) + '</div>\
                     <div class="hr-col">' + receipt.clerk + '</div>\
                     <div class="hr-col">' + receiptTotal.formatMoney() + ' ' + App.settings.currency.symbol + '</div>\
@@ -3118,14 +3119,20 @@ App.renderSaleHistory = function () {
     container.append(receiptListDOM);
     
     $("<button>").text(App.lang.settings_next_10_receipts).addClass("sh-next").click(function () {
+        var t = $(this);
         $.ajax({
             type: "post",
             url: "/api/sales",
             data: {nReceivedReceipts: App.sales.receipts.length},
             dataType: "json"
         }).done(function (res) {
-            App.sales.receipts = res.receipts.concat(App.sales.receipts);
-            App.renderSaleHistory();
+            if (res.receipts.length > 0) {
+                App.sales.receipts = res.receipts.concat(App.sales.receipts);
+                App.renderSaleHistory();
+            } else {
+                t.text(App.lang.settings_no_more_receipts);
+                t.attr("disabled", true);
+            }
         });
     }).appendTo(container);
     
