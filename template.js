@@ -9,11 +9,31 @@ var template = {
             text: 'Hello,\n\nyou have recently registered an account on Online Point of Sale System.\n'
                     + 'Please visit the following link to complete your registration.\n\n'
                     + config.host + '/activate?key=' + key
+                    + '\nPlease activate your account within 1 day.'
                     + '\n\nBest regards,\nOnline Point of Sale System Team',
             html: '<p>Hello,<br><br>you have recently registered an account on Online Point of Sale System.<br>'
                     + 'Please visit the following link to complete your registration.<br><br>'
                     + '<a href="' + config.host + "/activate?key=" + key + '">' + config.host + '/activate?key=' + key + '</a>'
+                    + '<br>Please activate your account within 1 day after registration.</p>'
                     + '<br><br>Best regards,<br>Online Point of Sale System Team</p>'
+        };
+    },
+    generateActivatedMail: function (recipient) {
+        return {
+            from: '"' + config.companyName + '" <' + config.mail_transport.auth.user + '>',
+            to: recipient,
+            subject: 'Account activated - Online Point of Sale System',
+            text: 'Hello,\n\nthank you for activating your account.'
+                    + '\nYou can now sign in to the app at ' + config.host
+                    + '\nPlease use you email address as the username.'
+                    + '\nThe default employee account name is Admin and the PIN is 0000.'
+                    + '\n\nBest regards,\nOnline Point of Sale System Team',
+            html: '<p>Hello,<br><br>thank you for activating your account.'
+                    + '<br>Please use you email address as the username.'
+                    + '<br>You can now sign in to the  at <a href="' + config.host + '">' + config.host + '</a>'
+                    + '<br>Please use you email address as the username.'
+                    + '<br>The default employee account name is Admin and the PIN is 0000.'
+                    + '<br><br>Best regards,<br>Online Point of Sale System Team </p>'
         };
     },
     generateForgotMail: function (recipient, key, token) {

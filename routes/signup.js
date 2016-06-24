@@ -96,13 +96,18 @@ module.exports = router;
 
 // defaults
 function generateNewUser(newUserId, newEmail, password) {
+    var activationExpire = new Date();
+    activationExpire.setDate(activationExpire.getDate() + 1);
     return {
         _id: newUserId,
         email: newEmail,
         password: utils.hash(password),
         activated: false,
-        password_pending: "no"/*,
-         session_token: "no"*/
+        password_pending: "no",
+        activation_expire: activationExpire,
+        register_date: new Date(),
+        last_login: null,
+        nLogins: 0
     };
 }
 ;

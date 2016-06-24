@@ -11,11 +11,19 @@ passport.use(new passportLocal.Strategy(function (username, password, done) {
         Users.findOne({email: username}, function (err, user) {
             if (user) {
                 if (username === user.email && utils.hash(password) === user.password && user.activated) {
-                    //var session_token = utils.generateRandomString(16);
-                    //user.session_token = session_token;
-                    //user.save().then(function (user) {
+                    user.last_login = new Date();
+                    if (user.nLogins === undefined) {
+                        user.nLogins = 0;
+                    }
+                    user.nLogins++;
+                    if (user.register_date === undefined) {
+                        user.register_date = new Date();
+                    }
+                    user.save().then(function (u) {
                         done(null, {id: user._id, username: username});
-                    //});
+                    }).catch(function(err){
+                        console.log(err);
+                    });
                 } else {
                     done(null, null);
                 }
