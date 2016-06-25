@@ -138,7 +138,8 @@ form [type="submit"] {
     background-color: #01AA93;
     background-image: none;    
     padding: 20px 0;
-    border-radius: 0
+    border-radius: 0;
+    margin-top: 5px;
 }
 form#sign-up [type="submit"] {
     background-color: #6EC179;

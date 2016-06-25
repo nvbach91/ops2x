@@ -6,6 +6,8 @@ App.GLocalVI = {
     sign_in_sign_in            : "SIGN IN",
     sign_in_sign_up            : "Sign up",
     sign_in_forgot             : "Forgot your password?",
+    sign_in_enter_ep           : "Please enter your email and password to sign in",
+    sign_in_invalid_employee   : "Invalid Employee Name or PIN",
            
     sign_up_header             : "Welcome to OPS",
     sign_up_label              : "CREATE A NEW STORE",
@@ -23,6 +25,8 @@ App.GLocalVI = {
     sign_up_czk                : "CZK - Czech Koruna",
     sign_up_sign_up            : "SIGN UP",
     sign_up_back               : "Back to sign in",
+    sign_up_thank              : function (msg) {return "Thank you for creating an account<br>Please check your inbox at <strong>" + msg + "</strong> to complete the registration";},
+    sign_up_fail               : function (msg) {return "Unable to create account<br><strong>" + msg + "</strong><br>Please let us know at <a href='mailto:info.enterpriseapps@gmail.com'>info.enterpriseapps@gmail.com</a>";},
     
     forgot_header              : "Welcome to OPS",
     forgot_label               : "RESET PASSWORD",
@@ -30,8 +34,11 @@ App.GLocalVI = {
     forgot_instruction         : "You'll receive a password reset link in your inbox",
     forgot_submit              : "SUBMIT",
     forgot_back                : "Back to sign in",
+    forgot_success             : function (msg) {return "A reset link has been sent to your inbox at <strong>" + msg + "</strong>";},
+    forgot_fail                : function (msg) {return "Unable to process your request<br><strong>" + msg + "</strong><br>Please let us know at <a href='mailto:info.enterpriseapps@gmail.com'>info.enterpriseapps@gmail.com</a>";},
     
     dashboard_sign_out         : "Sign out",
+    dashboard_unable_sign_out  : "Unable to sign out. Please check your connection",
     dashboard_header           : "Open Cash Register",
     dashboard_label            : "EMPLOYEE LOGIN",
     dashboard_username         : "USERNAME",
@@ -43,8 +50,8 @@ App.GLocalVI = {
     reg_cp                     : "Control Panel",
     reg_checkout               : "CHECKOUT",
     reg_items                  : "item",    
-  //reg_item                   : "položka",
-  //reg_item_plural            : "položky",    
+  //reg_item                   : "item",
+  //reg_item_plural            : "items",    
     reg_total                  : "Total",
     reg_park                   : "Park Sale",
     reg_discard                : "Discard Sale",
@@ -144,8 +151,17 @@ App.GLocalVI = {
     info_tabs                  : "Warning: The content of the removed tab will also be removed",
     info_qs                    : "Tip: Search your catalog for the item, then reference its EAN code here",
     
+    csv_invalid_nFields        : "Invalid CSV header format. Incorrect number of fields",
+    csv_invalid_header         : function (i, headers, validHeaders) {return "Invalid CSV header " + (i + 1) + ": " + headers[i] + ". Must be " + validHeaders[i];},
+    csv_invalid_nLine_values   : function (i, validLine) {return "Invalid format on line " + (i + 1) + ". Must have " + validLine.length + " values separated by semicolons (;)";},
+    csv_invalid_line_value     : function (i, header, currentValue) {return "Invalid CSV on line " + (i + 1) + ", column: " + header + ", value: " + (currentValue || "/empty/");},
+    csv_must_unique            : function (nextItem, currentItem) {"EAN codes must be unique! Duplicate EAN codes on lines " + nextItem.lineNumber + " and " + currentItem.lineNumber;},
+    csv_max_file_size          : "File cannot be larger than 5 Megabytes",
+    
     ph_search_ean              : "SEARCH EAN CODE",
     
+    misc_incorrect_ep          : "Incorrect username or password",
+    misc_network_error         : "Network error. Please check your connection",    
     misc_reason                : "Reason: ",
     misc_status                : "Status: ",
     misc_password_changed      : "Password changed",
@@ -157,6 +173,8 @@ App.GLocalVI = {
     misc_new_password          : "NEW PASSWORD",
     misc_con_password          : "CONFIRM PASSWORD",
     misc_submit                : "SUBMIT",
+    misc_passwords_not_match   : "Passwords don't match",
+    misc_password_min_length   : "The minimum length for a password is 8 characters",
     
     report_receipts            : "RECEIPTS",
     report_takings             : "TAKINGS",

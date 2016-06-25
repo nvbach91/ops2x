@@ -6,6 +6,8 @@ App.GLocalCS = {
     sign_in_sign_in            : "PŘIHLÁSIT SE",
     sign_in_sign_up            : "Registrace",
     sign_in_forgot             : "Zapomenuté heslo",
+    sign_in_enter_ep           : "Pro přihlášení zadejte email a heslo",
+    sign_in_invalid_employee   : "Nesprávný login zaměstnance",
             
     sign_up_header             : "Vítejte v OPS",
     sign_up_label              : "VYTVOŘENÍ NOVÉHO OBCHODU",
@@ -23,6 +25,8 @@ App.GLocalCS = {
     sign_up_czk                : "CZK - Česká koruna",
     sign_up_sign_up            : "VYTVOŘIT ÚČET",
     sign_up_back               : "Zpět na přihlášení",
+    sign_up_thank              : function (msg) {return "Děkujeme za vytvoření účtu<br>Zkontrolujte svou e-mailovou schránku <strong>" + msg + "</strong> pro dokončení registrace";},
+    sign_up_fail               : function (msg) {return "Nepodařilo se nám vytvořit účet<br><strong>" + msg + "</strong><br>Dejte nám vědět na <a href='mailto:info.enterpriseapps@gmail.com'>info.enterpriseapps@gmail.com</a>";},
     
     forgot_header              : "Vítejte v OPS",
     forgot_label               : "OBNOVENÍ HESLA",
@@ -30,8 +34,11 @@ App.GLocalCS = {
     forgot_instruction         : "Po stisknutí ODESLAT dostanete v mailu odkaz na obnovení hesla",
     forgot_submit              : "ODESLAT",
     forgot_back                : "Zpět na přihlášení",
+    forgot_success             : function (msg) {return "Poslali jsme na Váš email <strong>" + msg + "</strong> odkaz na obnovení hesla" ;},
+    forgot_fail                : function (msg) {return "Nepodařilo se vyřídit Váš požadavek<br><strong>" + msg + "</strong><br>Dejte nám vědět na <a href='mailto:info.enterpriseapps@gmail.com'>info.enterpriseapps@gmail.com</a>";},
     
     dashboard_sign_out         : "Odhlásit se",
+    dashboard_unable_sign_out  : "Nepodařilo se odhlásit. Zkontrolujte spojení",
     dashboard_header           : "Otevření pokladny",
     dashboard_label            : "PŘIHLÁŠENÍ ZAMĚSTNANCE",
     dashboard_username         : "UŽIVATELSKÉ JMÉNO",
@@ -144,8 +151,17 @@ App.GLocalCS = {
     info_tabs                  : "Pozor: Obsah odebrané záložky bude také smazán",
     info_qs                    : "Tip: Pro vytváření vložte EAN kód zboží",
     
+    csv_invalid_nFields        : "Formát CSV hlavičky je neplatný. Nesprávný počet polí",
+    csv_invalid_header         : function (i, headers, validHeaders) {return "Nesprávná CSV hlavička " + (i + 1) + ": " + headers[i] + ". Musí být " + validHeaders[i];},
+    csv_invalid_nLine_values   : function (i, validLine) {return "Nesprávný formát na řádce " + (i + 1) + ". Musí mít " + validLine.length + " hodnot oddělených středníkem (;)";},
+    csv_invalid_line_value     : function (i, header, currentValue) {return "Nesprávná hodnota na řádce: " + (i + 1) + ", sloupec: " + header + ", hodnota: " + (currentValue || "/prázdná/");},
+    csv_must_unique            : function (nextItem, currentItem) {"EAN kódy musí být unikátní! Našly se duplicitní EAN kódy na řádkách " + nextItem.lineNumber + " a " + currentItem.lineNumber;},
+    csv_max_file_size          : "Soubor nemůže být větší než 5 MB",
+    
     ph_search_ean              : "EAN kód",
     
+    misc_incorrect_ep          : "Nesprávné uživatelské jméno nebo heslo",
+    misc_network_error         : "Chyba sítě. Zkontrolujte internetové připojení",    
     misc_reason                : "Příčina: ",
     misc_status                : "Status: ",
     misc_password_changed      : "Heslo změněno",
@@ -157,6 +173,8 @@ App.GLocalCS = {
     misc_new_password          : "NOVÉ HESLO",
     misc_con_password          : "NOVÉ HESLO",
     misc_submit                : "ODESLAT",
+    misc_passwords_not_match   : "Hesla se neshodují",
+    misc_password_min_length   : "Minimální délka hesla je 8 znaků",
     
     report_receipts            : "ÚČTENEK",
     report_takings             : "TRŽBY",

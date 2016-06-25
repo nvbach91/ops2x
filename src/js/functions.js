@@ -1563,7 +1563,7 @@ App.renderDashBoard = function () {
             }
         }
         if (!loggedIn) {
-            App.showWarning("Invalid Employee Name or PIN");
+            App.showWarning(App.lang.sign_in_invalid_employee);
         } else {
             App.renderWebRegister();
         }
@@ -1578,7 +1578,7 @@ App.renderDashBoard = function () {
             App.renderSignin();
         }).fail(function () {
             App.closeCurtain();
-            App.showWarning("Unable to sign out. Please check your connection");
+            App.showWarning(App.lang.dashboard_unable_sign_out);
         });
     });
     
@@ -1682,7 +1682,7 @@ App.renderSignin = function () {
         var username = t.find("#username").val().toLowerCase();
         var password = t.find("#password").val();
         if (!App.isValidEmail(username) || !password.length) {
-            App.showWarning("Please enter your email and password to sign in");
+            App.showWarning(App.lang.sign_in_enter_ep);
         } else {
             App.showLoading();
             $.ajax({
@@ -1697,13 +1697,13 @@ App.renderSignin = function () {
                 if (resp.isAuthenticated) {
                     App.initDashBoard();
                 } else {
-                    alert("Wrong credentials");
+                    alert(App.lang.misc_incorrect_ep);
                 }
             }).fail(function (resp) {
                 App.closeCurtain();
-                var msg = "Incorrect username and/or password";
+                var msg = App.lang.misc_incorrect_ep;
                 if (resp.status === 0) {
-                    msg = "Network error. Please check your internet connection";
+                    msg = App.lang.misc_network_error;
                 }
                 App.showWarning(msg);
             });
@@ -1751,13 +1751,13 @@ App.renderSignup = function () {
         e.preventDefault();
         var username = $("#username");
         if (!App.isValidEmail(username.val())) {
-            App.showWarning("<strong>" + username.val() + "</strong> is not a valid emaill address!");
+            App.showWarning("<strong>" + username.val() + "</strong> " + App.lang.misc_invalid_email);
             return false;
         }
         var password = $("#password");
         var confirm = $("#confirm");
         if (password.val() !== confirm.val()) {
-            App.showWarning("Passwords do not match!");
+            App.showWarning(App.lang.misc_passwords_not_match);
             return false;
         }
         var signupRequest = {
@@ -1782,20 +1782,16 @@ App.renderSignup = function () {
         }).done(function (resp) {
             if (resp.success) {
                 App.renderSignin();
-                App.showWarning("Thank you for creating an account<br>Please check your inbox at <strong>" 
-                        + resp.msg 
-                        + "</strong> to complete the registration");
+                App.showWarning(App.lang.sign_up_thank(resp.msg));
             } else {
                 App.closeCurtain();
-                App.showWarning("Unable to create account<br><strong>" 
-                        + resp.msg 
-                        + "</strong><br>Please let us know at <a href='mailto:info.enterpriseapps@gmail.com'>info.enterpriseapps@gmail.com</a>");
+                App.showWarning(App.lang.sign_up_fail(resp.msg));
             }
         }).fail(function (resp) {
             App.closeCurtain();
-            var msg = "Incorrect username and/or password";
+            var msg = App.lang.misc_incorrect_ep;
             if (resp.status === 0) {
-                msg = "Network error. Please check your internet connection";
+                msg = App.lang.misc_network_error;
             }
             App.showWarning(msg);
         });
@@ -1827,7 +1823,7 @@ App.renderForgot = function () {
         e.preventDefault();
         var username = $("#username");
         if (!App.isValidEmail(username.val())) {
-            App.showWarning("<strong>" + username.val() + "</strong> is not a valid emaill address!");
+            App.showWarning("<strong>" + username.val() + "</strong> " + App.lang.misc_invalid_email);
             return false;
         }
         App.showLoading();
@@ -1841,17 +1837,15 @@ App.renderForgot = function () {
         }).done(function (resp) {
             if (resp.success) {
                 App.renderSignin();
-                App.showWarning("A reset link has been sent to your inbox at <strong>" + resp.msg + "</strong>");
+                App.showWarning(App.lang.forgot_success(resp.msg));
             } else {
                 App.closeCurtain();
-                App.showWarning("Unable to process your request<br><strong>" 
-                        + resp.msg 
-                        + "</strong><br>Please let us know at <a href='mailto:info.enterpriseapps@gmail.com'>info.enterpriseapps@gmail.com</a>");
+                App.showWarning(App.lang.forgot_fail(resp.msg));
             }
         }).fail(function (resp) {
             var msg = "Request failed. " + resp.status;
             if (resp.status === 0) {
-                msg = "Network error. Please check your internet connection";
+                msg = App.lang.misc_network_error;
             }
             App.closeCurtain();
             App.showWarning(msg);
@@ -1988,11 +1982,11 @@ App.renderAccountSettings = function () {
         if (newPass.val().length < 8
                 || conPass.val().length < 8
                 || oldPass.val().length < 8) {
-            App.showWarning("The minimum length for a password is " + 8 + " characters");
+            App.showWarning(App.lang.misc_password_min_length);
             return false;
         }
         if (newPass.val() !== conPass.val()) {
-            App.showWarning("Passwords do not match");
+            App.showWarning(App.lang.misc_passwords_not_match);
             return false;
         }
         App.showLoading();
@@ -2013,9 +2007,9 @@ App.renderAccountSettings = function () {
             }
         }).fail(function (resp) {
             App.closeCurtain();
-            var msg = "The password is invalid";
+            var msg = App.lang.misc_incorrect_ep;
             if (resp.status === 0) {
-                msg = "Network error. Please check your internet connection";
+                msg = App.lang.misc_network_error;
             }
             App.showWarning(msg);
         });
@@ -2160,7 +2154,7 @@ App.requestModifyItem = function (url, data, button) {
         span.html(requestFailMsg + "<br>" + App.lang.misc_status + ": " + resp.status + " " + resp.responseText);
         if (resp.status === 0) {
             App.closeCurtain();
-            App.showWarning("Network error. Server may be down or your internet connection is lost");
+            App.showWarning(App.lang.misc_network_error);
         }
     });
 };
@@ -2328,7 +2322,7 @@ App.bindModSettings = function (modFormContainer, modifyUrl) {
         if (submitted.dataFunction === App.getMiQuickSalesUpdateData
                 && App.catalog.articles.binaryIndexOf("ean", submitted.button.parents().eq(1).find("input[placeholder='EAN']").val()) === -1
                 && submitted.requestType === "save") {
-                App.showWarning("EAN not found in catalog");
+                App.showWarning(App.lang.misc_plu_not_found);
         } else {
             var data = submitted.dataFunction(submitted.requestType, submitted.button);
             App.requestModifyItem(modifyUrl, data, submitted.button);
@@ -2656,12 +2650,12 @@ App.checkAndTrimPluImportCSV = function (csv, lineSeparator, valueDelimiter) {
     var validHeaders = ["ean", "name", "price", "group", "tax"];
     var headers = lines[0].split(valueDelimiter);
     if (headers.length !== validHeaders.length) {
-        return {isValid: false, msg: "Invalid CSV header format. Incorrect number of fields. Must be " + validHeaders.length};
+        return {isValid: false, msg: App.lang.csv_invalid_nFields};
     }
     for (var i = 0; i < headers.length; i++) {
         headers[i] = headers[i].trim();
         if (headers[i] !== validHeaders[i]) {
-            return {isValid: false, msg: "Invalid CSV header " + (i + 1) + ": " + headers[i] + ". Must be " + validHeaders[i]};
+            return {isValid: false, msg: App.lang.csv_invalid_header(i, headers, validHeaders)};
         }
     }
     var result = validHeaders.join(";");
@@ -2672,13 +2666,13 @@ App.checkAndTrimPluImportCSV = function (csv, lineSeparator, valueDelimiter) {
     for (var i = 1; i < lines.length; i++) {
         var currentLine = lines[i].split(valueDelimiter);
         if (validLine.length !== currentLine.length) {            
-            return {isValid: false, msg: "Invalid format on line " + (i + 1) + ". Must have " + validLine.length + " values separated by semicolons (;)"};
+            return {isValid: false, msg: App.lang.csv_invalid_nLine_values(i, validLine)};
         }
         //var obj = {};
         for (var j = 0; j < validLine.length; j++) {
             currentLine[j] = currentLine[j].trim();
             if (!validLine[j].test(currentLine[j])) {
-                return {isValid: false, msg: "Invalid CSV on line " + (i + 1) + ", column: " + headers[j] + ", value: " + (currentLine[j] || "/empty/")};
+                return {isValid: false, msg: App.lang.csv_invalid_line_value(i, headers[j], currentLine[j])};
             }
             if (headers[j] === "ean") {
                 eanSet.push({lineNumber: i + 1, ean: currentLine[j]});
@@ -2694,7 +2688,7 @@ App.checkAndTrimPluImportCSV = function (csv, lineSeparator, valueDelimiter) {
         var currentItem = eanSet[i];
         var nextItem = eanSet[i + 1];
         if (currentItem.ean === nextItem.ean) {
-            return {isValid: false, msg: "EAN codes must be unique! Duplicate EAN codes on lines " + nextItem.lineNumber + " and " + currentItem.lineNumber};
+            return {isValid: false, msg: App.lang.csv_must_unique(nextItem, currentItem)};
         }
     }
     return {isValid: true, msg: result};
@@ -2826,7 +2820,7 @@ App.renderPLUSettings = function () {
         var reader = new FileReader();
         reader.onload = function () {
             if (size > 10000000) {
-                App.showWarning("File cannot be larger than 5 Megabytes");
+                App.showWarning(App.lang.csv_max_file_size);
             } else {
                 var csv = App.checkAndTrimPluImportCSV(this.result, /[\n\r]+/, ";");
                 if (!csv.isValid) {
