@@ -1541,7 +1541,7 @@ App.renderDashBoard = function () {
                     <div class="form-label">' + App.lang.dashboard_label + '</div>\
                     <input id="employee-username" type="text" placeholder="' + App.lang.dashboard_username + '">\
                     <input id="employee-pin" type="password" placeholder="PIN">\
-                    <input type="submit" value="OK">\
+                    <button type="submit">OK</button>\
                 </form>', ' center');
     App.jAppContainer.html(dashBoardDOM);
     var form = $("#employee-login");
@@ -1640,7 +1640,7 @@ App.renderSignin = function () {
                     </div>\
                     <input id="username" type="text" placeholder="' + App.lang.sign_in_username + '">\
                     <input id="password" type="password" placeholder="' + App.lang.sign_in_password + '">\
-                    <input type="submit" value="' + App.lang.sign_in_sign_in + '">\
+                    <button type="submit">' + App.lang.sign_in_sign_in + '</button>\
                     <div id="form-help">\
                         <div id="signup">' + App.lang.sign_in_sign_up + '</div>\
                         <div id="forgot">' + App.lang.sign_in_forgot + '</div>\
@@ -1735,7 +1735,7 @@ App.renderSignup = function () {
                     <select id="currency">\
                         <option data=\'{"code":"CZK","symbol":"Kč"}\' selected>' + App.lang.sign_up_czk + '</option>\
                     </select>\
-                    <input type="submit" value="' + App.lang.sign_up_sign_up + '">\
+                    <button type="submit">' + App.lang.sign_up_sign_up + '</button>\
                     <div id="form-help">\
                         <div id="signin">' + App.lang.sign_up_back + '</div>\
                     </div>\
@@ -1811,7 +1811,7 @@ App.renderForgot = function () {
                     <div class="form-label">' + App.lang.forgot_label + '</div>\
                     <input id="username" type="text" placeholder="' + App.lang.forgot_email + '" required>\
                     <div class="form-instruction">' + App.lang.forgot_instruction + '</div>\
-                    <input type="submit" value="' + App.lang.forgot_submit + '">\
+                    <button type="submit">' + App.lang.forgot_submit + '</button>\
                     <div id="form-help">\
                         <div id="signin">' + App.lang.forgot_back + '</div>\
                     </div>\
@@ -1974,7 +1974,7 @@ App.renderAccountSettings = function () {
                     <input id="old-password" type="password" pattern=".{8,128}" title="Password must be at least 8 characters long" placeholder="' + App.lang.misc_old_password + '">\
                     <input id="new-password" type="password" pattern=".{8,128}" title="Password must be at least 8 characters long" placeholder="' + App.lang.misc_new_password + '">\
                     <input id="con-password" type="password" pattern=".{8,128}" title="Password must be at least 8 characters long" placeholder="' + App.lang.misc_con_password + '">\
-                    <input type="submit" value="' + App.lang.misc_submit + '">\
+                    <button type="submit">' + App.lang.misc_submit + '</button>\
                 </form>');
     App.cpBody.html(accDOM);
 

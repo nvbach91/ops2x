@@ -136,7 +136,9 @@ form [type="submit"] {
     cursor: pointer;
     color: #fff;
     background-color: #01AA93;
-    background-image: none;
+    background-image: none;    
+    padding: 20px 0;
+    border-radius: 0
 }
 form#sign-up [type="submit"] {
     background-color: #6EC179;
