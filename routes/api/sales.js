@@ -9,22 +9,24 @@ router.post('/sales', function (req, res) {
         var actualNumberOfReceipts = results[0].receiptSize;
         var nReceiptsLeft = actualNumberOfReceipts - nReceivedReceipts;
         if (nReceiptsLeft > 0) {
-            var nReceiptsToSend = 10;            
-            var offset = nReceiptsToSend + nReceivedReceipts;
-            if (nReceiptsLeft < 10) {
-                nReceiptsToSend = nReceiptsLeft;
+            if (nReceivedReceipts === 0) { // first sales load 50 latest                
+                Sales.find(query, options).where("receipts").slice([-50, 50]).exec().then(function (sales) {
+                    res.json(sales[0]);
+                }).catch(function (err) {
+                    res.json(err);
+                });
+            } else { // next manual sales loads per 10 sales
+                var nReceiptsToSend = 10;
+                var offset = nReceiptsToSend + nReceivedReceipts;
+                if (nReceiptsLeft < 10) {
+                    nReceiptsToSend = nReceiptsLeft;
+                }
+                Sales.find(query, options).where("receipts").slice([-offset, nReceiptsToSend]).exec().then(function (sales) {
+                    res.json(sales[0]);
+                }).catch(function (err) {
+                    res.json(err);
+                });
             }
-            /*
-            console.log("received: " + nReceivedReceipts);
-            console.log("left    : " + nReceiptsLeft);
-            console.log("offset  :-" + negativeIndex);
-            console.log("to send : " + nReceiptsToSend);
-            console.log("");*/
-            Sales.find(query, options).where("receipts").slice([-offset, nReceiptsToSend]).exec().then(function (sales) {
-                res.json(sales[0]);
-            }).catch(function (err) {
-                res.json(err);
-            });
         } else {
             res.json({receipts: []});
         }
