@@ -155,8 +155,8 @@ App.GLocalCS = {
     csv_invalid_header         : function (i, headers, validHeaders) {return "Nesprávná CSV hlavička " + (i + 1) + ": " + headers[i] + ". Musí být " + validHeaders[i];},
     csv_invalid_nLine_values   : function (i, validLine) {return "Nesprávný formát na řádce " + (i + 1) + ". Musí mít " + validLine.length + " hodnot oddělených středníkem (;)";},
     csv_invalid_line_value     : function (i, header, currentValue) {return "Nesprávná hodnota na řádce: " + (i + 1) + ", sloupec: " + header + ", hodnota: " + (currentValue || "/prázdná/");},
-    csv_must_unique            : function (nextItem, currentItem) {"EAN kódy musí být unikátní! Našly se duplicitní EAN kódy na řádkách " + nextItem.lineNumber + " a " + currentItem.lineNumber;},
-    csv_max_file_size          : "Soubor nemůže být větší než 5 MB",
+    csv_must_unique            : function (nextItem, currentItem) {return "EAN kódy musí být unikátní! Našly se duplicitní EAN kódy na řádkách " + nextItem.lineNumber + " a " + currentItem.lineNumber;},
+    csv_max_file_size          : "Soubor nemůže být větší než 3 MB",
     
     ph_search_ean              : "EAN kód",
     
@@ -175,6 +175,7 @@ App.GLocalCS = {
     misc_submit                : "ODESLAT",
     misc_passwords_not_match   : "Hesla se neshodují",
     misc_password_min_length   : "Minimální délka hesla je 8 znaků",
+    misc_wrong_keyboard        : "Čtečka detekovala, že máte aktivní českou klávesnici. Prosím změňte jazyk klávesnice na anglickou verzi.<br>Můžete použít Alt+Shift",
     
     report_receipts            : "ÚČTENEK",
     report_takings             : "TRŽBY",

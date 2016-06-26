@@ -32,7 +32,6 @@ router.post('/addsale', function (req, res) {
         }).then(function (sales) {
             return Stocks.findOne(query).exec();
         }).then(function (stocks) {
-            console.log(stocks);
             var articles = stocks.articles;
             var items = newReceiptObj.items;
             // for each item in the basket deduct the quantity from the balance of the article
@@ -54,7 +53,6 @@ router.post('/addsale', function (req, res) {
         }).then(function () {
             res.json({success: true, msg: newReceiptObj});
         }).catch(function (err) {
-            console.log(err + "**");
             res.json({success: false, msg: err});
         });
     }

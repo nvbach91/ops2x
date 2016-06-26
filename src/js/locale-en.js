@@ -156,7 +156,7 @@ App.GLocalEN = {
     csv_invalid_nLine_values   : function (i, validLine) {return "Invalid format on line " + (i + 1) + ". Must have " + validLine.length + " values separated by semicolons (;)";},
     csv_invalid_line_value     : function (i, header, currentValue) {return "Invalid CSV on line " + (i + 1) + ", column: " + header + ", value: " + (currentValue || "/empty/");},
     csv_must_unique            : function (nextItem, currentItem) {return "EAN codes must be unique! Duplicate EAN codes on lines " + nextItem.lineNumber + " and " + currentItem.lineNumber;},
-    csv_max_file_size          : "File cannot be larger than 5 Megabytes",
+    csv_max_file_size          : "File cannot be larger than 3 Megabytes",
     
     ph_search_ean              : "SEARCH EAN CODE",
     
@@ -175,6 +175,7 @@ App.GLocalEN = {
     misc_submit                : "SUBMIT",
     misc_passwords_not_match   : "Passwords don't match",
     misc_password_min_length   : "The minimum length for a password is 8 characters",
+    misc_wrong_keyboard        : "It seems like you have the wrong keyboard layout. Please switch back to EN-us keyboard layout. You can use Alt+Shift",
     
     report_receipts            : "RECEIPTS",
     report_takings             : "TAKINGS",

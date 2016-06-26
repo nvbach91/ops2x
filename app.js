@@ -25,8 +25,8 @@ app.set('view engine', 'jade');
 app.use(helmet());
 app.use(favicon(path.join(__dirname, 'public/img', 'favicon.png')));
 //app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.json({limit: '3mb'}));
+app.use(bodyParser.urlencoded({extended: false, limit: '3mb'}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 

@@ -38,6 +38,43 @@ Array.prototype.binaryIndexOf = function (field, needle) {
     return -1;
 };
 
+App.binaryInsert = function (value, array, compareField, startVal, endVal) {
+
+    var length = array.length;
+    var start = typeof (startVal) !== 'undefined' ? startVal : 0;
+    var end = typeof (endVal) !== 'undefined' ? endVal : length - 1;//!! endVal could be 0 don't use || syntax
+    var m = start + Math.floor((end - start) / 2);
+
+    if (length === 0) {
+        array.push(value);
+        return;
+    }
+
+    if (value[compareField] > array[end][compareField]) {
+        array.splice(end + 1, 0, value);
+        return;
+    }
+
+    if (value[compareField] < array[start][compareField]) {//!!
+        array.splice(start, 0, value);
+        return;
+    }
+
+    if (start >= end) {
+        return;
+    }
+
+    if (value[compareField] < array[m][compareField]) {
+        App.binaryInsert(value, array, compareField, start, m - 1);
+        return;
+    }
+
+    if (value[compareField] > array[m][compareField]) {
+        App.binaryInsert(value, array, compareField, m + 1, end);
+        return;
+    }
+};
+
 // compares the value with the suffix of a string
 String.prototype.endsWith = function (suffix) {
     return this.indexOf(suffix, this.length - suffix.length) !== -1;
@@ -1459,9 +1496,14 @@ App.renderWebRegister = function () {
             App.justUsedScanner = false;
         }, App._timeBetweenConsecutiveScannings);
         App.closeCurtain();
-        if (!App.jControlPanel.hasClass("visible")){
-            App.addPluItem(s);
-            App.isInRegistrySession = true/*.text("1")*/;
+        if (!App.jControlPanel.hasClass("visible")) {
+            if (/[\+ěščřžýáíé]/.test(s)) {
+                s = App.translateCzeckKeys(s);
+                //App.showWarning(App.lang.misc_wrong_keyboard);
+            } //else {
+                App.addPluItem(s);
+                App.isInRegistrySession = true/*.text("1")*/;
+            //}
         }
     });
 
@@ -1486,6 +1528,25 @@ App.renderWebRegister = function () {
      dropDown.html("");
      dropDown.removeClass("visible");
      });*/
+};
+
+App.mapCzechKey = function (k) {
+    var cze = "+ěščřžýáíé";
+    var eng = "1234567890";
+    for (var i = 0; i < cze.length; i++) {
+        if (k === cze[i]) {
+            return eng[i];
+        }
+    }
+    return "";
+};
+
+App.translateCzeckKeys = function (s) {
+    var res = "";
+    for (var i = 0; i < s.length; i++) {
+        res += App.mapCzechKey(s[i]);
+    }
+    return res;
 };
 
 App.addPluItem = function (s) {
@@ -2086,8 +2147,9 @@ App.requestModifyItem = function (url, data, button) {
                         } else {
                             updatedArticle.id = App.nArticles;
                             App.nArticles++;
-                            articles.push(updatedArticle);
-                            articles.sort(App.sortByEAN);
+                            /*articles.push(updatedArticle);
+                            articles.sort(App.sortByEAN);*/
+                            App.binaryInsert(updatedArticle, articles, 'ean');
                             var modItem = button.parents().eq(2);
                             modItem.find("input[placeholder='EAN']").prop("disabled", true);
                             modItem.find(".mi-header").removeClass("new-item");
@@ -2102,6 +2164,10 @@ App.requestModifyItem = function (url, data, button) {
                 case "/mod/pluimport" :
                     App.catalog = resp.msg;
                     App.catalog.articles.sort(App.sortByEAN);
+                    var newArticles = App.catalog.articles;
+                    for (var i = 0; i < newArticles.length; i++) {
+                        newArticles[i].id = i;
+                    }
                     App.renderQuickSales();
                     break;
                 case "/mod/salegroups" :
@@ -2824,7 +2890,7 @@ App.renderPLUSettings = function () {
         var size = file.size;
         var reader = new FileReader();
         reader.onload = function () {
-            if (size > 10000000) {
+            if (size > 3000000) {
                 App.showWarning(App.lang.csv_max_file_size);
             } else {
                 var csv = App.checkAndTrimPluImportCSV(this.result, /[\n\r]+/, ";");

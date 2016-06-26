@@ -22,7 +22,7 @@ router.post('/plu', function (req, res) {
             name: req.body.name,
             price: req.body.price,
             group: req.body.group,
-            tax: req.body.tax
+            tax: parseInt(req.body.tax)
         };
         Catalogs.findOne(query).exec().then(function (catalog) {
             var articles = catalog.articles;
