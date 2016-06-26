@@ -7,6 +7,7 @@ var Buttons = require('../models/Buttons');
 var Settings = require('../models/Settings');
 var Catalogs = require('../models/Catalogs');
 var Sales = require('../models/Sales');
+var Stocks = require('../models/Stocks');
 var ObjectID = require('mongodb').ObjectID;
 
 router.post('/signup', function (req, res) {
@@ -37,6 +38,7 @@ router.post('/signup', function (req, res) {
             var newButtons = new Buttons(generateDefaultButtons(newUserId));
             var newCatalog = new Catalogs(generateDefaultCatalog(newUserId));
             var newSales = new Sales(generateDefaultSales(newUserId));
+            var newStocks = new Stocks(generateDefaultStocks(newUserId));
             newUser.save().then(function (s) {
                 console.log('User     created: ' + s._id);
                 return newSettings.save();
@@ -49,6 +51,9 @@ router.post('/signup', function (req, res) {
             }).then(function (s) {
                 console.log('Catalog  created: ' + s.userId);
                 return newSales.save();
+            }).then(function (s) {
+                console.log('Stock    created: ' + s.userId);
+                return newStocks.save();
             }).then(function (s) {
                 console.log('Sales    created: ' + s.userId);
                 utils.mailer.sendMail(template.generateSignupMail(newEmail, newUserId.valueOf()), function (error, info) {
@@ -78,6 +83,9 @@ router.post('/signup', function (req, res) {
                     return Sales.findOneAndRemove({userId: newUserId}).exec();
                 }).then(function () {
                     console.log('Sales    removed: ' + newUserId);
+                    return Stocks.findOneAndRemove({userId: newUserId}).exec();
+                }).then(function () {                    
+                    console.log('Stock    removed: ' + newUserId);
                     res.json({
                         success: false,
                         msg: err
@@ -322,6 +330,13 @@ function generateDefaultSales(newUserId) {
     return {
         userId: newUserId,
         receipts: []
+    };
+}
+;
+function generateDefaultStocks(newUserId) {
+    return {
+        userId: newUserId,
+        articles: []
     };
 }
 ;

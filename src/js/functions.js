@@ -583,12 +583,13 @@ App.bindQuickSales = function (qs) {
             App.jPriceInput.val(price);
             var name = t.find("button").text();//
             var id = t.find(".qs-id").text();
+            var ean = t.find(".qs-ean").text();
             var tax = t.find(".qs-tax").text();
             var group = t.find(".qs-group").text();
             var tags = t.find(".qs-tags").text();
             var desc = t.find(".qs-desc").text();
 
-            App.addItemToCheckout(id, "", name, price, group, tax, tags, desc, mult);
+            App.addItemToCheckout(id, ean, name, price, group, tax, tags, desc, mult);
 
             App.isInRegistrySession = true/*.text("1")*/;
             App.justUsedScanner = false;
@@ -932,6 +933,7 @@ App.renderQuickSales = function () {
                         '<div class="qs-item">\
                         <button style="background-color:#' + qs.bg + '">' + item.name + '</button>\
                         <div class="qs-id">qs-t' + (i + 1) + "-" + j + '</div>\
+                        <div class="qs-ean">' + item.ean + '</div>\
                         <div class="qs-price">' + item.price + ' ' + App.settings.currency.symbol + '</div>\
                         <div class="qs-group">' + item.group + '</div>\
                         <div class="qs-tax">' + item.tax + '</div>\
@@ -1190,10 +1192,12 @@ App.renderWebRegister = function () {
             var q = t.find(".si-quantity").val();
             var p = t.find(".si-price").text();
             var n = t.find(".si-name").val();
+            var e = t.find(".si-ean").text();
             var taxRate = t.find(".si-tax").text();
 
             currentReceiptObj.items.push({
                 name: n,
+                ean: e,
                 price: p,
                 quantity: parseInt(q),
                 tax_rate: parseInt(taxRate)
@@ -1284,6 +1288,8 @@ App.renderWebRegister = function () {
                     $(this).select();
                 }).appendTo(cashInputRow);
         //payForm.appendTo(payment);
+        /*App.jCashInput.focus();
+        App.jCashInput.blur();*/
         cashInputRow.appendTo(payment);
         
         var paymentKeyboard = $(
@@ -1381,8 +1387,7 @@ App.renderWebRegister = function () {
                     } else {
                         t.text(App.lang.pay_confirm);
                         App.closeCurtain();
-                        App.showWarning("Server refused to sync");
-                        console.log(resp);
+                        App.showWarning("Server refused to sync. " + resp.msg);
                     }
                 }).fail(function (resp) {
                     paymentBody.addClass("failed");
@@ -1419,7 +1424,7 @@ App.renderWebRegister = function () {
         paymentBody.appendTo(paymentBox);
 
         App.showInCurtain(paymentBox);
-        //App.jCashInput.focus();
+        App.jCashInput.blur();
         App.beep();
     });
 

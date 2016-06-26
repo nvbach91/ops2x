@@ -30,7 +30,7 @@ var template = {
                     + '\n\nBest regards,\nOnline Point of Sale System Team',
             html: '<p>Hello,<br><br>thank you for activating your account.'
                     + '<br>Please use you email address as the username.'
-                    + '<br>You can now sign in to the  at <a href="' + config.host + '">' + config.host + '</a>'
+                    + '<br>You can now sign in to the app at <a href="' + config.host + '">' + config.host + '</a>'
                     + '<br>Please use you email address as the username.'
                     + '<br>The default employee account name is Admin and the PIN is 0000.'
                     + '<br><br>Best regards,<br>Online Point of Sale System Team </p>'

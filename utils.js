@@ -58,6 +58,42 @@ var utils = {
         }
 
         return -1;
+    },
+    binaryInsert: function (value, array, compareField, startVal, endVal) {
+
+        var length = array.length;
+        var start = typeof (startVal) !== 'undefined' ? startVal : 0;
+        var end = typeof (endVal) !== 'undefined' ? endVal : length - 1;//!! endVal could be 0 don't use || syntax
+        var m = start + Math.floor((end - start) / 2);
+
+        if (length === 0) {
+            array.push(value);
+            return;
+        }
+
+        if (value[compareField] > array[end][compareField]) {
+            array.splice(end + 1, 0, value);
+            return;
+        }
+
+        if (value[compareField] < array[start][compareField]) {//!!
+            array.splice(start, 0, value);
+            return;
+        }
+
+        if (start >= end) {
+            return;
+        }
+
+        if (value[compareField] < array[m][compareField]) {
+            utils.binaryInsert(value, array, compareField, start, m - 1);
+            return;
+        }
+
+        if (value[compareField] > array[m][compareField]) {
+            utils.binaryInsert(value, array, compareField, m + 1, end);
+            return;
+        }
     }
 };
 
