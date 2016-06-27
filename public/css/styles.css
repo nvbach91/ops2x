@@ -140,6 +140,7 @@ form [type="submit"] {
     padding: 20px 0;
     border-radius: 0;
     margin-top: 5px;
+    margin-bottom: 10px;
 }
 form#sign-up [type="submit"] {
     background-color: #6EC179;

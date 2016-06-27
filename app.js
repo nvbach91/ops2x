@@ -10,6 +10,7 @@ var bodyParser = require('body-parser');
 var helmet = require('helmet');
 
 var expressSession = require('express-session');
+var MongoStore = require('connect-mongo')(expressSession);
 var passport = require('passport');
 
 var mongoose = require('mongoose');
@@ -30,12 +31,24 @@ app.use(bodyParser.urlencoded({extended: false, limit: '3mb'}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+/*app.use(expressSession({
+ secret: process.env.SESSION_SECRET || 'suchclassifiedveryconfidentialmuchsecreetwow',
+ resave: false,
+ saveUninitialized: false,    
+ cookie: {maxAge: 86400000} // 24 hours
+ }));*/
+
 app.use(expressSession({
-    secret: process.env.SESSION_SECRET || 'suchclassifiedveryconfidentialmuchsecreetwow',
+    secret: 'suchclassifiedveryconfidentialmuchsecreetwow',
+    store: new MongoStore({
+        mongooseConnection: mongoose.connection,
+        ttl: 24 * 60 * 60 //24hrs
+    }),
     resave: false,
-    saveUninitialized: false,    
-    cookie: {maxAge: 86400000} // 24 hours
+    saveUninitialized: false
 }));
+
+
 app.use(passport.initialize());
 app.use(passport.session());
 
