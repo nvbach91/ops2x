@@ -20,7 +20,7 @@ router.post('/pluimport', function (req, res) {
                 catalog.articles = csvToJSON(req.body.data);
                 return catalog.save();
             }).then(function (catalog) {
-                res.json({success: true, msg: {articles: catalog.articles}});
+                res.json({success: true, msg: utils.convertJsonCatalogToCSV(catalog.articles)});
             }).catch(function (err) {
                 res.json({success: false, msg: err});
             });
@@ -29,7 +29,7 @@ router.post('/pluimport', function (req, res) {
 });
 
 function csvToJSON(csv) {
-    var lines = csv.split("\n");
+    var lines = csv.split(/[\r\n]+/);
     var result = [];
     var headers = lines[0].split(";");
     for (var i = 1; i < lines.length; i++) {

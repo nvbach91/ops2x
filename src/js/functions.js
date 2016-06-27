@@ -1465,12 +1465,6 @@ App.renderWebRegister = function () {
         App.beep();
     });
 
-    //populating articles for scanning    
-    var articles = App.catalog.articles;
-    App.nArticles = articles.length;
-    for (var i = 0; i < App.nArticles; i++) {
-        articles[i].id = i;
-    }
     App.jSearchBox = App.jLiveSearch.find("#search");
     App.jSearchBox.keyup(function (e) {
         if (e.keyCode === 13) {
@@ -1651,11 +1645,30 @@ App.renderDashBoard = function () {
     employeeUsername.focus();
 };
 
+App.convertCsvCatalogToJSON = function (csv) {
+    var lines = csv.split("\n");
+    var articles = [];
+    //console.log(lines[0]);
+    for (var i = 1; i < lines.length; i++) {
+        var line = lines[i];
+        var fields = line.split(";");
+        articles.push({
+            id: i-1,
+            ean: fields[0],
+            name: fields[1],
+            price: fields[2],
+            group: fields[3],
+            tax: parseInt(fields[4])
+        });
+    }
+    return {articles: articles};
+};
+
 // get data for web register
 App.initDashBoard = function () {
     $.when(
-            $.getJSON("/api/catalog", function (catalog) {
-                App.catalog = catalog;
+            $.getJSON("/api/catalog", function (resp) {
+                App.catalog = App.convertCsvCatalogToJSON(resp.csv);
             }),
             $.getJSON("/api/settings", function (settings) {
                 App.settings = settings;
@@ -2145,10 +2158,7 @@ App.requestModifyItem = function (url, data, button) {
                             updatedArticle.id = articles[articleIndex].id;
                             articles[articleIndex] = updatedArticle;
                         } else {
-                            updatedArticle.id = App.nArticles;
-                            App.nArticles++;
-                            /*articles.push(updatedArticle);
-                            articles.sort(App.sortByEAN);*/
+                            updatedArticle.id = articles.length;
                             App.binaryInsert(updatedArticle, articles, 'ean');
                             var modItem = button.parents().eq(2);
                             modItem.find("input[placeholder='EAN']").prop("disabled", true);
@@ -2162,7 +2172,7 @@ App.requestModifyItem = function (url, data, button) {
                     App.renderQuickSales();
                     break;
                 case "/mod/pluimport" :
-                    App.catalog = resp.msg;
+                    App.catalog = App.convertCsvCatalogToJSON(resp.msg);
                     App.catalog.articles.sort(App.sortByEAN);
                     var newArticles = App.catalog.articles;
                     for (var i = 0; i < newArticles.length; i++) {
@@ -2893,7 +2903,7 @@ App.renderPLUSettings = function () {
             if (size > 3000000) {
                 App.showWarning(App.lang.csv_max_file_size);
             } else {
-                var csv = App.checkAndTrimPluImportCSV(this.result, /[\n\r]+/, ";");
+                var csv = App.checkAndTrimPluImportCSV(this.result, /[\r\n]+/, ";");
                 if (!csv.isValid) {
                     App.closeCurtain();
                     App.showWarning(csv.msg);

@@ -94,6 +94,14 @@ var utils = {
             utils.binaryInsert(value, array, compareField, m + 1, end);
             return;
         }
+    },
+    convertJsonCatalogToCSV: function (articles) {
+        var res = "ean;name;price;group;tax";
+        for (var i = 0; i < articles.length; i++) {
+            var a = articles[i];
+            res += "\n" + a.ean + ";" + a.name + ";" + a.price + ";" + a.group + ";" + a.tax;
+        }
+        return res;
     }
 };
 
