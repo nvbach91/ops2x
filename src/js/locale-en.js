@@ -111,6 +111,7 @@ App.GLocalEN = {
     settings_staff             : "Staff Settings",
     settings_pos               : "Point of Sale Settings",
     settings_plu               : "Edit PLU Articles",
+    settings_stock             : "Stock",
     settings_sg                : "Edit Sale Groups",
     settings_tabs              : "Edit Quick Sale Tabs",
     settings_qs                : "Edit Quick Sale Buttons",
@@ -122,6 +123,7 @@ App.GLocalEN = {
     form_label_receipt         : "EDIT YOUR RECEIPT",
     form_label_pos             : "CONFIGURE YOUR CASH REGISTER",
     form_label_catalog         : "MANAGE YOUR CATALOG",
+    form_label_stock           : "MANAGE YOUR STOCK",
     form_label_sg              : "MANAGE YOUR SALE GROUP BUTTONS",
     form_label_tabs            : "MANAGE YOUR QUICK SALE TABS",
     form_label_qs              : "MANAGE YOUR QUICK SALE BUTTONS",
@@ -148,6 +150,7 @@ App.GLocalEN = {
     info_use_br                : "Tip: Use '&lt;br&gt;' to add new lines",
     info_import                : "Warning: Import will overwrite the current catalog!",
     info_plu                   : "Tip: New PLU will be highlighted green",
+    info_stock                 : "Tip: Search for an item by its EAN code",
     info_tabs                  : "Warning: The content of the removed tab will also be removed",
     info_qs                    : "Tip: Search your catalog for the item, then reference its EAN code here",
     

@@ -1069,9 +1069,9 @@ App.saveLocalSale = function (sale){
 
 // render web register view
 App.renderWebRegister = function () {    
-    $(window).on("beforeunload", function () {
+    /*$(window).on("beforeunload", function () {
         return App.lang.onbeforeunload;
-    });
+    });*/
     App.closeCurtain();
     App.createWebRegisterDOM();
     App.bindKeyboard();
@@ -1667,9 +1667,6 @@ App.convertCsvCatalogToJSON = function (csv) {
 // get data for web register
 App.initDashBoard = function () {
     $.when(
-            $.getJSON("/api/catalog", function (resp) {
-                App.catalog = App.convertCsvCatalogToJSON(resp.csv);
-            }),
             $.getJSON("/api/settings", function (settings) {
                 App.settings = settings;
                 App.staff = settings.staff;
@@ -1680,6 +1677,12 @@ App.initDashBoard = function () {
             }),
             $.post("/api/sales", function (sales) {
                 App.sales = sales;
+            }),
+            $.getJSON("/api/stock", function (stock){
+                App.stock = stock;
+            }),
+            $.getJSON("/api/catalog", function (resp) {
+                App.catalog = App.convertCsvCatalogToJSON(resp.csv);
             })
             ).then(function () {
         App.renderDashBoard();
@@ -1974,6 +1977,7 @@ App.createControlPanel = function () {
                 <div class="cp-item" id="sta-settings">' + App.lang.settings_staff + '</div>\
                 <div class="cp-item" id="pos-settings">' + App.lang.settings_pos + '</div>\
                 <div class="cp-item" id="plu-settings">' + App.lang.settings_plu + '</div>\
+                <div class="cp-item" id="stock-settings">' + App.lang.settings_stock + '</div>\
                 <div class="cp-item" id="sgs-settings">' + App.lang.settings_sg + '</div>\
                 <div class="cp-item" id="tab-settings">' + App.lang.settings_tabs + '</div>\
                 <div class="cp-item" id="qss-settings">' + App.lang.settings_qs + '</div>\
@@ -2008,6 +2012,9 @@ App.bindControlPanel = function () {
                 break;
             case "plu-settings":
                 t.click(App.renderPLUSettings);
+                break;
+            case "stock-settings":
+                t.click(App.renderStockSettings);
                 break;
             case "sgs-settings":
                 t.click(App.renderSaleGroupsSettings);
@@ -2180,6 +2187,22 @@ App.requestModifyItem = function (url, data, button) {
                     }
                     App.renderQuickSales();
                     break;
+                case "/mod/updatestock" :              
+                    var updatedArticle = resp.msg;      
+                    var articles = App.stock.articles;
+                    var articleIndex = articles.binaryIndexOf("ean", updatedArticle.ean);
+                    if (isSaveRequestType) {
+                        if (articleIndex >= 0) {
+                            articles[articleIndex].balance = updatedArticle.balance;
+                        } else {
+                            App.binaryInsert(updatedArticle, articles, 'ean');
+                        }
+                    } else {
+                        if (articleIndex >= 0) {
+                            articles.splice(articleIndex, 1);
+                        }
+                    }
+                    break;
                 case "/mod/salegroups" :
                     var currentSG = App.buttons.saleGroups;
                     if (data._id === "new sg") {
@@ -2267,6 +2290,9 @@ App.generateModItemFormDOM = function (type, item) {
         case "tabs":
             disabledFields = ["number", "buttons"];
             break;
+        case "stock":
+            disabledFields = ["ean", "name"];
+            break;
         default:
     }
     
@@ -2276,7 +2302,7 @@ App.generateModItemFormDOM = function (type, item) {
     var isReceipt = type === "receipt";
     var isPOS = type === "pos";
     var isSG = type === "salegroups";
-    var isQS = type === "quicksales";
+    var isQS = type === "quicksales" || type === "stock";
     var isHiddenBody = ["staff", "salegroups", "quicksales", "tabs"].indexOf(type) >= 0;
     var header = item.name ? item.name.value : type.toUpperCase();
     header = item.ean ? item.ean.value : header;
@@ -2938,6 +2964,87 @@ App.getMiPluUpdateData = function (requestType, button) {
     };
 };
 
+//------------------------------ STOCK SETTINGS ------------------------------//
+App.renderStockSettings = function () {    
+    var pluDOM =
+               '<div class="form-header">' + App.lang.settings_stock + '</div>\
+                <div class="mod-form">\
+                    <div class="form-row">\
+                        <div class="form-label">' + App.lang.form_label_stock + '</div>\
+                    </div>\
+                    <div class="mi-info">' + App.lang.info_stock + '</div>\
+                    <form class="form-row control">\
+                        <input class="plu-searcher" placeholder="' + App.lang.ph_search_ean + '" pattern="\\d{1,13}" title="EAN must have 1-13 digits">\
+                        <button class="plu-search">Search / Add</button>\
+                    </form>\
+                    <div class="modifier"></div>\
+                </form>';
+    App.cpBody.html(App.createCenterBox(pluDOM));
+    App.cpBody.find(".center-box").prepend(App.createGoBack());
+
+    var modFormContainer = App.cpBody.find(".mod-form");     
+    var modifyUrl = "/mod/updatestock";
+    
+    var modifier = modFormContainer.find(".modifier");
+    var submitted = null;
+    var pluInput = modFormContainer.find(".plu-searcher");
+    modFormContainer.submit(function(e) {
+        e.preventDefault();
+        var searchEAN = pluInput.val();
+        pluInput.val("");
+        if (searchEAN) {
+            var i = App.catalog.articles.binaryIndexOf("ean", searchEAN);
+            modifier.empty();
+            if (i >= 0) {
+                var catalogItem = App.catalog.articles[i];
+                var stockArticle = {
+                    ean: catalogItem.ean,
+                    balance: 0
+                };
+                var k = App.stock.articles.binaryIndexOf("ean", searchEAN);
+                if (k >= 0) {
+                    stockArticle = App.stock.articles[k];
+                }
+                var modItem = $(App.generateModItemFormDOM("stock", {
+                    ean: {title: "1-13 digits", valid : /^\d{1,13}$/, value: catalogItem.ean},
+                    name: {title: "1-128 characters", valid : /^[^"]{1,128}$/, value: catalogItem.name},
+                    balance: {title: "Integer", valid : /^\-?\d{1,5}$/, value: stockArticle.balance}
+                }));                
+                modItem.submit(function (e) {
+                    e.preventDefault();
+                    var data = submitted.dataFunction(submitted.requestType, submitted.button);
+                    App.requestModifyItem(modifyUrl, data, submitted.button);
+                });
+                modItem.find("input").change(function () {
+                    App.resetRequestButtons(modItem);
+                });
+                modItem.find(".mi-header").click(function () {
+                    $(this).next(".mi-body").slideToggle(App.getAnimationTime());
+                });
+                modItem.find("button.mi-save").click(function () {                    
+                    submitted = App.prepareSubmit(App.getMiStockUpdateData,  $(this), "save");
+                });
+                modItem.find("button.mi-remove").click(function () {
+                    submitted = App.prepareSubmit(App.getMiStockUpdateData, $(this), "remove");
+                });
+                modItem.hide().appendTo(modifier).slideDown(App.getAnimationTime());
+            } else {
+                App.showWarning(App.lang.misc_plu_not_found);
+            }
+        }
+    });    
+};
+
+App.getMiStockUpdateData = function (requestType, button) {
+    var miBody = button.parents().eq(1);
+    return {
+        requestType: requestType,
+        ean: miBody.find("input[placeholder='EAN']").val(),
+        balance: miBody.find("input[placeholder='BALANCE']").val()
+    };
+};
+
+
 //------------------------ SALE GROUPS SETTINGS ------------------------------//
 App.renderSaleGroupsSettings = function () {
     var sgDOM =
@@ -3156,8 +3263,7 @@ App.renderSaleHistory = function () {
     var shDOM =
             App.createCenterBox(
                 '<div class="form-header">' + App.lang.settings_sales_history + '</div>\
-                <div id="sale-history-container">\
-                </div>');
+                <div id="sale-history-container"></div>');
     App.cpBody.html(shDOM);
     
     App.cpBody.find(".center-box").prepend(App.createGoBack());

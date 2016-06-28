@@ -505,7 +505,7 @@ div#logout {
     position: absolute;
     top: -9999px;
 }
-#sale-history-container, #off-history-container {
+#sale-history-container, #off-history-container, #stock-container {
     margin-top: 5px;
     font-size: 14px;
     width: 100%;
@@ -522,7 +522,7 @@ div#logout {
 .hr-col:first-child {
     border-left: 5px solid transparent;
 }
-.history-receipt {
+.history-receipt, .stock-article {
     display: flex;
     justify-content: center;
 }
@@ -642,6 +642,7 @@ div#logout {
 #sta-settings {background-image: url('../img/ico/staff.svg');}
 #pos-settings {background-image: url('../img/ico/pos.svg');}
 #plu-settings {background-image: url('../img/ico/barcode.svg');}
+#stock-settings {background-image: url('../img/ico/stock.svg');}
 #sgs-settings {background-image: url('../img/ico/sg.svg');}
 #tab-settings {background-image: url('../img/ico/tabs.svg');}
 #qss-settings {background-image: url('../img/ico/qs.svg');}

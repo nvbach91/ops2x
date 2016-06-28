@@ -111,6 +111,7 @@ App.GLocalCS = {
     settings_staff             : "Nastavení personálu",
     settings_pos               : "Nastavení pokladny",
     settings_plu               : "Editace PLU",
+    settings_stock             : "Kontrola skladu",
     settings_sg                : "Editace zbožních skupin",
     settings_tabs              : "Editace záložek",
     settings_qs                : "Editace rychlých tlačítek",
@@ -122,6 +123,7 @@ App.GLocalCS = {
     form_label_receipt         : "ZMĚNA ÚČTENKY",
     form_label_pos             : "KONFIGURACE POKLADNY",
     form_label_catalog         : "ÚPRAVA KATALOGU",
+    form_label_stock           : "SPRÁVA SKLADU",
     form_label_sg              : "ÚPRAVA ZBOŽNÍCH SKUPIN",
     form_label_tabs            : "ÚPRAVA ZÁLOŽEK",
     form_label_qs              : "ÚPRAVA RYCHLÝCH TLAČÍTEK",
@@ -148,6 +150,7 @@ App.GLocalCS = {
     info_use_br                : "Tip: Použijte '&lt;br&gt;' jako nový řádek",
     info_import                : "Pozor: Import přepíše stávající katalog!",
     info_plu                   : "Tip: Nové PLU bude vyznačeno zeleně, existující modře",
+    info_stock                 : "Tip: Vyhledejte položku pomocí EAN kódu",
     info_tabs                  : "Pozor: Obsah odebrané záložky bude také smazán",
     info_qs                    : "Tip: Pro vytváření vložte EAN kód zboží",
     
