@@ -1483,21 +1483,29 @@ App.renderWebRegister = function () {
     });
 
     $(document).scannerDetection(function (s) {
-        clearTimeout(App._scannerTimingOut);
-        App.jSearchBox.blur();
-        App.justUsedScanner = true;
-        App._scannerTimingOut = setTimeout(function () {
-            App.justUsedScanner = false;
-        }, App._timeBetweenConsecutiveScannings);
-        App.closeCurtain();
-        if (!App.jControlPanel.hasClass("visible")) {
+        if (!/^\d+$/.test(s)) {
+            App.showWarning(App.lang.misc_wrong_keyboard);
+        } else {
             if (/[\+ěščřžýáíé]/.test(s)) {
                 s = App.translateCzeckKeys(s);
-                //App.showWarning(App.lang.misc_wrong_keyboard);
-            } //else {
+            }
+            clearTimeout(App._scannerTimingOut);
+            App.jSearchBox.blur();
+            App.justUsedScanner = true;
+            App._scannerTimingOut = setTimeout(function () {
+                App.justUsedScanner = false;
+            }, App._timeBetweenConsecutiveScannings);
+            App.closeCurtain();
+            if (App.jControlPanel.hasClass("visible")) {
+                var pluInput = App.cpBody.find(".plu-searcher");
+                if (pluInput.size() === 1) {
+                    pluInput.val(s);
+                    pluInput.parent().submit();
+                }
+            } else {
                 App.addPluItem(s);
                 App.isInRegistrySession = true/*.text("1")*/;
-            //}
+            }
         }
     });
 

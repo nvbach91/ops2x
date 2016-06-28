@@ -178,7 +178,7 @@ App.GLocalCS = {
     misc_submit                : "ODESLAT",
     misc_passwords_not_match   : "Hesla se neshodují",
     misc_password_min_length   : "Minimální délka hesla je 8 znaků",
-    misc_wrong_keyboard        : "Čtečka detekovala, že máte aktivní českou klávesnici. Prosím změňte jazyk klávesnice na anglickou verzi.<br>Můžete použít Alt+Shift",
+    misc_wrong_keyboard        : "Čtečka detekovala, že máte nesprávnou klávesnici. Prosím změňte jazyk klávesnice na anglický.<br>Můžete použít Alt+Shift",
     
     report_receipts            : "ÚČTENEK",
     report_takings             : "TRŽBY",
