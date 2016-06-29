@@ -1433,8 +1433,9 @@ App.renderWebRegister = function () {
                             /*if (!receiptPrinted) {
                                 window.print();
                             }*/
-                            App.closeCurtain();
+                            
                             App.showOnCustomerDisplay(App.lang.customer_display_welcome);
+                            App.closeCurtain();
                             //App.jPriceInput.focus();
                         }).appendTo(payment);
                         App.bindClickEffect(donePayment);
@@ -1458,9 +1459,11 @@ App.renderWebRegister = function () {
                     }).appendTo(payment);
                     //payment.append(paymentComplete);
                     $("<button>").attr("id", "done-payment").text(App.lang.pay_done).click(function () {
-                        if (!receiptPrinted) {
+                        /*if (!receiptPrinted) {
                             window.print();
-                        }
+                        }*/
+                        
+                        App.showOnCustomerDisplay(App.lang.customer_display_welcome);
                         App.closeCurtain();
                         //App.jPriceInput.focus();
                     }).appendTo(payment);
