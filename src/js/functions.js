@@ -1428,9 +1428,9 @@ App.renderWebRegister = function () {
                         emailReceipt.appendTo(payment);
                         //payment.append(paymentComplete);
                         var donePayment = $("<button>").attr("id", "done-payment").text(App.lang.pay_done).click(function () {
-                            if (!receiptPrinted) {
+                            /*if (!receiptPrinted) {
                                 window.print();
-                            }
+                            }*/
                             App.closeCurtain();
                             App.showOnCustomerDisplay(App.lang.customer_display_welcome);
                             //App.jPriceInput.focus();
