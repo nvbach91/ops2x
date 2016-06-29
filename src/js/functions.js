@@ -1083,9 +1083,9 @@ App.saveLocalSale = function (sale){
 
 // render web register view
 App.renderWebRegister = function () {    
-    /*$(window).on("beforeunload", function () {
+    $(window).on("beforeunload", function () {
         return App.lang.onbeforeunload;
-    });*/
+    });
     App.closeCurtain();
     App.createWebRegisterDOM();
     App.bindKeyboard();
