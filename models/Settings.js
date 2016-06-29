@@ -30,6 +30,10 @@ var Settings = new Schema({
         header: String,
         footer: String,
         width: Number
+    },
+    customer_display: {
+        name: String,
+        active: Boolean
     }
 });
 

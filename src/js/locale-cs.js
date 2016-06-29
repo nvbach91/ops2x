@@ -110,6 +110,7 @@ App.GLocalCS = {
     settings_account           : "Nastavení účtu",
     settings_staff             : "Nastavení personálu",
     settings_pos               : "Nastavení pokladny",
+    settings_per               : "Nastavení periferií",
     settings_plu               : "Editace PLU",
     settings_stock             : "Kontrola skladu",
     settings_sg                : "Editace zbožních skupin",
@@ -122,6 +123,7 @@ App.GLocalCS = {
     form_label_team            : "NASTAVENÍ TÝMU",
     form_label_receipt         : "ZMĚNA ÚČTENKY",
     form_label_pos             : "KONFIGURACE POKLADNY",
+    form_label_per             : "KONFIGURACE PERIFERIÍ",
     form_label_catalog         : "ÚPRAVA KATALOGU",
     form_label_stock           : "SPRÁVA SKLADU",
     form_label_sg              : "ÚPRAVA ZBOŽNÍCH SKUPIN",
@@ -145,6 +147,8 @@ App.GLocalCS = {
     history_yes                : "ANO",
     history_no                 : "NE",
     history_print              : "Vytisknout účtenku",
+    
+    customer_display_name      : "Zákaznický displej",
     
     info_close_register        : "Tip: Vyberte den pro generování finanční zprávy",
     info_use_br                : "Tip: Použijte '&lt;br&gt;' jako nový řádek",

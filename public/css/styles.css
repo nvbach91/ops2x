@@ -406,6 +406,11 @@ div#logout {
     height: 40px;
     margin: auto;
 }
+.mod-item input[type='checkbox'] {
+    height: 30px;
+    margin: 10px 0;
+    cursor: pointer;
+}
 .tab-header {
     font-size: 14px;
     color: #555;

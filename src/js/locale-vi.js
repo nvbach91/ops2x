@@ -110,6 +110,7 @@ App.GLocalVI = {
     settings_account           : "Account Settings",
     settings_staff             : "Staff Settings",
     settings_pos               : "Point of Sale Settings",
+    settings_per               : "Periferials Settings",
     settings_plu               : "Edit PLU Articles",
     settings_stock             : "Stock",
     settings_sg                : "Edit Sale Groups",
@@ -122,6 +123,7 @@ App.GLocalVI = {
     form_label_team            : "MANAGE YOUR TEAM",
     form_label_receipt         : "EDIT YOUR RECEIPT",
     form_label_pos             : "CONFIGURE YOUR CASH REGISTER",
+    form_label_per             : "CONFIGURE YOUR PERIFERIALS",
     form_label_catalog         : "MANAGE YOUR CATALOG",
     form_label_stock           : "MANAGE YOUR STOCK",
     form_label_sg              : "MANAGE YOUR SALE GROUP BUTTONS",
@@ -145,6 +147,8 @@ App.GLocalVI = {
     history_yes                : "YES",
     history_no                 : "NO",
     history_print              : "Print this receipt",
+    
+    customer_display_name      : "Customer Display",
     
     info_close_register        : "Tip: Choose a day to generate report",
     info_use_br                : "Tip: Use '&lt;br&gt;' to add new lines",

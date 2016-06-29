@@ -381,6 +381,7 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
     if (id.toString() === lastItem.find(".si-id").text()) {
         if (App.isInRegistrySession/*.text() === "1"*/) {
             App.incrementLastItem(lastItem);
+            App.showOnCustomerDisplay(name + "\n" + mult + " x " + price);
             return true;
         }
     }
@@ -540,7 +541,20 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
     }, App.getAnimationTime());
 
     App.recalculateTotalCost();
+    App.showOnCustomerDisplay(name + "\n" + mult + " x " + price);
     App.beep();
+};
+
+App.showOnCustomerDisplay = function (msg) {
+    if (App.settings.customer_display.active) {
+        $.ajax({
+            url: "http://localhost:2112/customerdisplay",
+            dataType: "jsonp", jsonp: "callback", data: {msg: msg},
+            success: function (resp) {
+                console.log(resp);
+            }
+        });
+    }
 };
 
 // increments the quantity of the last item in the checkout
@@ -1462,6 +1476,7 @@ App.renderWebRegister = function () {
 
         App.showInCurtain(paymentBox);
         App.jCashInput.blur();
+        App.showOnCustomerDisplay(App.lang.reg_total + ":\n" + total + " " + App.settings.currency.code);
         App.beep();
     });
 
@@ -1482,31 +1497,30 @@ App.renderWebRegister = function () {
         $(this).attr("placeholder", "PLU");
     });
 
-    $(document).scannerDetection(function (s) {
-        if (!/^\d+$/.test(s)) {
+    $(document).scannerDetection(function (s) {        
+        if (/[\+ěščřžýáíé]/.test(s)) {
+            s = App.translateCzeckKeys(s);
+        } /*else if (!/^\d+$/.test(s)) {
             App.showWarning(App.lang.misc_wrong_keyboard);
+        }*/
+        clearTimeout(App._scannerTimingOut);
+        App.jSearchBox.blur();
+        App.justUsedScanner = true;
+        App._scannerTimingOut = setTimeout(function () {
+            App.justUsedScanner = false;
+        }, App._timeBetweenConsecutiveScannings);
+        App.closeCurtain();
+        if (App.jControlPanel.hasClass("visible")) {
+            var pluInput = App.cpBody.find(".plu-searcher");
+            if (pluInput.size() === 1) {
+                pluInput.val(s);
+                pluInput.parent().submit();
+            }
         } else {
-            if (/[\+ěščřžýáíé]/.test(s)) {
-                s = App.translateCzeckKeys(s);
-            }
-            clearTimeout(App._scannerTimingOut);
-            App.jSearchBox.blur();
-            App.justUsedScanner = true;
-            App._scannerTimingOut = setTimeout(function () {
-                App.justUsedScanner = false;
-            }, App._timeBetweenConsecutiveScannings);
-            App.closeCurtain();
-            if (App.jControlPanel.hasClass("visible")) {
-                var pluInput = App.cpBody.find(".plu-searcher");
-                if (pluInput.size() === 1) {
-                    pluInput.val(s);
-                    pluInput.parent().submit();
-                }
-            } else {
-                App.addPluItem(s);
-                App.isInRegistrySession = true/*.text("1")*/;
-            }
+            App.addPluItem(s);
+            App.isInRegistrySession = true/*.text("1")*/;
         }
+
     });
 
     $("#logout").click(function () {
@@ -1984,6 +1998,7 @@ App.createControlPanel = function () {
                 '<div class="cp-item" id="acc-settings">' + App.lang.settings_account + '</div>\
                 <div class="cp-item" id="sta-settings">' + App.lang.settings_staff + '</div>\
                 <div class="cp-item" id="pos-settings">' + App.lang.settings_pos + '</div>\
+                <div class="cp-item" id="per-settings">' + App.lang.settings_per + '</div>\
                 <div class="cp-item" id="plu-settings">' + App.lang.settings_plu + '</div>\
                 <div class="cp-item" id="stock-settings">' + App.lang.settings_stock + '</div>\
                 <div class="cp-item" id="sgs-settings">' + App.lang.settings_sg + '</div>\
@@ -2017,6 +2032,9 @@ App.bindControlPanel = function () {
                 break;
             case "pos-settings":
                 t.click(App.renderPOSSettings);
+                break;
+            case "per-settings":
+                t.click(App.renderPerSettings);
                 break;
             case "plu-settings":
                 t.click(App.renderPLUSettings);
@@ -2164,6 +2182,10 @@ App.requestModifyItem = function (url, data, button) {
                 case "/mod/pos" :
                     App.settings = resp.msg;
                     break;
+                case "/mod/per" :
+                    App.settings.customer_display.name = resp.msg.name;
+                    App.settings.customer_display.active = resp.msg.active;
+                    break;
                 case "/mod/plu" :              
                     var updatedArticle = resp.msg;      
                     var articles = App.catalog.articles;
@@ -2285,6 +2307,8 @@ App.generateModItemFormDOM = function (type, item) {
             break;
         case "pos":
             break;
+        case "per":
+            break;
         case "plu":
             disabledFields = ["ean"];
             break;
@@ -2308,7 +2332,7 @@ App.generateModItemFormDOM = function (type, item) {
     // disable role field and remove button of the first admin user
     var isFirstAdmin = item.number && (item.number.value === 0) && item.role && (item.role.value === "Admin");
     var isReceipt = type === "receipt";
-    var isPOS = type === "pos";
+    var isPOS = type === "pos" || type === "per";
     var isSG = type === "salegroups";
     var isQS = type === "quicksales" || type === "stock";
     var isHiddenBody = ["staff", "salegroups", "quicksales", "tabs"].indexOf(type) >= 0;
@@ -2374,6 +2398,10 @@ App.generateModItemFormDOM = function (type, item) {
                     dom +=     '<option tab-number="' + (j + 1) + '"' + ((j + 1) === item[keys[i]].value ? ' selected' : '') + '>' + (j + 1) + ' - ' + tabs[j].name + '</option>';    
                 }
                 dom +=     '</select>';
+                
+                } else if(keys[i] === "active") {
+                // ATTENTION!!!    
+                dom +=     '<input type="checkbox"' + (item[keys[i]].value ? ' checked' : '') + '>';
                 
                 } else if (keys[i] === "bg") {
                      dom += '<input class="colpicker" \
@@ -2498,6 +2526,11 @@ App.bindModSettings = function (modFormContainer, modifyUrl) {
         case "/mod/pos" :
             modifier.find("button.mi-save").click(function () {
                 submitted = App.prepareSubmit(App.getMiPosUpdateData, $(this), "save");
+            });
+            break;        
+        case "/mod/per" :            
+            modifier.find("button.mi-save").click(function () {               
+                submitted = App.prepareSubmit(App.getMiPerUpdateData, $(this), "save");
             });
             break;
         case "/mod/salegroups" :            
@@ -2710,9 +2743,9 @@ App.getMiReceiptUpdateData = function (requestType, button) {
     };
 };
 
-//--------------------------- POS SETTINGS -----------------------------------//
+//--------------------------- PERIFERIAL SETTINGS ----------------------------//
 App.renderPOSSettings = function () {
-    var receiptDOM =
+    var posDOM =
             App.createCenterBox(
                     '<div class="form-header">' + App.lang.settings_pos + '</div>\
                     <div class="mod-form">\
@@ -2734,7 +2767,7 @@ App.renderPOSSettings = function () {
                     })
                     + '</div>\
                     </div>');
-    App.cpBody.html(receiptDOM);
+    App.cpBody.html(posDOM);
     App.cpBody.find(".center-box").prepend(App.createGoBack());
     
     var modFormContainer = App.cpBody.find(".mod-form");
@@ -2756,6 +2789,40 @@ App.getMiPosUpdateData = function (requestType, button) {
         country : miBody.find("input[placeholder='COUNTRY']").val(),
         phone   : miBody.find("input[placeholder='PHONE']").val(),
         currency: miBody.find("select").find(":selected").attr("data")
+    };
+};
+
+//--------------------------- POS SETTINGS -----------------------------------//
+App.renderPerSettings = function () {
+    var receiptDOM =
+            App.createCenterBox(
+                    '<div class="form-header">' + App.lang.settings_per + '</div>\
+                    <div class="mod-form">\
+                        <div class="form-row">\
+                            <div class="form-label">' + App.lang.form_label_per + '</div>\
+                        </div>\
+                        <div class="modifier">'
+                    + App.generateModItemFormDOM("per", {
+                        name:       {title: "3-100 characters", valid : /^.{3,100}$/,value: App.settings.customer_display.name || App.lang.customer_display_name},
+                        active:     {title: "true|false", valid : /^true|false$/,value: App.settings.customer_display.active}
+                    })
+                    + '</div>\
+                    </div>');
+    App.cpBody.html(receiptDOM);
+    App.cpBody.find(".center-box").prepend(App.createGoBack());
+    
+    var modFormContainer = App.cpBody.find(".mod-form");
+    var modifyUrl = "/mod/per";
+    
+    App.bindModSettings(modFormContainer, modifyUrl);
+};
+
+App.getMiPerUpdateData = function (requestType, button) {
+    var miBody = button.parents().eq(1);
+    return {
+        requestType: requestType,
+        name: miBody.find("input[placeholder='NAME']").val(),
+        customerDisplay: miBody.find("input[type='checkbox']").is(":checked")
     };
 };
 
