@@ -75,7 +75,7 @@ App.GLocalVI = {
     receipt_total_items        : "Total items:",
     receipt_subtotal           : "Subtotal:",
     receipt_round              : "Round:",
-    receipt_total_amount       : "Total amount:",
+    receipt_total_amount       : "Total:",
     receipt_tendered           : "Tendered:",
     receipt_change             : "Change:",
     receipt_vat_summary        : "VAT summary",

@@ -75,7 +75,7 @@ App.GLocalCS = {
     receipt_total_items        : "Celkem položek:",
     receipt_subtotal           : "Mezisoučet:",
     receipt_round              : "Zaokrouhlení:",
-    receipt_total_amount       : "Celkem k platbě:",
+    receipt_total_amount       : "Celkem:",
     receipt_tendered           : "Přijato:",
     receipt_change             : "Vráceno:",
     receipt_vat_summary        : "Přehled DPH",

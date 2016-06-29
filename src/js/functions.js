@@ -1405,6 +1405,7 @@ App.renderWebRegister = function () {
                 currentReceiptObj.date = new Date();
                 currentReceiptObj.items = JSON.stringify(currentReceiptObj.items);
                 currentReceiptObj.tendered = App.jCashInput.val();
+                App.showOnCustomerDisplay(App.lang.receipt_tendered + currentReceiptObj.tendered + "\n" + App.lang.receipt_change + App.changeAmount);
                 $.ajax({
                     type: "POST",
                     url: "/mod/addsale",
