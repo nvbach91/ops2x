@@ -43,7 +43,8 @@ router.post('/pos', function (req, res) {
                 currency: settings.currency,
                 tax_rates: settings.tax_rates,
                 receipt: settings.receipt,
-                staff: settings.staff
+                staff: settings.staff,
+                customer_display: settings.customer_display
             };
             res.json({success: true, msg: ret});
         }).catch(function (err) {
