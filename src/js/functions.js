@@ -669,7 +669,6 @@ App.showWarning = function (msg) {
 
 // remove the current sale list
 App.discardSale = function (immediate) {
-    App.showOnCustomerDisplay(App.lang.customer_display_welcome);
     if (immediate) {
         App.jSaleList.find(".sale-item").remove();
         App.recalculateTotalCost();
