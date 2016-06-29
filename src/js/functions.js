@@ -1214,6 +1214,7 @@ App.renderWebRegister = function () {
     // bind pay button to proceed to payment, generate payment box
     var jPay = $("#pay").click(function () {
         if (App.jSaleList.find(".sale-item").size() < 1) {
+            App.showOnCustomerDisplay(App.lang.customer_display_welcome);
             return false;
         }
         App.jPriceInput.val("");
