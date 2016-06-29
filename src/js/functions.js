@@ -730,7 +730,7 @@ App.createWebRegisterDOM = function () {
                            <div>' + App.lang.reg_si_placeholder + '</div>\
                        </li>\
                    </ul>\
-                   <div id="keyboard" class="keyboard" style="display: none;">\
+                   <div id="keyboard" class="keyboard">\
                         <button id="btnp">PLU</button>\
                         <button id="btn7">7</button>\
                         <button id="btn8">8</button>\
@@ -749,7 +749,7 @@ App.createWebRegisterDOM = function () {
                         <button id="btnb"></button>\
                    </div>\
                    <div id="paycalc">\
-                       <button id="kb-toggle" class="open"></button>\
+                       <button id="kb-toggle" class="close"></button>\
                        <div id="pay">\
                            <div id="pay-label">' + App.lang.reg_pay + '</div>\
                            <div id="pay-amount">0</div>\
