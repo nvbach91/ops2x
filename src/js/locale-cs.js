@@ -149,6 +149,7 @@ App.GLocalCS = {
     history_print              : "Vytisknout účtenku",
     
     customer_display_name      : "Zákaznický displej",
+    customer_display_welcome   : "Vítejte",
     
     info_close_register        : "Tip: Vyberte den pro generování finanční zprávy",
     info_use_br                : "Tip: Použijte '&lt;br&gt;' jako nový řádek",

@@ -1432,6 +1432,7 @@ App.renderWebRegister = function () {
                                 window.print();
                             }
                             App.closeCurtain();
+                            App.showOnCustomerDisplay(App.lang.customer_display_welcome);
                             //App.jPriceInput.focus();
                         }).appendTo(payment);
                         App.bindClickEffect(donePayment);
