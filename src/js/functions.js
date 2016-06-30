@@ -1676,6 +1676,7 @@ App.renderWebRegister = function () {
 };
 
 App.openCashDrawer = function () {
+    $(document.activeElement).blur();
     $(".receipt").hide();
     window.print();
 };
