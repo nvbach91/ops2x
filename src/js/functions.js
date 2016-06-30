@@ -615,7 +615,7 @@ App.bindSaleGroups = function (sg) {
             var tax = t.attr("sg-tax");
             var tags = t.attr("sg-group");
             var desc = t.text();
-            App.addItemToCheckout(id, "", name, price, group, tax, tags, desc, mult);
+            App.addItemToCheckout(id, "", name, sign + price, group, tax, tags, desc, mult);
             App.isInRegistrySession = true/*.text("1")*/;
             App.justUsedScanner = false;
         });
@@ -1439,6 +1439,8 @@ App.renderWebRegister = function () {
 
         
         App.setUpMobileNumericInput(App.jCashInput);
+        
+        $("<div>").addClass("cash-total").text(App.lang.pay_total + total + " " + App.settings.currency.symbol).prependTo(payment);
         cashChange.text(App.lang.pay_change + Number(0).formatMoney() + " " + App.settings.currency.symbol).appendTo(payment);
 
         var receiptPrinted = false;
@@ -1496,7 +1498,7 @@ App.renderWebRegister = function () {
                         });
                         App.lastReceipt = resp.msg;
                         if (!App.isActivePrintReceipt) {
-                            $(".receipt, .receipt-gratitude, .receipt-footer").hide();
+                            $(".receipt").hide();
                         }   
                         window.print();
                     } else {
@@ -2056,7 +2058,8 @@ App.renderForgot = function () {
             App.closeCurtain();
             App.jPrinterCopyReceipt = null;            
         }
-        $(".receipt, .receipt-gratitude, .receipt-footer").show();
+        console.log(App.curtain);
+        $(".receipt").show();
         //App.closeCurtain();
     };
 

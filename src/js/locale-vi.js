@@ -68,6 +68,7 @@ App.GLocalVI = {
     pay_payment                : "Payment",
     pay_quick_cash             : "Quick cash payment",
     pay_tendered               : "Amount tendered",
+    pay_total                  : "Total: ",
     pay_change                 : "Change: ",
     pay_confirm                : "CONFIRM PAYMENT",    
     

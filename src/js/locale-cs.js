@@ -68,6 +68,7 @@ App.GLocalCS = {
     pay_payment                : "Platba",
     pay_quick_cash             : "Hotovost",
     pay_tendered               : "Přijato",
+    pay_total                  : "Celkem: ",
     pay_change                 : "Vráceno: ",
     pay_confirm                : "POTVRDIT PLATBU",    
     
