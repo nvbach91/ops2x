@@ -1,6 +1,21 @@
 
 /* global App */
 
+// keyboard keycodes
+App.key = {
+    ESC: 27,
+    ENTER: 13,
+    F10: 121,
+    SPACE: 32,
+    BACKSPACE: 8,
+    TAB: 9,
+    NUMPAD_MINUS: 109,
+    MINUS_UNDERSCORE: 189,
+    FIREFOX_MINUS_UNDERSCORE: 173,
+    NUMPAD_ASTERISK: 106,
+    NUMPAD_DOT_DEL: 110
+};
+
 // returns current window width for animations
 App.getWindowWidth = function () {
     return window.innerWidth;
@@ -267,21 +282,21 @@ App.correctPriceInput = function () {
 App.checkPriceInput = function (e) {
     e.stopPropagation();
     App.jKc.text("keyCode: " + e.keyCode);
-    if (e.keyCode === 27) { // allow esc
+    if (e.keyCode === App.key.ESC) { // allow esc
         App.jPriceInput.blur();
         return true;
     }
     var jpiVal = App.jPriceInput.val();
-    if (e.keyCode === 13) { // allow enter 
+    if (e.keyCode === App.key.ENTER) { // allow enter 
         if (jpiVal.length) {
             App.jPriceInput.blur();
         }
         return true;
     }
-    if (e.keyCode === 8 || e.keyCode === 9) { //allow backspace)
+    if (e.keyCode === App.key.BACKSPACE || e.keyCode === App.key.TAB) { //allow backspace and tab)
         return true;
     }
-    if (e.keyCode === 109 || e.keyCode === 189 || e.keyCode === 173) { // check for multiple dashes
+    if (e.keyCode === App.key.NUMPAD_MINUS || e.keyCode === App.key.MINUS_UNDERSCORE || e.keyCode === App.key.FIREFOX_MINUS_UNDERSCORE) { // check for multiple dashes
         if (jpiVal.length > 0) {
             return false;
         }
@@ -294,7 +309,7 @@ App.checkPriceInput = function (e) {
     }
     // allow asterisk for scanner multiplication
     // do not allow more than 999*
-    if (e.keyCode === 106) {
+    if (e.keyCode === App.key.NUMPAD_ASTERISK) {
         if (jpiVal.length === 0 || jpiVal.length > 3) {
             return false;
         }
@@ -304,7 +319,7 @@ App.checkPriceInput = function (e) {
         }
         return false;
     }
-    if (e.keyCode === 110) {        
+    if (e.keyCode === App.key.NUMPAD_DOT_DEL) {        
         if (jpiVal.length === 0) {
             return false;
         }
@@ -323,11 +338,11 @@ App.checkPriceInput = function (e) {
 
 // allows only numbers
 App.checkNumericInput = function (e, t) {
-    if (e.keyCode === 13) { // allow enter and blur upon press
+    if (e.keyCode === App.key.ENTER) { // allow enter and blur upon press
         t.blur();
         return true;
     }
-    if (e.keyCode === 8) { //allow backspace
+    if (e.keyCode === App.key.BACKSPACE) { //allow backspace
         return true;
     }
 
@@ -769,7 +784,7 @@ App.createWebRegisterDOM = function () {
 // returns a enter keyup event
 App.simulateEnterKeyup = function () {
     var e = $.Event("keyup");
-    e.keyCode = 13;
+    e.keyCode = App.key.ENTER;
     return e;
 };
 
@@ -931,9 +946,9 @@ App.init = function () {
     App._timeBetweenConsecutiveScannings = 2000;
     // esc to remove curtain, focus price input after hitting enter if price input is not yet focused
     $(document).keydown(function (e) {
-        if (e.keyCode === 27) {
+        if (e.keyCode === App.key.ESC) {
             App.closeCurtain();
-        } else if (e.keyCode === 13) {
+        } else if (e.keyCode === App.key.ENTER) {
             if (App.jControlPanel && !App.jControlPanel.hasClass("visible")) {
                 if (!App.curtain && App.jPriceInput && !App.justUsedScanner) {
                     App.jPriceInput.focus();
@@ -941,8 +956,19 @@ App.init = function () {
                     App.jCashInput.focus();
                 }
             }
-        } else if (e.keyCode === 121) { // F10 = open cash drawer
+        } else if (e.keyCode === App.key.F10) { // F10 = open cash drawer
             App.openCashDrawer();
+        } else if (e.keyCode === App.key.SPACE) { // space = proceed to payment and then confirm payment
+            var activeElement = $(document.activeElement);
+            if (!activeElement.is("input") && !App.jControlPanel.hasClass("visible")) {
+                activeElement.blur();
+                var cashConf = $("#cash-confirm");
+                if (cashConf.size() === 1) {
+                    cashConf.click();
+                } else {
+                    App.jPay.click();
+                }
+            };
         }
         return true;
     });
@@ -1106,7 +1132,8 @@ App.renderWebRegister = function () {
     App.jKc = $("#kc");
     App.jSaleList = $("#sale-list");
     App.jPriceInput = $("#price-input");
-    App.jPayAmount = $("#pay-amount");
+    App.jPay = $("#pay");
+    App.jPayAmount = App.jPay.find("#pay-amount");
     App.jCheckoutTotal = $("#checkout-total");
     App.jCheckoutLabel = $("#checkout-label");
     App.jLiveSearch = $("#live-search");
@@ -1256,7 +1283,7 @@ App.renderWebRegister = function () {
     
     var currentReceiptObj = null;
     // bind pay button to proceed to payment, generate payment box
-    var jPay = $("#pay").click(function () {
+    App.jPay.click(function () {
         if (App.jSaleList.find(".sale-item").size() < 1) {
             App.showOnCustomerDisplay(App.lang.customer_display_welcome);
             return false;
@@ -1359,7 +1386,7 @@ App.renderWebRegister = function () {
                 .val(parseInt(total) < 0 ? "0.00" : total)
                 .keydown(function (e) {
                     e.stopPropagation();
-                    if (e.keyCode === 27) {
+                    if (e.keyCode === App.key.ESC) {
                         App.jCashInput.blur();
                         return true;
                     }
@@ -1558,9 +1585,9 @@ App.renderWebRegister = function () {
 
     App.jSearchBox = App.jLiveSearch.find("#search");
     App.jSearchBox.keyup(function (e) {
-        if (e.keyCode === 13) {
+        if (e.keyCode === App.key.ENTER) {
             App.addPluItem(App.jSearchBox.val());
-        } if (e.keyCode === 27) {
+        } if (e.keyCode === App.key.ESC) {
             App.jSearchBox.blur();
         }
     }).keydown(function (e) {
@@ -1609,7 +1636,7 @@ App.renderWebRegister = function () {
     });
     
     App.bindClickEffect(jDiscardSale);
-    App.bindClickEffect(jPay);
+    App.bindClickEffect(App.jPay);
     App.bindClickEffect(jKbToggle);
     $("#menu-top > div").each(function(){
         App.bindClickEffect($(this));
