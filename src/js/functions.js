@@ -1225,7 +1225,12 @@ App.renderWebRegister = function () {
 
     // Price input accepts only numeric values, also only reacts to enter and backspace
     App.jPriceInput.keydown(function (e) {
-        return App.checkPriceInput(e);
+        e.stopPropagation();
+        if (e.keyCode === App.key.F10) {
+            $(document.activeElement).blur();
+        } else {
+            return App.checkPriceInput(e);
+        }
     }).blur(function () {
         return App.correctPriceInput();
     }).click(function () {
