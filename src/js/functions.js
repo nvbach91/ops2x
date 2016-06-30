@@ -561,10 +561,20 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
 };
 
 App.showOnCustomerDisplay = function (msg) {
+    var lines = msg.split("\n");
+    var res = [];
+    for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        if (line.length > 20) {
+            line = line.slice(0, 20);
+        }
+        res.push(line);
+    }
+    var message = res.join("\n");
     if (App.settings.customer_display.active) {
         $.ajax({
             url: "http://localhost:2112/customerdisplay",
-            dataType: "jsonp", jsonp: "callback", data: {msg: msg},
+            dataType: "jsonp", jsonp: "callback", data: {msg: message},
             success: function (resp) {
                 console.log(resp);
             }
