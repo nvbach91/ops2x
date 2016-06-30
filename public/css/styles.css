@@ -1369,7 +1369,7 @@ div#taxes-label {
     font-size: 12px;
     text-align: left;
 }
-.receipt-gratitude {
+.receipt-brand {
     display: none;
 }
 .receipt-footer {
@@ -2047,14 +2047,13 @@ div#taxes-label {
     .tin, .vat, #receipt-number, .receipt-custom-header {
         display: block;
     }    
-    .receipt-footer {
+    .receipt-brand {
         display: block;
         line-height: 25px;
         font-size: 12px;
         padding-bottom: 40px;
-        border-bottom: 1px solid black;
     }
-    .receipt-gratitude {
+    .receipt-footer {
         font-style: italic;
         display: block;
         font-size: 12px;

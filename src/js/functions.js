@@ -3627,10 +3627,10 @@ App.renderReceipt = function (receiptObj, isCopy) {
     $("<div>").addClass("receipt-clerk").text(App.lang.receipt_checked + receiptObj.clerk).appendTo(receipt);
     App.receiptTime = $("<div>").attr("id", "receipt-time").text(App.getDate(receiptObj.date)).appendTo(receipt);
 
-    $("<div>").addClass("receipt-gratitude").text(App.receipt.footer).appendTo(receipt);
+    $("<div>").addClass("receipt-footer").text(App.receipt.footer).appendTo(receipt);
 
     //creating receipt footer
-    $("<div>").addClass("receipt-footer").text("Powered by EnterpriseApps").appendTo(receipt);
+    $("<div>").addClass("receipt-brand").html("Powered by EnterpriseApps<br><br>+").appendTo(receipt);
     
     return receipt;    
 };
