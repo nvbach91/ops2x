@@ -159,13 +159,13 @@ App.sortByEAN = function (a, b) {
 };
 
 // plays beep sound
-App.beep = function () {
+App.beep = function (beeper) {
     if (!App.isMuted) {
-        App.beeper.pause();
-        if (App.beeper.readyState > 0) {
-            App.beeper.currentTime = 0;
+        beeper.pause();
+        if (beeper.readyState > 0) {
+            beeper.currentTime = 0;
         }
-        var p = App.beeper.play();
+        var p = beeper.play();
         if (p && (typeof Promise !== "undefined") && p instanceof Promise) {
             p.catch(function (err) {
             });
@@ -557,7 +557,7 @@ App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, 
 
     App.recalculateTotalCost();
     App.showOnCustomerDisplay(name + "\n" + mult + " x " + price);
-    App.beep();
+    App.beep(App.beeper);
 };
 
 App.showOnCustomerDisplay = function (msg) {
@@ -577,7 +577,7 @@ App.incrementLastItem = function (lastItem) {
     var lastQuantity = lastItem.find(".si-quantity");
     lastQuantity.val(parseInt(lastQuantity.val()) + 1);
     App.recalculateTotalCost();
-    App.beep();
+    App.beep(App.beeper);
 };
 
 // binds salegroups button events
@@ -859,7 +859,7 @@ App.bindKeyboard = function () {
                         activeInput.val(p + t.text());
                     }
             }
-            App.beep();
+            App.beep(App.beeper);
         });
     });
 };
@@ -1129,6 +1129,7 @@ App.renderWebRegister = function () {
     App.jMain = $("#main");
     App.jSiPlaceholder = $("#si-placeholder");
     App.beeper = new Audio("/sound/beep2.mp3");
+    App.longBeeper = new Audio("/sound/longbeep.mp3");
     App.jKc = $("#kc");
     App.jSaleList = $("#sale-list");
     App.jPriceInput = $("#price-input");
@@ -1260,7 +1261,7 @@ App.renderWebRegister = function () {
         /*if (App.jSaleList.find(".sale-item").size()) {
             App.recalculateTotalCost();
             App.jPayAmount.addClass("checked");
-            App.beep();
+            App.beep(App.beeper);
         }*/
         var t = $(this);
         if(t.hasClass("close")){
@@ -1580,7 +1581,7 @@ App.renderWebRegister = function () {
         App.showInCurtain(paymentBox);
         App.jCashInput.blur();
         App.showOnCustomerDisplay(App.lang.reg_total + ":\n" + total + " " + App.settings.currency.code);
-        App.beep();
+        App.beep(App.beeper);
     });
 
     App.jSearchBox = App.jLiveSearch.find("#search");
@@ -1706,6 +1707,7 @@ App.addPluItem = function (s) {
         //t.addClass("not-found");
         t.attr("placeholder", App.lang.misc_plu_not_found);
         App.showWarning(App.lang.misc_plu_not_found + ": <strong>" + needle + "</strong>");
+        App.beep(App.longBeeper);
     }
     t.val("");
 };
