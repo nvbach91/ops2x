@@ -18,6 +18,7 @@ router.post('/pluimport', function (req, res) {
 
             Catalogs.findOne(query).exec().then(function (catalog) {
                 catalog.articles = csvToJSON(req.body.data);
+                catalog.articles.sort(utils.sortByEAN);
                 return catalog.save();
             }).then(function (catalog) {
                 res.json({success: true, msg: utils.convertJsonCatalogToCSV(catalog.articles)});

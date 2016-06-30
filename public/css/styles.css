@@ -128,6 +128,14 @@ form#sign-up input[type='submit'] {
 form #username, form #employee-username {
     background-image: url("../img/ico/user.svg");
 }
+select#employee-username {
+    background-image: url("../img/ico/user.svg");
+    background-position: 20px;
+    background-repeat: no-repeat;
+    background-size: 20px;
+    padding: 15px 0px;
+    text-indent: 56px;
+}
 form [type="password"] {
     background-image: url("../img/ico/lock.svg");
 }

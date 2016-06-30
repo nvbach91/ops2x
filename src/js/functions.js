@@ -686,7 +686,7 @@ App.createWebRegisterDOM = function () {
     var appDOM =
             '<nav>\
                 <div id="logo"><div class="logo"></div></div>\
-                <div id="brand">EnterpriseApps</div>\
+                <div id="brand">' + App.settings.name + '</div>\
                 <div id="menu-top">\
                     <div id="cp-link" title="' + App.lang.reg_open_cp + '"></div>\
                     <div id="toggle-sg" title="' + App.lang.reg_close_sg + '"></div>\
@@ -1531,7 +1531,11 @@ App.renderWebRegister = function () {
 
     $("#logout").click(function () {
         $(window).off("beforeunload");
-        App.renderDashBoard();
+        if (App.staff.length > 1) { 
+            App.renderDashBoard();
+        } else {
+            App.signOut();
+        }
     });
     
     App.bindClickEffect(jDiscardSale);
@@ -1613,7 +1617,19 @@ App.createCenterBox = function (content, center) {
 
 // render dashboard view
 App.renderDashBoard = function () {
+    var staff = App.staff;
+    if (staff.length === 1) {
+        App.currentEmployee = staff[0];
+        App.renderWebRegister();
+        return;
+    }
     App.closeCurtain();
+    var employeeSelectList = '<select id="employee-username" title="' + App.lang.dashboard_username + '">';
+    for (var i = 0; i < staff.length; i++) {
+        employeeSelectList += '<option' + (i === 0 ? ' selected' : '') + '>' + staff[i].name + '</option>';
+    }
+    employeeSelectList += '</select>';
+
     var dashBoardDOM =
             '<nav>\
                 <div id="logo"><div class="logo"></div></div>\
@@ -1626,14 +1642,13 @@ App.renderDashBoard = function () {
             + App.createCenterBox(   
                 '<div class="form-header">' + App.lang.dashboard_header + '</div>\
                 <form id="employee-login" action="">\
-                    <div class="form-label">' + App.lang.dashboard_label + '</div>\
-                    <input id="employee-username" type="text" placeholder="' + App.lang.dashboard_username + '">\
-                    <input id="employee-pin" type="password" placeholder="PIN">\
+                    <div class="form-label">' + App.lang.dashboard_label + '</div>'+
+                    employeeSelectList +
+                    '<input id="employee-pin" type="password" placeholder="PIN">\
                     <button type="submit">OK</button>\
                 </form>', ' center');
     App.jAppContainer.html(dashBoardDOM);
     var form = $("#employee-login");
-    var employeeUsername = form.find("#employee-username");
     form.submit(function (e) {
         e.preventDefault();
         var employeeUsername = form.find("#employee-username");
@@ -1642,7 +1657,7 @@ App.renderDashBoard = function () {
         var nStaff = App.staff.length;
         for (var i = 0; i < nStaff; i++) {
             var employee = App.staff[i];
-            if (employee.name === employeeUsername.val()) {
+            if (employee.name === employeeUsername.find(":checked").val()) {
                 if (employee.pin === employeePIN.val()) {
                     App.currentEmployee = employee;
                     loggedIn = true;
@@ -1659,18 +1674,22 @@ App.renderDashBoard = function () {
 
     $("#sign-out").click(function () {
         App.showLoading();
-        $.ajax({
-            type: "GET",
-            url: "/signout"
-        }).done(function () {
-            App.renderSignin();
-        }).fail(function () {
-            App.closeCurtain();
-            App.showWarning(App.lang.dashboard_unable_sign_out);
-        });
+        App.signOut();
     });
     
-    employeeUsername.focus();
+    //employeeUsername.focus();
+};
+
+App.signOut = function () {
+    $.ajax({
+        type: "GET",
+        url: "/signout"
+    }).done(function () {
+        App.renderSignin();
+    }).fail(function () {
+        App.closeCurtain();
+        App.showWarning(App.lang.dashboard_unable_sign_out);
+    });
 };
 
 App.convertCsvCatalogToJSON = function (csv) {

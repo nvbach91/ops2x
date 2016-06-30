@@ -11,9 +11,7 @@ router.post('/plu', function (req, res) {
         group: /^[^"]{1,50}$/,
         tax: /^(0|10|15|21)$/
     };
-    if (req.body.name === 'New PLU') {        
-        res.json({success: false, msg: 'Cannot save as "New PLU"'});
-    } else if (!utils.isValidRequest(validator, req.body)) {
+    if (!utils.isValidRequest(validator, req.body)) {
         res.json({success: false, msg: 'Invalid format'});
     } else {
         var query = {userId: req.user._id};
@@ -25,8 +23,8 @@ router.post('/plu', function (req, res) {
             tax: parseInt(req.body.tax)
         };
         Catalogs.findOne(query).exec().then(function (catalog) {
-            var articles = catalog.articles;
-            articles.sort(utils.sortByEAN);
+            var articles = catalog.articles; // this is now always sorted by EAN even after insert
+            //articles.sort(utils.sortByEAN);
             var articleIndex = utils.binaryIndexOf(articles, 'ean', searchArticle.ean);
           
             if (articleIndex >= 0) {  // found article
@@ -41,8 +39,7 @@ router.post('/plu', function (req, res) {
                 }  
             } else { // article not found
                 if (req.body.requestType === 'save') {
-                    articles.push(searchArticle);
-                    articles.sort(utils.sortByEAN);
+                    utils.binaryInsert(searchArticle, articles, 'ean');
                 } else if (req.body.requestType === 'remove') {
                     throw "Cannot remove non existing PLU";
                 }
