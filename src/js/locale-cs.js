@@ -56,6 +56,7 @@ App.GLocalCS = {
     reg_park                   : "Zaparkovat",
     reg_discard                : "Zrušit prodej",
     reg_print_last             : "Tisk poslední",
+    reg_no_last_receipt        : "V historii nejsou žádné prodeje",
     reg_si_placeholder         : "Zde se zobrazují namarkované položky",
     reg_pay                    : "Zaplatit",
     reg_individual_price       : "Individuální cena",

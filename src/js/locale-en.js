@@ -56,6 +56,7 @@ App.GLocalEN = {
     reg_park                   : "Park Sale",
     reg_discard                : "Discard Sale",
     reg_print_last             : "Print Last",
+    reg_no_last_receipt        : "There is no receipts in sale history",
     reg_si_placeholder         : "Registered items will be dsplayed here",
     reg_pay                    : "Pay",
     reg_individual_price       : "Individual Price",

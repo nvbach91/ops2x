@@ -18,7 +18,7 @@ router.post('/addsale', function (req, res) {
         res.json({success: false, msg: 'Invalid format'});
     } else {
         var newReceiptObj = {
-            number: newReceipt.number,
+            number: parseInt(newReceipt.number),
             date: new Date(newReceipt.date),
             clerk: newReceipt.clerk,
             items: JSON.parse(newReceipt.items),

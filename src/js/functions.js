@@ -1146,7 +1146,15 @@ App.renderWebRegister = function () {
 
         var paymentBody = $("<div>").addClass("pb-body");
         var container = $("<div>").addClass("receipt-container" + App.receiptWidth);
-
+        if (!App.lastReceipt) { 
+            var nReceipts = App.sales.receipts.length;
+            if (nReceipts > 0){
+                App.lastReceipt = App.sales.receipts[nReceipts - 1];
+            } else {
+                App.showWarning(App.lang.reg_no_last_receipt);
+                return;
+            }
+        } 
         container.append(App.renderReceipt(App.lastReceipt, true));
         paymentBody.append(container);
 
