@@ -778,7 +778,7 @@ button:disabled {
     font-size: 14px;
     height: 40px;
 }
-button#park-sale, button#discard-sale {
+button#park-sale, button#discard-sale, button#print-last {
     margin: 2px 8px;
     color: #353535;
     line-height: 35px;
@@ -802,6 +802,9 @@ button#park-sale, button#discard-sale {
 }
 #discard-sale {
     background-image: url("../img/ico/bin.svg");
+}
+#print-last {
+    background-image: url("../img/ico/print.svg");
 }
 #reg-buttons {
     flex-grow: 1;

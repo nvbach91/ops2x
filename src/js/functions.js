@@ -722,6 +722,7 @@ App.createWebRegisterDOM = function () {
                        <div id="checkout-total">' + App.lang.reg_total + ': 0 ' + App.settings.currency.symbol + '</div>\
                    </div>\
                    <div id="checkout-btns">\
+                       <button id="print-last">' + App.lang.reg_print_last + '</button>\
                        <button id="park-sale">' + App.lang.reg_park + '</button>\
                        <button id="discard-sale">' + App.lang.reg_discard + '</button>\
                    </div>\
@@ -1138,6 +1139,23 @@ App.renderWebRegister = function () {
     jDiscardSale.click(function () {
         App.discardSale(false);
     });
+    
+    // print last receipt
+    var jPrintLast = $("#print-last");
+    jPrintLast.click(function () {
+
+        var paymentBody = $("<div>").addClass("pb-body");
+        var container = $("<div>").addClass("receipt-container" + App.receiptWidth);
+
+        container.append(App.renderReceipt(App.lastReceipt, true));
+        paymentBody.append(container);
+
+        App.jPrinterCopyReceipt = $("<div id='payment-box'></div>").append(paymentBody);
+
+        App.showInCurtain(App.jPrinterCopyReceipt);
+
+        window.print();
+    });
 
     // Price input accepts only numeric values, also only reacts to enter and backspace
     App.jPriceInput.keydown(function (e) {
@@ -1289,7 +1307,7 @@ App.renderWebRegister = function () {
         var cashChange = $("<div>").attr("id", "cash-change");
         App.changeAmount = 0;
         //var payForm = $("<div>").addClass("pay-form");
-        $("<div>").addClass("cash-pay-label").text(App.lang.pay_tendered).appendTo(payment);
+        //$("<div>").addClass("cash-pay-label").text(App.lang.pay_tendered).appendTo(payment);
         var cashInputRow = $("<div>").addClass("cash-input-row");
         $("<div>").attr("id", "pk-toggle").addClass("open").click(function () {
             var t = $(this);
@@ -1439,6 +1457,7 @@ App.renderWebRegister = function () {
                             //App.jPriceInput.focus();
                         }).appendTo(payment);
                         App.bindClickEffect(donePayment);
+                        App.lastReceipt = resp.msg;
                     } else {
                         t.text(App.lang.pay_confirm);
                         App.closeCurtain();
@@ -1467,7 +1486,9 @@ App.renderWebRegister = function () {
                         App.closeCurtain();
                         //App.jPriceInput.focus();
                     }).appendTo(payment);
-                    App.saveLocalSale(currentReceiptObj);
+                    App.saveLocalSale(currentReceiptObj);                    
+                    App.lastReceipt = currentReceiptObj;
+                    App.lastReceipt.items = JSON.parse(App.lastReceipt.items);
                     //currentReceiptObj.items = JSON.parse(currentReceiptObj.items);
                     //App.sales.receipts.push(currentReceiptObj);                    
                 });
