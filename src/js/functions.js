@@ -1496,7 +1496,7 @@ App.renderWebRegister = function () {
                         });
                         App.lastReceipt = resp.msg;
                         if (!App.isActivePrintReceipt) {
-                            $(".receipt").hide();
+                            $(".receipt, .receipt-gratitude, .receipt-footer").hide();
                         }   
                         window.print();
                     } else {
@@ -2056,8 +2056,7 @@ App.renderForgot = function () {
             App.closeCurtain();
             App.jPrinterCopyReceipt = null;            
         }
-        console.log(App.curtain);
-        $(".receipt").show();
+        $(".receipt, .receipt-gratitude, .receipt-footer").show();
         //App.closeCurtain();
     };
 
