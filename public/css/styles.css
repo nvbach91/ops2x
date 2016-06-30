@@ -2051,7 +2051,7 @@ div#taxes-label {
         display: block;
         line-height: 25px;
         font-size: 12px;
-        padding-bottom: 40px;
+        border-bottom: 1px solid black;
     }
     .receipt-gratitude {
         font-style: italic;
