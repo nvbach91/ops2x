@@ -941,6 +941,8 @@ App.init = function () {
                     App.jCashInput.focus();
                 }
             }
+        } else if (e.keyCode === 121) { // F10 = open cash drawer
+            App.openCashDrawer();
         }
         return true;
     });
@@ -1501,9 +1503,10 @@ App.renderWebRegister = function () {
                         });
                         App.lastReceipt = resp.msg;
                         if (!App.isActivePrintReceipt) {
-                            $(".receipt").hide();
-                        }   
-                        window.print();
+                            App.openCashDrawer();
+                        } else {
+                            window.print();
+                        }
                     } else {
                         t.text(App.lang.pay_confirm);
                         App.closeCurtain();
@@ -1621,6 +1624,11 @@ App.renderWebRegister = function () {
      dropDown.html("");
      dropDown.removeClass("visible");
      });*/
+};
+
+App.openCashDrawer = function () {
+    $(".receipt").hide();
+    window.print();
 };
 
 App.mapCzechKey = function (k) {
@@ -2061,7 +2069,6 @@ App.renderForgot = function () {
             App.closeCurtain();
             App.jPrinterCopyReceipt = null;            
         }
-        console.log(App.curtain);
         $(".receipt").show();
         //App.closeCurtain();
     };
