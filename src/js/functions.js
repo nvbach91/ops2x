@@ -1498,7 +1498,7 @@ App.renderWebRegister = function () {
                 if (parseInt(currentReceiptObj.tendered) < 0) {
                     currentReceiptObj.tendered = 0;
                 }
-                App.showOnCustomerDisplay(App.lang.receipt_tendered + currentReceiptObj.tendered + "\n" + App.lang.receipt_change + App.changeAmount);
+                App.showOnCustomerDisplay(App.lang.pay_total + total + "\n" + App.lang.pay_change + App.changeAmount);
                 $.ajax({
                     type: "POST",
                     url: "/mod/addsale",
@@ -1553,26 +1553,37 @@ App.renderWebRegister = function () {
                 }).fail(function (resp) {
                     paymentBody.addClass("failed");
 
-                    payment.children().remove();
+                    quickCash.remove();
+                    quickCashLabel.remove();
+                    paymentKeyboard.remove();
+                    cashInputClear.remove();
+                    pkToggle.remove();
+                    cashInputRow.remove();
+                        
                     App.discardSale(true);
-                    $("<div>").addClass("pc-label").html(App.lang.pay_sync_failed).appendTo(payment);
-                    if (App.changeAmount !== "0.00") {
+                    /*if (App.changeAmount !== "0.00") {
                         $("<div>").addClass("pc-change").text(App.lang.pay_issue_change + App.changeAmount + " " + App.settings.currency.symbol).appendTo(payment);
-                    }
+                    }*/
                     $("<button>").attr("id", "print-receipt").text(App.lang.pay_print_without_fik).click(function () {
                         window.print();
                         receiptPrinted = true;
-                    }).appendTo(payment);
+                    }).prependTo(payment);
+                    $("<div>").addClass("pc-label").html(App.lang.pay_sync_failed).prependTo(payment);
                     //payment.append(paymentComplete);
-                    $("<button>").attr("id", "done-payment").text(App.lang.pay_done).click(function () {
-                        /*if (!receiptPrinted) {
-                            window.print();
-                        }*/
-                        
+                    /*$("<button>").attr("id", "done-payment").text(App.lang.pay_done).click(function () {
                         App.showOnCustomerDisplay(App.lang.customer_display_welcome);
                         App.closeCurtain();
-                        //App.jPriceInput.focus();
-                    }).appendTo(payment);
+                    }).appendTo(payment);*/
+                    cashConfirm.text(App.lang.pay_done).click(function(){                            
+                            App.showOnCustomerDisplay(App.lang.customer_display_welcome);
+                            App.closeCurtain();
+                        });
+                        App.lastReceipt = resp.msg;
+                        if (!App.isActivePrintReceipt) {
+                            App.openCashDrawer();
+                        } else {
+                            window.print();
+                        }
                     App.saveLocalSale(currentReceiptObj);                    
                     App.lastReceipt = currentReceiptObj;
                     App.lastReceipt.items = JSON.parse(App.lastReceipt.items);

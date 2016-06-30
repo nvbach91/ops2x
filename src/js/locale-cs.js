@@ -91,7 +91,7 @@ App.GLocalCS = {
     receipt_checked            : "Obsluha: ",
     
     pay_complete               : "Transakce dokončena!",
-    pay_sync_failed            : "Tržba nebyla odeslána<br>Zřejmě spadlo spojení",
+    pay_sync_failed            : "Tržba nebyla odeslána<br>Spadlo spojení",
     pay_issue_change           : "Vráceno ",
     pay_print_receipt          : "Vytisknout účtenku",
     pay_print_without_fik      : "Vytisknout účtenku bez FIK",

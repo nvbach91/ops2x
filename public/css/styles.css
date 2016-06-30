@@ -1545,7 +1545,7 @@ div#taxes-label {
 }
 .pc-label {
     width: 100%;
-    font-size: 28px;
+    font-size: 24px;
 }
 .pc-label:before {
     /*content: "\2713";*/
@@ -1718,7 +1718,7 @@ div#taxes-label {
         font-size: 14px;
     }
     .pc-label {
-        font-size: 40px;
+        font-size: 28px;
     }
 }
 
