@@ -281,6 +281,11 @@ App.correctPriceInput = function () {
 // checks inputs for price input
 App.checkPriceInput = function (e) {
     e.stopPropagation();
+    if (e.keyCode === App.key.F10) {
+        $(document.activeElement).blur();
+        App.openCashDrawer();
+        return true;
+    }
     App.jKc.text("keyCode: " + e.keyCode);
     if (e.keyCode === App.key.ESC) { // allow esc
         App.jPriceInput.blur();
@@ -1225,12 +1230,7 @@ App.renderWebRegister = function () {
 
     // Price input accepts only numeric values, also only reacts to enter and backspace
     App.jPriceInput.keydown(function (e) {
-        e.stopPropagation();
-        if (e.keyCode === App.key.F10) {
-            $(document.activeElement).blur();
-        } else {
-            return App.checkPriceInput(e);
-        }
+        return App.checkPriceInput(e);
     }).blur(function () {
         return App.correctPriceInput();
     }).click(function () {
