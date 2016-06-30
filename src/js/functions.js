@@ -3630,7 +3630,7 @@ App.renderReceipt = function (receiptObj, isCopy) {
     $("<div>").addClass("receipt-footer").text(App.receipt.footer).appendTo(receipt);
 
     //creating receipt footer
-    $("<div>").addClass("receipt-brand").html("Powered by EnterpriseApps<br><br>+").appendTo(receipt);
+    $("<div>").addClass("receipt-brand").html("Powered by EnterpriseApps<br><br>*").appendTo(receipt);
     
     return receipt;    
 };
