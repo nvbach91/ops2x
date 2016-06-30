@@ -26,7 +26,7 @@ App.GLocalCS = {
     sign_up_sign_up            : "VYTVOŘIT ÚČET",
     sign_up_back               : "Zpět na přihlášení",
     sign_up_thank              : function (msg) {return "Děkujeme za vytvoření účtu<br>Zkontrolujte svou e-mailovou schránku <strong>" + msg + "</strong> pro dokončení registrace";},
-    sign_up_fail               : function (msg) {return "Nepodařilo se nám vytvořit účet<br><strong>" + msg + "</strong><br>Dejte nám vědět na <a href='mailto:info.enterpriseapps@gmail.com'>info.enterpriseapps@gmail.com</a>";},
+    sign_up_fail               : function (msg) {return "Nepodařilo se nám vytvořit účet<br><strong>" + msg + "</strong><br>Dejte nám vědět na <a href='mailto:etherealcz@gmail.com'>etherealcz@gmail.com</a>";},
     
     forgot_header              : "Vítejte v OPS",
     forgot_label               : "OBNOVENÍ HESLA",
@@ -35,7 +35,7 @@ App.GLocalCS = {
     forgot_submit              : "ODESLAT",
     forgot_back                : "Zpět na přihlášení",
     forgot_success             : function (msg) {return "Poslali jsme na Váš email <strong>" + msg + "</strong> odkaz na obnovení hesla" ;},
-    forgot_fail                : function (msg) {return "Nepodařilo se vyřídit Váš požadavek<br><strong>" + msg + "</strong><br>Dejte nám vědět na <a href='mailto:info.enterpriseapps@gmail.com'>info.enterpriseapps@gmail.com</a>";},
+    forgot_fail                : function (msg) {return "Nepodařilo se vyřídit Váš požadavek<br><strong>" + msg + "</strong><br>Dejte nám vědět na <a href='mailto:etherealcz@gmail.com'>etherealcz@gmail.com</a>";},
     
     dashboard_sign_out         : "Odhlásit se",
     dashboard_unable_sign_out  : "Nepodařilo se odhlásit. Zkontrolujte spojení",

@@ -26,7 +26,7 @@ App.GLocalEN = {
     sign_up_sign_up            : "SIGN UP",
     sign_up_back               : "Back to sign in",
     sign_up_thank              : function (msg) {return "Thank you for creating an account<br>Please check your inbox at <strong>" + msg + "</strong> to complete the registration";},
-    sign_up_fail               : function (msg) {return "Unable to create account<br><strong>" + msg + "</strong><br>Please let us know at <a href='mailto:info.enterpriseapps@gmail.com'>info.enterpriseapps@gmail.com</a>";},
+    sign_up_fail               : function (msg) {return "Unable to create account<br><strong>" + msg + "</strong><br>Please let us know at <a href='mailto:etherealcz@gmail.com'>etherealcz@gmail.com</a>";},
     
     forgot_header              : "Welcome to OPS",
     forgot_label               : "RESET PASSWORD",
@@ -35,7 +35,7 @@ App.GLocalEN = {
     forgot_submit              : "SUBMIT",
     forgot_back                : "Back to sign in",
     forgot_success             : function (msg) {return "A reset link has been sent to your inbox at <strong>" + msg + "</strong>";},
-    forgot_fail                : function (msg) {return "Unable to process your request<br><strong>" + msg + "</strong><br>Please let us know at <a href='mailto:info.enterpriseapps@gmail.com'>info.enterpriseapps@gmail.com</a>";},
+    forgot_fail                : function (msg) {return "Unable to process your request<br><strong>" + msg + "</strong><br>Please let us know at <a href='mailto:etherealcz@gmail.com'>etherealcz@gmail.com</a>";},
     
     dashboard_sign_out         : "Sign out",
     dashboard_unable_sign_out  : "Unable to sign out. Please check your connection",

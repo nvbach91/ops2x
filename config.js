@@ -8,13 +8,13 @@ var config = {
     host: 'http://kouzelnakasa.cz',
     mongodb_host: 'mongodb://127.0.0.1:27017/dev',    
     
-    companyName: 'EnterpriseApps',
+    companyName: 'Ethereal',
     // when changing mail service, follow the EAUTH instructions from the service provider
     mail_transport: {
         service: 'Gmail',
         auth: {
             // this should be changed, create your own gmail account then enable less secure apps on that account
-            user: 'info.enterpriseapps@gmail.com',
+            user: 'etherealcz@gmail.com',
             pass: 'ttrello2015'
         }
     }

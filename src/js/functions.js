@@ -1708,7 +1708,7 @@ App.renderDashBoard = function () {
     var dashBoardDOM =
             '<nav>\
                 <div id="logo"><div class="logo"></div></div>\
-                <div id="brand">EnterpriseApps</div>\
+                <div id="brand">Ethereal</div>\
                 <div id="menu-top">\
                     <div id="profile">' + App.settings.name + '</div>\
                     <div id="sign-out">' + App.lang.dashboard_sign_out + '</div>\
@@ -1850,7 +1850,7 @@ App.renderSignin = function () {
                         <div id="forgot">' + App.lang.sign_in_forgot + '</div>\
                     </div>\
                 </form>\
-                <div class="form-footer">Powered by EnterpriseApps</div>', ' center');
+                <div class="form-footer">Powered by Ethereal</div>', ' center');
     
     App.jAppContainer.html(signinDOM);
     $("#lang-switch").find(".lang").click(function () {
@@ -1944,7 +1944,7 @@ App.renderSignup = function () {
                         <div id="signin">' + App.lang.sign_up_back + '</div>\
                     </div>\
                 </form>\
-                <div class="form-footer">Powered by EnterpriseApps</div>');
+                <div class="form-footer">Powered by Ethereal</div>');
     App.jAppContainer.html(signupDOM);
 
     var form = $("#sign-up");
@@ -2016,7 +2016,7 @@ App.renderForgot = function () {
                         <div id="signin">' + App.lang.forgot_back + '</div>\
                     </div>\
                 </form>\
-                <div class="form-footer">Powered by EnterpriseApps</div>', ' center');
+                <div class="form-footer">Powered by Ethereal</div>', ' center');
     App.jAppContainer.html(forgotDOM);
 
     var form = $("#reset-password");
@@ -3630,7 +3630,7 @@ App.renderReceipt = function (receiptObj, isCopy) {
     $("<div>").addClass("receipt-footer").text(App.receipt.footer).appendTo(receipt);
 
     //creating receipt footer
-    $("<div>").addClass("receipt-brand").html("Powered by EnterpriseApps<br><br>*").appendTo(receipt);
+    $("<div>").addClass("receipt-brand").html("Powered by Ethereal © 2016<br><br>*").appendTo(receipt);
     
     return receipt;    
 };
