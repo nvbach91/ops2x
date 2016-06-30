@@ -1448,7 +1448,7 @@ div#taxes-label {
 #pkeyboard {
     max-width: 420px;
     min-width: 320px;
-    margin: 0 auto;
+    margin: 5px auto 0 auto;
     height: 350px;
 }
 #pkeyboard > button {
@@ -1504,7 +1504,7 @@ div#taxes-label {
 }
 #cash-change {
     line-height: 60px;
-    font-size: 20px;
+    font-size: 30px;
 }
 #print-receipt { 
     font-size: 24px;
@@ -1991,6 +1991,7 @@ div#taxes-label {
 @media print {
     html, body {
         font-family: "Open Sans", sans-serif;
+        background-color: #fff;
     }
     nav, #control-panel, #main, .pb-header, #payment, .preview {
         display: none;
