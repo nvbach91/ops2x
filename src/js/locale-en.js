@@ -56,6 +56,8 @@ App.GLocalEN = {
     reg_park                   : "Park Sale",
     reg_discard                : "Discard Sale",
     reg_print_last             : "Print Last",
+    reg_print_on               : "Print ON",
+    reg_print_off              : "Print OFF",
     reg_no_last_receipt        : "There is no receipts in sale history",
     reg_si_placeholder         : "Registered items will be dsplayed here",
     reg_pay                    : "Pay",
@@ -91,7 +93,7 @@ App.GLocalEN = {
     pay_sync_failed            : "Sale is not sent<br>Internet connection is lost",
     pay_issue_change           : "Issue change of ",
     pay_print_receipt          : "Print receipt",
-    pay_print_receipt_without  : "Print receipt without FIK",
+    pay_print_without_fik      : "Print receipt without FIK",
     pay_email_receipt          : "Email receipt",
     pay_done                   : "DONE",
     

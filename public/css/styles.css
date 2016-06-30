@@ -778,7 +778,7 @@ button:disabled {
     font-size: 14px;
     height: 40px;
 }
-button#park-sale, button#discard-sale, button#print-last {
+#checkout-btns button {
     margin: 2px 8px;
     color: #353535;
     line-height: 35px;
@@ -793,7 +793,7 @@ button#park-sale, button#discard-sale, button#print-last {
     background-repeat: no-repeat;
     background-color: transparent;
 }
-#park-sale:hover, #discard-sale:hover {
+#checkout-btns button:hover {
     border: 1px solid #aaa;
 }
 #park-sale {
@@ -805,6 +805,14 @@ button#park-sale, button#discard-sale, button#print-last {
 }
 #print-last {
     background-image: url("../img/ico/print.svg");
+}
+#print-switch.inactive {
+    background-image: url("../img/ico/print.svg");
+}
+#print-switch.active {
+    background-image: url("../img/ico/printw.svg");
+    background-color: #65C365;
+    color: white;
 }
 #reg-buttons {
     flex-grow: 1;
@@ -1467,16 +1475,19 @@ div#taxes-label {
 #cash-input.invalid {
     box-shadow: 0 0 5px 1px red;
 }
+#cash-input.paid {
+    color: #65C365;
+}
 #cash-confirm { 
     margin: 0 auto;
     width: 100%;
     max-width: 460px;
     padding: 30px 0;
     font-size: 20px;
-    background-color: #4176AD;
+    background-color: #65C365;
 }
 #cash-confirm:hover {
-    background-color: #65C365; 
+    background-color: #66de66; 
 }
 #cash-confirm.disabled {
     background-color: #656565;
@@ -1504,15 +1515,17 @@ div#taxes-label {
 }
 #cash-change {
     line-height: 60px;
-    font-size: 30px;
+    font-size: 50px;
+    color: #65C365;
+    margin: 10px 0;
 }
 #print-receipt { 
     font-size: 24px;
     width: 99%;
-    max-width: 420px;
-    margin: 10px auto;
+    max-width: 460px;
+    margin: 0 auto;
     cursor: pointer;
-    line-height: 80px;
+    line-height: 90px;
     text-indent: 0px;
     background-color: transparent;
     color: #434343;
@@ -1815,7 +1828,7 @@ div#taxes-label {
     #checkout-header, .sale-item-main div, input.si-name {
         font-size: 12px;
     }
-    button#park-sale, button#discard-sale {
+    #checkout-btns button {
         font-size: 12px;
     }
     .d-price, .d-discount,
@@ -1851,7 +1864,7 @@ div#taxes-label {
     #sale-list input.si-quantity, #sale-list  {
         font-size: 12px;
     } 
-    button#park-sale, button#discard-sale {
+    #checkout-btns button {
         margin: 5px;
         font-size: 14px;
     }
@@ -1974,7 +1987,7 @@ div#taxes-label {
     #cp-header > .close, #go-back, .adder, .mi-header, #pk-toggle {
         transition: background-color .2s ease;
     }
-    button#park-sale, button#discard-sale {
+    #checkout-btns button {
         transition: border .2s ease, background-color .2s ease;
     }
     .d-detail {

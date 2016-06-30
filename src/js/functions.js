@@ -722,6 +722,8 @@ App.createWebRegisterDOM = function () {
                        <div id="checkout-total">' + App.lang.reg_total + ': 0 ' + App.settings.currency.symbol + '</div>\
                    </div>\
                    <div id="checkout-btns">\
+                       <button id="print-switch" class="' + (App.isActivePrintReceipt ? 'active' : 'inactive') + '">' 
+                            + (App.isActivePrintReceipt ? App.lang.reg_print_on : App.lang.reg_print_off) + '</button>\
                        <button id="print-last">' + App.lang.reg_print_last + '</button>\
                        <button id="park-sale">' + App.lang.reg_park + '</button>\
                        <button id="discard-sale">' + App.lang.reg_discard + '</button>\
@@ -847,17 +849,18 @@ App.bindKeyboard = function () {
     });
 };
 
-App.saveLocale = function (locale) {
-    localStorage.locale = locale;
-    App.locale = locale;
-};
-
 App.loadLocalStorage = function () {
     if (localStorage.hasOwnProperty("isMuted")) {
         App.isMuted = localStorage.isMuted === "true";
     } else {
         localStorage.isMuted = false;
         App.isMuted = false;
+    }
+    if (localStorage.hasOwnProperty("isActivePrintReceipt")) {
+        App.isActivePrintReceipt = localStorage.isActivePrintReceipt === "true";
+    } else {
+        localStorage.isActivePrintReceipt = false;
+        App.isActivePrintReceipt = false;
     }
     if (localStorage.hasOwnProperty("isClosedSG")) {
         App.isClosedSG = localStorage.isClosedSG === "true";
@@ -868,7 +871,7 @@ App.loadLocalStorage = function () {
     if (localStorage.hasOwnProperty("locale")) {
         App.locale = localStorage.locale;
     } else {
-        App.saveLocale("en");
+        App.saveLocalPreference("locale", "en");
     }
     if (!localStorage.hasOwnProperty("offlineSales")) {
         localStorage.offlineSales = "[]";
@@ -1082,6 +1085,11 @@ App.saveLocalSale = function (sale){
     localStorage.offlineSales = JSON.stringify(offlineSales);
 };
 
+App.saveLocalPreference = function (field, value) {
+    localStorage[field] = value;
+    App[field] = value;
+};
+
 // render web register view
 App.renderWebRegister = function () {    
     $(window).on("beforeunload", function () {
@@ -1122,15 +1130,11 @@ App.renderWebRegister = function () {
     }
     muter.click(function () {
         if (App.isMuted) {
-            muter.removeClass("muted");
-            muter.addClass("unmuted");
-            localStorage.isMuted = false;
-            App.isMuted = false;
+            muter.attr("class", "unmuted");
+            App.saveLocalPreference("isMuted", false);
         } else {            
-            muter.removeClass("unmuted");
-            muter.addClass("muted");
-            localStorage.isMuted = true;
-            App.isMuted = true;
+            muter.attr("class", "muted");
+            App.saveLocalPreference("isMuted", true);
         }
     });
 
@@ -1138,6 +1142,20 @@ App.renderWebRegister = function () {
     var jDiscardSale = $("#discard-sale");
     jDiscardSale.click(function () {
         App.discardSale(false);
+    });
+    
+    // reset checkout
+    var jPrintSwitch = $("#print-switch");
+    jPrintSwitch.click(function () {
+        if (jPrintSwitch.hasClass("active")) {            
+            jPrintSwitch.attr("class", "inactive");
+            jPrintSwitch.text(App.lang.reg_print_off);
+            App.saveLocalPreference("isActivePrintReceipt", false);
+        } else {
+            jPrintSwitch.attr("class", "active");
+            jPrintSwitch.text(App.lang.reg_print_on);
+            App.saveLocalPreference("isActivePrintReceipt", true);
+        }
     });
     
     // print last receipt
@@ -1190,12 +1208,10 @@ App.renderWebRegister = function () {
         var t = $(this);
         if (t.hasClass("closed")) {
             t.removeClass("closed");
-            localStorage.isClosedSG = false;
-            App.isClosedSG = false;
+            App.saveLocalPreference("isClosedSG", false);
         } else {
             t.addClass("closed");
-            localStorage.isClosedSG = true;
-            App.isClosedSG = true;
+            App.saveLocalPreference("isClosedSG", true);
         }
         App.sg.slideToggle(App.getAnimationTime());
     });
@@ -1317,7 +1333,7 @@ App.renderWebRegister = function () {
         //var payForm = $("<div>").addClass("pay-form");
         //$("<div>").addClass("cash-pay-label").text(App.lang.pay_tendered).appendTo(payment);
         var cashInputRow = $("<div>").addClass("cash-input-row");
-        $("<div>").attr("id", "pk-toggle").addClass("open").click(function () {
+        var pkToggle = $("<div>").attr("id", "pk-toggle").addClass("open").click(function () {
             var t = $(this);
             if (t.hasClass("close")) {
                 t.removeClass("close");
@@ -1331,7 +1347,7 @@ App.renderWebRegister = function () {
             quickCash.slideToggle(App.getAnimationTime());
             quickCashLabel.slideToggle(App.getAnimationTime());
         }).appendTo(cashInputRow);
-        $("<div>").attr("id", "cash-input-clear").click(function () {
+        var cashInputClear = $("<div>").attr("id", "cash-input-clear").click(function () {
             App.jCashInput.val("");
             App.jCashInput.blur();
         }).appendTo(cashInputRow);
@@ -1351,7 +1367,13 @@ App.renderWebRegister = function () {
                     var p = t.val();
                     var correctValue = App.correctPrice(p);
                     t.val(correctValue);
-                    if (!correctValue || !/^\-?\d+\.\d{2}$/g.test(correctValue) || parseFloat(correctValue) < parseFloat(total)) {
+                    if (!correctValue || !/^\-?\d+\.\d{2}$/g.test(correctValue)) {
+                        t.addClass("invalid");
+                        payment.find("#cash-confirm").addClass("disabled");
+                        return true;
+                    } else if (parseFloat(correctValue) < parseFloat(total)) {                  
+                        App.changeAmount = (parseFloat(t.val()) - parseFloat(total)).formatMoney();
+                        cashChange.text(App.lang.pay_change + App.changeAmount + " " + App.settings.currency.symbol);
                         t.addClass("invalid");
                         payment.find("#cash-confirm").addClass("disabled");
                         return true;
@@ -1442,30 +1464,41 @@ App.renderWebRegister = function () {
                         paymentBody.addClass("done");
                         App.sales.receipts.push(resp.msg);
 
-                        payment.children().remove();
+                        quickCash.remove();
+                        quickCashLabel.remove();
+                        paymentKeyboard.remove();
+                        cashInputClear.remove();
+                        pkToggle.remove();
+                        cashInputRow.remove();
+                        //App.jCashInput.attr("disabled", true);
+                        //App.jCashInput.addClass("paid");
+                        
                         App.discardSale(true);
-                        $("<div>").addClass("pc-label").text(App.lang.pay_complete).appendTo(payment);
-                        if (App.changeAmount !== "0.00") {
+                        //$("<div>").addClass("pc-label").text(App.lang.pay_complete).appendTo(payment);
+                        /*if (App.changeAmount !== "0.00") {
                             $("<div>").addClass("pc-change").text(App.lang.pay_issue_change + App.changeAmount + " " + App.settings.currency.symbol).appendTo(payment);
-                        }
+                        }*/
                         $("<button>").attr("id", "print-receipt").text(App.lang.pay_print_receipt).click(function () {
                             window.print();
                             receiptPrinted = true;
-                        }).appendTo(payment);
-                        var emailReceipt = App.generateEmailReceipt(currentReceiptObj);
-                        emailReceipt.appendTo(payment);
+                        }).prependTo(payment);
+                        //var emailReceipt = App.generateEmailReceipt(currentReceiptObj);
+                        //emailReceipt.appendTo(payment);
                         //payment.append(paymentComplete);
-                        var donePayment = $("<button>").attr("id", "done-payment").text(App.lang.pay_done).click(function () {
-                            /*if (!receiptPrinted) {
-                                window.print();
-                            }*/
-                            
+                        /*var donePayment = $("<button>").attr("id", "done-payment").text(App.lang.pay_done).click(function () {
                             App.showOnCustomerDisplay(App.lang.customer_display_welcome);
                             App.closeCurtain();
-                            //App.jPriceInput.focus();
                         }).appendTo(payment);
-                        App.bindClickEffect(donePayment);
+                        App.bindClickEffect(donePayment);*/
+                        cashConfirm.text(App.lang.pay_done).click(function(){                            
+                            App.showOnCustomerDisplay(App.lang.customer_display_welcome);
+                            App.closeCurtain();
+                        });
                         App.lastReceipt = resp.msg;
+                        if (!App.isActivePrintReceipt) {
+                            $(".receipt").hide();
+                        }   
+                        window.print();
                     } else {
                         t.text(App.lang.pay_confirm);
                         App.closeCurtain();
@@ -1480,7 +1513,7 @@ App.renderWebRegister = function () {
                     if (App.changeAmount !== "0.00") {
                         $("<div>").addClass("pc-change").text(App.lang.pay_issue_change + App.changeAmount + " " + App.settings.currency.symbol).appendTo(payment);
                     }
-                    $("<button>").attr("id", "print-receipt").text(App.lang.pay_print_receipt_without).click(function () {
+                    $("<button>").attr("id", "print-receipt").text(App.lang.pay_print_without_fik).click(function () {
                         window.print();
                         receiptPrinted = true;
                     }).appendTo(payment);
@@ -1810,11 +1843,11 @@ App.renderSignin = function () {
     $("#lang-switch").find(".lang").click(function () {
         var t = $(this);        
         if (t.hasClass("en")) {
-            App.saveLocale("en");
+            App.saveLocalPreference("locale", "en");
         } else if (t.hasClass("cs")) {
-            App.saveLocale("cs");
+            App.saveLocalPreference("locale", "cs");
         } else if (t.hasClass("vi")) {
-            App.saveLocale("vi");
+            App.saveLocalPreference("locale", "vi");
         }
         if (!t.hasClass("active")) {
             var currentUsername = $("#username").val();
@@ -2019,10 +2052,12 @@ App.renderForgot = function () {
     };
 
     var afterPrint = function () {
-        if(App.jPrinterCopyReceipt) {
+        if(App.jPrinterCopyReceipt) { //jPrinterCopyReceipt is the payment-box div containing the receipt
             App.closeCurtain();
             App.jPrinterCopyReceipt = null;            
         }
+        console.log(App.curtain);
+        $(".receipt").show();
         //App.closeCurtain();
     };
 

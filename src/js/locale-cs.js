@@ -56,6 +56,8 @@ App.GLocalCS = {
     reg_park                   : "Zaparkovat",
     reg_discard                : "Zrušit prodej",
     reg_print_last             : "Tisk poslední",
+    reg_print_on               : "Tisk ON",
+    reg_print_off              : "Tisk OFF",
     reg_no_last_receipt        : "V historii nejsou žádné prodeje",
     reg_si_placeholder         : "Zde se zobrazují namarkované položky",
     reg_pay                    : "Zaplatit",
@@ -91,7 +93,7 @@ App.GLocalCS = {
     pay_sync_failed            : "Tržba nebyla odeslána<br>Zřejmě spadlo spojení",
     pay_issue_change           : "Vráceno ",
     pay_print_receipt          : "Vytisknout účtenku",
-    pay_print_receipt_without  : "Vytisknout účtenku bez FIK",
+    pay_print_without_fik      : "Vytisknout účtenku bez FIK",
     pay_email_receipt          : "Odeslat mail",
     pay_done                   : "Hotovo",
     
