@@ -1354,7 +1354,7 @@ App.renderWebRegister = function () {
         App.jCashInput.attr("id", "cash-input")
                 .attr("placeholder", "0.00")
                 .attr("maxlength", "9")
-                .val(total)
+                .val(parseInt(total) < 0 ? "0.00" : total)
                 .keydown(function (e) {
                     e.stopPropagation();
                     if (e.keyCode === 27) {
@@ -1455,6 +1455,9 @@ App.renderWebRegister = function () {
                 currentReceiptObj.date = new Date();
                 currentReceiptObj.items = JSON.stringify(currentReceiptObj.items);
                 currentReceiptObj.tendered = App.jCashInput.val();
+                if (parseInt(currentReceiptObj.tendered) < 0) {
+                    currentReceiptObj.tendered = 0;
+                }
                 App.showOnCustomerDisplay(App.lang.receipt_tendered + currentReceiptObj.tendered + "\n" + App.lang.receipt_change + App.changeAmount);
                 $.ajax({
                     type: "POST",
