@@ -345,13 +345,12 @@ div#logout {
     display: flex;
 }
 .form-row.control {
-    margin-bottom: 10px;
     min-height: 50px;
     flex-direction: row;
     padding: 0;
 }
 .form-row:first-child {
-    padding: 10px 0;
+    padding: 5px 0;
 }
 .plu-searcher {    
     margin: 0 5px 0 0;
@@ -1939,10 +1938,16 @@ div#taxes-label {
     }
     #sale-groups button, .qs-item button {
         height: 90px;
-        font-size: 16px;
+        font-size: 20px;
     }
     .qs-item .qs-price {
         font-size: 14px;
+    }
+    #sale-list * {
+        font-size: 16px;
+    }
+    input.si-name, #sale-list div.si-total, #sale-list input.si-quantity {
+        font-weight: bold;
     }
 }
 @media screen and (min-width: 1366px){
