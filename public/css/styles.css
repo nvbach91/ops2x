@@ -653,7 +653,9 @@ div#logout {
 #acc-settings {background-image: url('../img/ico/userwhite.svg');}
 #sta-settings {background-image: url('../img/ico/staff.svg');}
 #pos-settings {background-image: url('../img/ico/pos.svg');}
+#per-settings {background-image: url('../img/ico/peripherials.svg');}
 #plu-settings {background-image: url('../img/ico/barcode.svg');}
+#plulinks-settings {background-image: url('../img/ico/plulinks.svg');}
 #stock-settings {background-image: url('../img/ico/stock.svg');}
 #sgs-settings {background-image: url('../img/ico/sg.svg');}
 #tab-settings {background-image: url('../img/ico/tabs.svg');}

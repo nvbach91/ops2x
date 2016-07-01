@@ -395,14 +395,31 @@ App.getMultiplicationNumber = function () {
 };
 
 // adds an item(s) to the checkout
-App.addItemToCheckout = function (id, ean, name, price, group, tax, tags, desc, mult) {
+App.addItemToCheckout = function (item, mult) {
+    var id = item.id; 
+    var ean = item.ean; 
+    var name = item.name; 
+    var price = item.price; 
+    var group = item.group; 
+    var tax = item.tax; 
+    var tags = item.tags; 
+    var desc = item.desc;
     App.jPayAmount.removeClass("checked");
-    var lastItem = App.jSaleList.find(".sale-item.last");
+    /*var lastItem = App.jSaleList.find(".sale-item.last");
     if (id.toString() === lastItem.find(".si-id").text()) {
-        if (App.isInRegistrySession/*.text() === "1"*/) {
+        if (App.isInRegistrySession) {
             App.incrementLastItem(lastItem);
             App.showOnCustomerDisplay(name + "\n" + mult + " x " + price);
             return true;
+        }
+    }*/
+    var saleItems = App.jSaleList.find(".sale-item");
+    for (var i = 0; i < saleItems.size(); i++){
+        var thisSaleItem = $(saleItems[i]);
+        if (id.toString() === thisSaleItem.find(".si-id").text()) {
+                App.incrementSaleListItem(thisSaleItem, mult);
+                App.showOnCustomerDisplay(name + "\n" + mult + " x " + price);
+                return true;
         }
     }
     if (App.jSiPlaceholder.size()) {
@@ -588,9 +605,9 @@ App.showOnCustomerDisplay = function (msg) {
 };
 
 // increments the quantity of the last item in the checkout
-App.incrementLastItem = function (lastItem) {
-    var lastQuantity = lastItem.find(".si-quantity");
-    lastQuantity.val(parseInt(lastQuantity.val()) + 1);
+App.incrementSaleListItem = function (saleListItem, mult) {
+    var lastQuantity = saleListItem.find(".si-quantity");
+    lastQuantity.val(parseInt(lastQuantity.val()) + mult);
     App.recalculateTotalCost();
     App.beep(App.beeper);
 };
@@ -645,7 +662,16 @@ App.bindSaleGroups = function (sg) {
             var tax = t.attr("sg-tax");
             var tags = t.attr("sg-group");
             var desc = t.text();
-            App.addItemToCheckout(id, "", name, sign + price, group, tax, tags, desc, mult);
+            App.addItemToCheckout({
+                id: id, 
+                ean: "", 
+                name: name, 
+                price: sign + price, 
+                group: group, 
+                tax: tax, 
+                tags: tags, 
+                desc: desc
+            }, mult);
             App.isInRegistrySession = true/*.text("1")*/;
             App.justUsedScanner = false;
         });
@@ -670,7 +696,16 @@ App.bindQuickSales = function (qs) {
             var tags = t.find(".qs-tags").text();
             var desc = t.find(".qs-desc").text();
 
-            App.addItemToCheckout(id, ean, name, price, group, tax, tags, desc, mult);
+            App.addItemToCheckout({
+                id: id, 
+                ean: ean, 
+                name: name, 
+                price: price, 
+                group: group, 
+                tax: tax, 
+                tags: tags, 
+                desc: desc
+            }, mult);
 
             App.isInRegistrySession = true/*.text("1")*/;
             App.justUsedScanner = false;
@@ -1705,38 +1740,35 @@ App.translateCzeckKeys = function (s) {
     return res;
 };
 
-App.addPluItem = function (s) {
-    var t = App.jSearchBox;
-    var needle = s;
-    var i = App.catalog.articles.binaryIndexOf("ean", needle);
-    if (i >= 0) {
-        var item = App.catalog.articles[i];
+App.addPluItem = function (ean) {
+    var jSearchBox = App.jSearchBox;
+    var mainItemIndex = App.catalog.articles.binaryIndexOf("ean", ean);
+    if (mainItemIndex >= 0) {
+        var mainItem = App.catalog.articles[mainItemIndex];
         var mult = App.getMultiplicationNumber();
-        App.addItemToCheckout(
-                item.id,
-                item.ean,
-                item.name,
-                item.price,
-                item.group,
-                item.tax,
-                item.tags,
-                item.desc,
-                // multiplication number
-                mult
-                );
-        t.removeClass("not-found");
-        t.attr("placeholder", "PLU");
+        App.addItemToCheckout(mainItem, mult);
+        jSearchBox.removeClass("not-found");
+        jSearchBox.attr("placeholder", "PLU");
 
         App.isInRegistrySession = false/*.text("0")*/;
         App.jPriceInput.blur();
-        App.jPriceInput.val(item.price);
+        App.jPriceInput.val(mainItem.price);
+        var linkIndex = App.pluLinks.binaryIndexOf("main", ean);
+        if (linkIndex >= 0) {
+            var sideEAN = App.pluLinks[linkIndex].side;
+            var sideItemIndex = App.catalog.articles.binaryIndexOf("ean", sideEAN);
+            if (sideItemIndex >= 0) {
+                var sideItem = App.catalog.articles[sideItemIndex];
+                App.addItemToCheckout(sideItem, mult);
+            }
+        }
     } else {
         //t.addClass("not-found");
-        t.attr("placeholder", App.lang.misc_plu_not_found);
-        App.showWarning(App.lang.misc_plu_not_found + ": <strong>" + needle + "</strong>");
+        jSearchBox.attr("placeholder", App.lang.misc_plu_not_found);
+        App.showWarning(App.lang.misc_plu_not_found + ": <strong>" + ean + "</strong>");
         App.beep(App.longBeeper);
     }
-    t.val("");
+    jSearchBox.val("");
 };
 
 //
@@ -2158,6 +2190,7 @@ App.createControlPanel = function () {
                 <div class="cp-item" id="pos-settings">' + App.lang.settings_pos + '</div>\
                 <div class="cp-item" id="per-settings">' + App.lang.settings_per + '</div>\
                 <div class="cp-item" id="plu-settings">' + App.lang.settings_plu + '</div>\
+                <div class="cp-item" id="plulinks-settings">' + App.lang.settings_plu_links + '</div>\
                 <div class="cp-item" id="stock-settings">' + App.lang.settings_stock + '</div>\
                 <div class="cp-item" id="sgs-settings">' + App.lang.settings_sg + '</div>\
                 <div class="cp-item" id="tab-settings">' + App.lang.settings_tabs + '</div>\
@@ -2196,6 +2229,9 @@ App.bindControlPanel = function () {
                 break;
             case "plu-settings":
                 t.click(App.renderPLUSettings);
+                break;
+            case "plulinks-settings":
+                t.click(App.renderPluLinksSettings);
                 break;
             case "stock-settings":
                 t.click(App.renderStockSettings);
@@ -2374,6 +2410,11 @@ App.requestModifyItem = function (url, data, button) {
                         newArticles[i].id = i;
                     }
                     App.renderQuickSales();
+                    break;
+                case "/mod/plulinks" :
+                    App.pluLinks = resp.msg;                    
+                    var modItem = button.parents().eq(2);
+                    modItem.find("input[placeholder='MAIN']").prop("disabled", true);
                     break;
                 case "/mod/updatestock" :              
                     var updatedArticle = resp.msg;      
@@ -2572,6 +2613,20 @@ App.generateModItemFormDOM = function (type, item) {
                     dom += '<option' + (App.receipt.width === 80 ? ' selected' : '') + '>80</option>';
                     dom += '</select>';
                 
+                } else if(keys[i] === "main") { // if is plu link main plu ean
+                // ATTENTION!!!    
+                    var isDisabledpluLinkMain = false;
+                    if (App.pluLinks.binaryIndexOf("main", item[keys[i]].value) >= 0) {
+                        isDisabledpluLinkMain = true;
+                    }
+                    dom += '<input class="" \
+                                   type="text" \
+                                   pattern="' + item[keys[i]].valid.toString().replace(/[\/^$]/g, "") + '" \
+                                   title="' + item[keys[i]].title + '" \
+                                   placeholder="' + keys[i].toUpperCase() + '" \
+                                   value="' + item[keys[i]].value + '"' 
+                                   + (isDisabledpluLinkMain ? ' disabled' : '') + '>';
+                
                 } else {
                 var current_EAN = "";
                 if (keys[i] === "ean" && isQS) {
@@ -2763,6 +2818,39 @@ App.bindModSettings = function (modFormContainer, modifyUrl) {
             });
             modifier.find("button.mi-remove").click(function () {
                 submitted = App.prepareSubmit(App.getMiTabsUpdateData, $(this), "remove");
+            });
+            break;
+        case "/mod/plulinks":           
+            modFormContainer.find(".adder").click(function () {
+                var modItem = $(App.generateModItemFormDOM("plulinks", {
+                    main: {title: "Main PLU EAN code", valid: /^\d{1,13}$/, value: ""},
+                    side: {title: "Side PLU EAN code", valid: /^\d{1,13}$/, value: ""}
+                }));
+                modItem.submit(function (e) {
+                    e.preventDefault();
+                    var data = submitted.dataFunction(submitted.requestType, submitted.button);
+                    App.requestModifyItem(modifyUrl, data, submitted.button);
+                });
+                modItem.find("input").change(function () {
+                    App.resetRequestButtons(modItem);
+                });
+                modItem.find(".mi-header").click(function () {
+                    $(this).next(".mi-body").slideToggle(App.getAnimationTime());
+                });
+                modItem.find("button.mi-save").click(function () {
+                    submitted = App.prepareSubmit(App.getMiPluLinksUpdateData, $(this), "save");
+                }).click();
+                modItem.find("button.mi-remove").click(function () {
+                    submitted = App.prepareSubmit(App.getMiPluLinksUpdateData, $(this), "remove");
+                });
+                modItem.hide().appendTo(modifier).slideDown(App.getAnimationTime());
+                
+            });
+            modifier.find("button.mi-save").click(function () {
+                submitted = App.prepareSubmit(App.getMiPluLinksUpdateData, $(this), "save");
+            });
+            modifier.find("button.mi-remove").click(function () {
+                submitted = App.prepareSubmit(App.getMiPluLinksUpdateData, $(this), "remove");
             });
             break;
         case "/mod/quicksales":
@@ -3728,6 +3816,44 @@ App.getMiTabsUpdateData = function (requestType, button) {
         requestType: requestType,
         number    : miBody.find("input[placeholder='NUMBER']").val(),
         name      : miBody.find("input[placeholder='NAME']").val()
+    };
+};
+
+//------------------------- RENDER PLU LINK SETTINGS -------------------------//
+App.renderPluLinksSettings = function () {
+    var links = App.pluLinks;
+    var pluLinksDOM =
+            '<div class="form-header">' + App.lang.settings_plu_links + '</div>\
+             <div class="mod-form">\
+                <div class="form-row">\
+                   <div class="form-label">' + App.lang.form_label_plu_links + '</div>\
+                   <div class="adder"></div>\
+                </div>\
+                <div class="mi-info">' + App.lang.info_plu_links + '</div>\
+                <div class="modifier">';
+    for (var i = 0; i < links.length; i++) {
+        var link = links[i];
+        pluLinksDOM += App.generateModItemFormDOM("plulinks", {
+            main: {title: "Main PLU EAN code", valid: /^\d{1,13}$/, value: link.main},
+            side: {title: "Side PLU EAN code", valid: /^\d{1,13}$/, value: link.side}
+        });
+    }
+    pluLinksDOM += '</div>\
+             </div>';
+    App.cpBody.html(App.createCenterBox(pluLinksDOM));
+    App.cpBody.find(".center-box").prepend(App.createGoBack());
+
+    var modFormContainer = App.cpBody.find(".mod-form");
+    var modifyUrl = "/mod/plulinks";
+    App.bindModSettings(modFormContainer, modifyUrl);
+};
+
+App.getMiPluLinksUpdateData = function (requestType, button) {
+    var miBody = button.parents().eq(1);
+    return {
+        requestType: requestType,
+        main    : miBody.find("input[placeholder='MAIN']").val(),
+        side    : miBody.find("input[placeholder='SIDE']").val()
     };
 };
 

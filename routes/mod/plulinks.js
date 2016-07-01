@@ -30,7 +30,7 @@ router.post('/plulinks', function (req, res) {
         res.json({success: false, msg: 'Side PLU EAN cannot be the same as Main PLU EAN'});
     } else {
         var query = {userId: req.user._id};
-        var options = {userId: 0, articles: 0}; // don't exclude _id or __v or else it can't be .saved()
+        var options = {userId: 0, articles: 0, 'links._id': 0}; // don't exclude _id or __v or else it can't be .saved()
         Catalogs.findOne(query, options).exec().then(function (catalog) {
             var links = catalog.links; // this is now always sorted by main EAN even after insert
             var mainLinkIndex = utils.binaryIndexOf(links, 'main', req.body.main);
