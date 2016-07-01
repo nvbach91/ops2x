@@ -998,7 +998,7 @@ input.si-name {
     padding: 5px;
     font-size: 10px;
 }
-.last {
+.sale-item.last {
     background-color: #ACFF89;
 }
 #si-placeholder > div {

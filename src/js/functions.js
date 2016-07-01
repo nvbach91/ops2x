@@ -414,20 +414,40 @@ App.addItemToCheckout = function (item, mult) {
         }
     }*/
     var saleItems = App.jSaleList.find(".sale-item");
-    for (var i = 0; i < saleItems.size(); i++){
-        var thisSaleItem = $(saleItems[i]);
-        if (id.toString() === thisSaleItem.find(".si-id").text()) {
+    if (ean === "SALE-GROUP") {
+        var lastSaleItem = saleItems.last();
+        if (id.toString() === lastSaleItem.find(".si-id").text()
+                && price === lastSaleItem.find(".si-price").text()) {            
+            App.incrementSaleListItem(lastSaleItem, mult);
+            App.jSaleList.children().removeClass("last");
+            lastSaleItem.addClass("last");
+            App.showOnCustomerDisplay(name + "\n" + mult + " x " + price);
+            return true;
+        }
+    } else {
+        for (var i = 0; i < saleItems.size(); i++) {
+            var thisSaleItem = $(saleItems[i]);
+            if (ean === thisSaleItem.find(".si-ean").text()) {
                 App.incrementSaleListItem(thisSaleItem, mult);
+                App.jSaleList.children().removeClass("last");
+                thisSaleItem.addClass("last");
                 App.showOnCustomerDisplay(name + "\n" + mult + " x " + price);
                 return true;
+            } else if (id.toString() === thisSaleItem.find(".si-id").text()) {
+                if (App.isInRegistrySession) {
+                    App.incrementSaleListItem(thisSaleItem, mult);
+                    App.jSaleList.children().removeClass("last");
+                    thisSaleItem.addClass("last");
+                    App.showOnCustomerDisplay(name + "\n" + mult + " x " + price);
+                    return true;
+                }
+            }
         }
     }
     if (App.jSiPlaceholder.size()) {
         App.jSiPlaceholder.addClass("hidden");
     }
-    if (App.jSaleList.children().size() > 0) {
-        App.jSaleList.children().eq(App.jSaleList.children().size() - 1).removeClass("last");
-    }
+    App.jSaleList.children().removeClass("last");    
     // creating sale item and bind events
     var saleItem = $("<li>").addClass("sale-item last");
     var siMain = $("<div>").addClass("sale-item-main");
@@ -573,9 +593,7 @@ App.addItemToCheckout = function (item, mult) {
     siExtension.appendTo(saleItem);
     saleItem.appendTo(App.jSaleList);
 
-    App.jSaleList.animate({
-        scrollTop: App.jSaleList[0].scrollHeight
-    }, App.getAnimationTime());
+    App.scrollToEndSaleList();
 
     App.recalculateTotalCost();
     App.showOnCustomerDisplay(name + "\n" + mult + " x " + price);
@@ -610,6 +628,8 @@ App.incrementSaleListItem = function (saleListItem, mult) {
     lastQuantity.val(parseInt(lastQuantity.val()) + mult);
     App.recalculateTotalCost();
     App.beep(App.beeper);
+    // scroll to incremented item
+    App.jSaleList.scrollTop(saleListItem.offset().top - App.jSaleList.offset().top + App.jSaleList.scrollTop());
 };
 
 // binds salegroups button events
@@ -664,7 +684,7 @@ App.bindSaleGroups = function (sg) {
             var desc = t.text();
             App.addItemToCheckout({
                 id: id, 
-                ean: "", 
+                ean: "SALE-GROUP", 
                 name: name, 
                 price: sign + price, 
                 group: group, 
@@ -680,18 +700,17 @@ App.bindSaleGroups = function (sg) {
 
 // binds quicksales button events
 App.bindQuickSales = function (qs) {
-    // bind quick sale buttons
     qs.find(".qs-item").each(function () {
         var t = $(this);
         App.bindClickEffect(t.find("button"));
         t.click(function () {
-            var price = t.find(".qs-price").text().replace(/[^\-\d\.]/g, "");
+            /*var price = t.find(".qs-price").text().replace(/[^\-\d\.]/g, "");
             var mult = App.getMultiplicationNumber();
             App.jPriceInput.val(price);
             var name = t.find("button").text();//
-            var id = t.find(".qs-id").text();
+            var id = t.find(".qs-id").text();*/
             var ean = t.find(".qs-ean").text();
-            var tax = t.find(".qs-tax").text();
+            /*var tax = t.find(".qs-tax").text();
             var group = t.find(".qs-group").text();
             var tags = t.find(".qs-tags").text();
             var desc = t.find(".qs-desc").text();
@@ -706,7 +725,8 @@ App.bindQuickSales = function (qs) {
                 tags: tags, 
                 desc: desc
             }, mult);
-
+*/
+            App.addPluItem(ean);
             App.isInRegistrySession = true/*.text("1")*/;
             App.justUsedScanner = false;
         });
@@ -853,7 +873,7 @@ App.bindKeyboard = function () {
             }
             var id = t.attr("id");
             var isPluActive = btnPLU.hasClass("activePLU");
-            var activeInput = isPluActive ? App.jSearchBox : App.jPriceInput;
+            var activeInput = isPluActive ? App.jPluSearchBox : App.jPriceInput;
             var inputMaxlength = isPluActive ? 13 : 9;
             var p = activeInput.val();
             switch (id) {
@@ -864,7 +884,7 @@ App.bindKeyboard = function () {
                         App.jPriceInput.hide();
                         btnMul.text("OK").addClass("activePLU");
                         activeInput.val("");
-                        activeInput = App.jSearchBox;
+                        activeInput = App.jPluSearchBox;
                         //activeInput.focus();
                     } else { // turn off PLU input and turn on Price input
                         btnPLU.removeClass("activePLU");
@@ -877,7 +897,7 @@ App.bindKeyboard = function () {
                     break;
                 case "btnm": //multiplication symbol or confirm PLU
                     if (isPluActive) {
-                        App.jSearchBox.trigger(App.simulateEnterKeyup());
+                        App.jPluSearchBox.trigger(App.simulateEnterKeyup());
                     } else {
                         if (p.length > 0 && p.length <= 3 && p.indexOf("*") < 0 && p !== "-") {
                             activeInput.val(p + "*");
@@ -1063,15 +1083,14 @@ App.renderQuickSales = function () {
             var item = articles[articles.binaryIndexOf("ean", qs.ean)];
             if (item) {
                 tabsContent +=
-                        '<div class="qs-item">\
-                        <button style="background-color:#' + qs.bg + '">' + item.name + '</button>\
-                        <div class="qs-id">qs-t' + (i + 1) + "-" + j + '</div>\
-                        <div class="qs-ean">' + item.ean + '</div>\
-                        <div class="qs-price">' + item.price + ' ' + App.settings.currency.symbol + '</div>\
-                        <div class="qs-group">' + item.group + '</div>\
-                        <div class="qs-tax">' + item.tax + '</div>\
-                    </div>'
-                        ;
+                        '<div class="qs-item">' +
+                        '<button style="background-color:#' + qs.bg + '">' + item.name + '</button>' +
+                        /*'<div class="qs-id">qs-t' + (i + 1) + "-" + j + '</div>\*/
+                        '<div class="qs-ean">' + item.ean + '</div>' +
+                        '<div class="qs-price">' + item.price + ' ' + App.settings.currency.symbol + '</div>' +
+                        /*<div class="qs-group">' + item.group + '</div>\
+                        <div class="qs-tax">' + item.tax + '</div>\*/
+                    '</div>';
             }
         }
         tabsContent += '</div>';
@@ -1166,6 +1185,12 @@ App.saveLocalSale = function (sale){
 App.saveLocalPreference = function (field, value) {
     localStorage[field] = value;
     App[field] = value;
+};
+
+App.scrollToEndSaleList = function () {
+    App.jSaleList.animate({
+        scrollTop: App.jSaleList[0].scrollHeight
+    }, App.getAnimationTime());
 };
 
 // render web register view
@@ -1325,9 +1350,7 @@ App.renderWebRegister = function () {
             if (App.keyboard.is(":visible")){
                 App.keyboard.css("display", "flex");
             }
-            App.jSaleList.animate({
-                scrollTop: App.jSaleList[0].scrollHeight
-            }, App.getAnimationTime());
+            App.scrollToEndSaleList();
         });
         
     });
@@ -1645,12 +1668,12 @@ App.renderWebRegister = function () {
         App.beep(App.beeper);
     });
 
-    App.jSearchBox = App.jLiveSearch.find("#search");
-    App.jSearchBox.keyup(function (e) {
+    App.jPluSearchBox = App.jLiveSearch.find("#search");
+    App.jPluSearchBox.keyup(function (e) {
         if (e.keyCode === App.key.ENTER) {
-            App.addPluItem(App.jSearchBox.val());
+            App.addPluItem(App.jPluSearchBox.val());
         } if (e.keyCode === App.key.ESC) {
-            App.jSearchBox.blur();
+            App.jPluSearchBox.blur();
         }
     }).keydown(function (e) {
         e.stopPropagation();
@@ -1669,7 +1692,7 @@ App.renderWebRegister = function () {
             App.showWarning(App.lang.misc_wrong_keyboard);
         }*/
         clearTimeout(App._scannerTimingOut);
-        App.jSearchBox.blur();
+        App.jPluSearchBox.blur();
         App.justUsedScanner = true;
         App._scannerTimingOut = setTimeout(function () {
             App.justUsedScanner = false;
@@ -1741,14 +1764,14 @@ App.translateCzeckKeys = function (s) {
 };
 
 App.addPluItem = function (ean) {
-    var jSearchBox = App.jSearchBox;
+    var jPluSearchBox = App.jPluSearchBox;
     var mainItemIndex = App.catalog.articles.binaryIndexOf("ean", ean);
     if (mainItemIndex >= 0) {
         var mainItem = App.catalog.articles[mainItemIndex];
         var mult = App.getMultiplicationNumber();
         App.addItemToCheckout(mainItem, mult);
-        jSearchBox.removeClass("not-found");
-        jSearchBox.attr("placeholder", "PLU");
+        jPluSearchBox.removeClass("not-found");
+        jPluSearchBox.attr("placeholder", "PLU");
 
         App.isInRegistrySession = false/*.text("0")*/;
         App.jPriceInput.blur();
@@ -1764,11 +1787,11 @@ App.addPluItem = function (ean) {
         }
     } else {
         //t.addClass("not-found");
-        jSearchBox.attr("placeholder", App.lang.misc_plu_not_found);
+        jPluSearchBox.attr("placeholder", App.lang.misc_plu_not_found);
         App.showWarning(App.lang.misc_plu_not_found + ": <strong>" + ean + "</strong>");
         App.beep(App.longBeeper);
     }
-    jSearchBox.val("");
+    jPluSearchBox.val("");
 };
 
 //
@@ -2479,12 +2502,12 @@ App.requestModifyItem = function (url, data, button) {
         } else {
             loader.removeClass("loading");
             button.addClass("fail");
-            span.html(requestFailMsg + "<br>" + App.lang.misc_reason + ": " + resp.msg);
+            span.html(requestFailMsg + "<br>" + App.lang.misc_reason + resp.msg);
         }
     }).fail(function (resp) {
         loader.removeClass("loading");
         button.addClass("fail");
-        span.html(requestFailMsg + "<br>" + App.lang.misc_status + ": " + resp.status + " " + resp.responseText);
+        span.html(requestFailMsg + "<br>" + App.lang.misc_status + resp.status + " " + resp.responseText);
         if (resp.status === 0) {
             App.closeCurtain();
             App.showWarning(App.lang.misc_network_error);
