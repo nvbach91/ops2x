@@ -27,8 +27,12 @@ var utils = {
         for (var i = 0; i < validKeys.length; i++) {
             if (validKeys[i] !== testKeys[i]) {
                 return false;
-            } else if (!validator[validKeys[i]].test(request[testKeys[i]])) {
-                return false;
+            } else {
+                if (typeof validator[validKeys[i]] === 'function') { // if the validator field requires a fuction to validate
+                    return validator[validKeys[i]](request[validKeys[i]]);
+                } else if (!validator[validKeys[i]].test(request[testKeys[i]])) {
+                    return false;
+                }
             }
         }
         return true;

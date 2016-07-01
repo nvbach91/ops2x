@@ -570,8 +570,8 @@ App.showOnCustomerDisplay = function (msg) {
     var res = [];
     for (var i = 0; i < lines.length; i++) {
         var line = lines[i];
-        if (line.length > 20) {
-            line = line.slice(0, 20);
+        if (line.length > 19) { // for customer displays with 2 lines of 20 characters each
+            line = line.slice(0, 19);
         }
         res.push(line);
     }
@@ -964,8 +964,8 @@ App.init = function () {
         if (e.keyCode === App.key.ESC) {
             App.closeCurtain();
         } else if (e.keyCode === App.key.ENTER) {
-            if (App.jControlPanel && !App.jControlPanel.hasClass("visible")) {
-                if (!App.curtain && App.jPriceInput && !App.justUsedScanner) {
+            if (App.jControlPanel && !App.jControlPanel.hasClass("visible")) { // if control panel is not active
+                if (!App.curtain && App.jPriceInput /*&& !App.justUsedScanner*/) {
                     App.jPriceInput.focus();
                 } else if (App.jCashInput) {
                     App.jCashInput.focus();
@@ -1861,6 +1861,7 @@ App.initDashBoard = function () {
             }),
             $.getJSON("/api/catalog", function (resp) {
                 App.catalog = App.convertCsvCatalogToJSON(resp.csv);
+                App.pluLinks = resp.links;
             })
             ).then(function () {
         App.renderDashBoard();

@@ -11,6 +11,12 @@ var Catalogs = new Schema({
             group: String,
             tax: Number
         }
+    ],
+    links: [ // links a side PLU to a main PLU to register together, non cyclical
+        {
+            main: String,
+            side: String
+        }
     ]
 });
 
