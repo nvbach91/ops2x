@@ -617,7 +617,7 @@ App.showOnCustomerDisplay = function (msg) {
             url: "http://localhost:2112/customerdisplay",
             dataType: "jsonp", jsonp: "callback", data: {msg: message},
             success: function (resp) {
-                console.log(resp);
+                console.log("Customer display: " + resp.msg);
             }
         });
     }
@@ -1930,7 +1930,6 @@ App.signOut = function () {
 App.convertCsvCatalogToJSON = function (csv) {
     var lines = csv.split("\n");
     var articles = [];
-    //console.log(lines[0]);
     for (var i = 1; i < lines.length; i++) {
         var line = lines[i];
         var fields = line.split(";");
