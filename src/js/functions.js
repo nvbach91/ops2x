@@ -1652,7 +1652,7 @@ App.renderWebRegister = function () {
                     } else {
                         t.text(App.lang.pay_confirm);
                         App.closeCurtain();
-                        App.showWarning("Server refused to sync. " + resp.msg);
+                        App.showWarning(App.lang.misc_server_refused_to_sync + resp.msg);
                     }
                 }).fail(function (resp) {
                     paymentBody.addClass("failed");
@@ -2200,7 +2200,7 @@ App.renderForgot = function () {
                 App.showWarning(App.lang.forgot_fail(resp.msg));
             }
         }).fail(function (resp) {
-            var msg = "Request failed. " + resp.status;
+            var msg = App.lang.misc_request_failed + resp.status;
             if (resp.status === 0) {
                 msg = App.lang.misc_network_error;
             }
@@ -2739,14 +2739,27 @@ App.bindModSettings = function (modFormContainer, modifyUrl) {
     var submitted = null;
     modFormContainer.find("form.mod-item").submit(function (e) {
         e.preventDefault();
-        if (submitted.dataFunction === App.getMiQuickSalesUpdateData
-                && App.catalog.articles.binaryIndexOf("ean", submitted.button.parents().eq(1).find("input[placeholder='EAN']").val()) === -1
-                && submitted.requestType === "save") {
-                App.showWarning(App.lang.misc_plu_not_found);
-        } else {
-            var data = submitted.dataFunction(submitted.requestType, submitted.button);
-            App.requestModifyItem(modifyUrl, data, submitted.button);
+        if (submitted.requestType === "save") {
+            if (submitted.dataFunction === App.getMiQuickSalesUpdateData) {
+                var theEan = submitted.button.parents().eq(1).find("input[placeholder='EAN']").val();
+                if (App.catalog.articles.binaryIndexOf("ean", theEan) === -1) {
+                    App.showWarning(App.lang.misc_plu_not_found);
+                    return false;
+                }
+            } else if (submitted.dataFunction === App.getMiPluLinksUpdateData) {
+                var mainEAN = submitted.button.parents().eq(1).find("input[placeholder='MAIN']").val();
+                var sideEAN = submitted.button.parents().eq(1).find("input[placeholder='SIDE']").val();
+                if (App.catalog.articles.binaryIndexOf("ean", mainEAN) === -1) {
+                    App.showWarning(App.lang.misc_plu_not_found + ": " + mainEAN);
+                    return false;
+                } else if (App.catalog.articles.binaryIndexOf("ean", sideEAN) === -1) {
+                    App.showWarning(App.lang.misc_plu_not_found + ": " + sideEAN);
+                    return false;
+                }
+            }
         }
+        var data = submitted.dataFunction(submitted.requestType, submitted.button);
+        App.requestModifyItem(modifyUrl, data, submitted.button);
     });
     var modifier = modFormContainer.find(".modifier");
     modifier.find(".mi-header").each(function () {
@@ -2892,8 +2905,19 @@ App.bindModSettings = function (modFormContainer, modifyUrl) {
                 }));
                 modItem.submit(function (e) {
                     e.preventDefault();
+                    if (submitted.requestType === "save") {
+                        var mainEAN = submitted.button.parents().eq(1).find("input[placeholder='MAIN']").val();
+                        var sideEAN = submitted.button.parents().eq(1).find("input[placeholder='SIDE']").val();
+                        if (App.catalog.articles.binaryIndexOf("ean", mainEAN) === -1) {                        
+                            App.showWarning(App.lang.misc_plu_not_found + ": " + mainEAN);
+                            return false;
+                        } else if (App.catalog.articles.binaryIndexOf("ean", sideEAN) === -1) {
+                            App.showWarning(App.lang.misc_plu_not_found + ": " + sideEAN);
+                            return false;
+                        }
+                    }
                     var data = submitted.dataFunction(submitted.requestType, submitted.button);
-                    App.requestModifyItem(modifyUrl, data, submitted.button);
+                    App.requestModifyItem(modifyUrl, data, submitted.button);                    
                 });
                 modItem.find("input").change(function () {
                     App.resetRequestButtons(modItem);
@@ -2929,7 +2953,7 @@ App.bindModSettings = function (modFormContainer, modifyUrl) {
                     if (submitted.dataFunction === App.getMiQuickSalesUpdateData
                             && App.catalog.articles.binaryIndexOf("ean", submitted.button.parents().eq(1).find("input[placeholder='EAN']").val()) === -1
                             && submitted.requestType === "save") {
-                        App.showWarning("EAN not found in catalog");
+                        App.showWarning(App.lang.misc_plu_not_found);
                     } else {
                         var data = submitted.dataFunction(submitted.requestType, submitted.button);
                         App.requestModifyItem(modifyUrl, data, submitted.button);

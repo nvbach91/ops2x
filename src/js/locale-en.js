@@ -178,6 +178,8 @@ App.GLocalEN = {
     
     misc_incorrect_ep          : "Incorrect username or password",
     misc_network_error         : "Network error. Please check your connection",
+    misc_server_refused_to_sync: "Server refused to sync: ",
+    misc_request_failed        : "Request failed: ",
     misc_reason                : "Reason: ",
     misc_status                : "Status: ",
     misc_password_changed      : "Password changed",

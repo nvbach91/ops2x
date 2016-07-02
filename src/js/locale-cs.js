@@ -178,6 +178,8 @@ App.GLocalCS = {
     
     misc_incorrect_ep          : "Nesprávné uživatelské jméno nebo heslo",
     misc_network_error         : "Chyba sítě. Zkontrolujte internetové připojení",    
+    misc_server_refused_to_sync: "Server odmítnul požadavek: ",
+    misc_request_failed        : "Request failed: ",
     misc_reason                : "Příčina: ",
     misc_status                : "Status: ",
     misc_password_changed      : "Heslo změněno",
