@@ -1,12 +1,11 @@
 # Project home #
-* I recommend you go to the git repository for because of updates and stuff
 ```
 https://nvbach91@bitbucket.org/nvbach91/ops2x.git
 ```
 
 # Latest updates #
-* Preview version is now online. [https://ops2x-62687.onmodulus.net/](https://ops2x-62687.onmodulus.net/)
-* https server is available with self signed key for testing, see Run Project for details
+```
+```
 
 # Quick start #
 ```
@@ -14,7 +13,8 @@ $ git clone https://nvbach91@bitbucket.org/nvbach91/ops2x.git
 $ cd ./ops2x  # navigate to project root
 $ npm install # install project dependencies
 $ mongod      # open a new CMD and start mongod on localhost:27017
-$ npm run dev # this will fire up the project
+$ npm run dev # this will fire up the project.
+              # gulp and nodemon must be installed globally with npm install -g gulp nodemon, see Build system setup
 ```
 
 # README #
@@ -41,33 +41,36 @@ $ npm -v
 * install from https://www.mongodb.org/downloads
 * check your installation with 
 ```
-$ mongod --version
+$ mongod --version # you might want to add MongoDB's bin directory to you system's PATH
 ```
-\* you might want to add MongoDB's bin to you system's PATH
 
-* Instead of installing a local MongoDB you can connect to a remote server. By default, the project assumes you choose to use a local MongoDB instance. Chnage file ``~/ops2x/config.js`` accordingly
+* Instead of installing a local MongoDB you can connect to a remote server. 
+* By default, the project assumes you choose to use a local MongoDB instance.
+* You can change the configuration in file ``~/ops2x/config.js``
 
 * navigate to project folder to continue
 ```
 $ cd ~/ops2x
 ```
 
-### Build system ###
-* install global packages to NodeJS
+### Build system setup ###
+* install these npm packages globally and only once
 ```
 $ npm install -g gulp nodemon
-
 ```
+
 * install local node module packages for our project
 ```
 $ npm install
 ```
 
-* Note: If you see red problems and warnings regarding socket.io (and freak out because you're not familiar with NodeJS), the project should still work and can be started, but if you want a clean installation with no errors and warnings, check [this solution](https://github.com/npm/npm/issues/9563#issuecomment-142666465)
+* Note: If you see red warnings regarding socket.io (don't freak out because you're not familiar with NodeJS) the project should still work and can be started, but if you want a clean installation with no errors and warnings, check [this solution](https://github.com/npm/npm/issues/9563#issuecomment-142666465)
+* with Node.js version 6.2.2 and later, there should be no errors
 
 ### Mail service ###
-* create a gmail account and enable less secure apps
+* create a gmail account and enable less secure apps in gmail
 * in file ``config.js`` replace it with your gmail account and password
+* or you can leave it as-is and use my gmail account
 
 ### Database ###
 * you can skip this part if you already have a MongoDB running somewhere
@@ -76,14 +79,19 @@ $ npm install
 $ mkdir C:/data/db/
 $ mongod
 ```
-* OR you can also specify mongod path with
+* OR you can also specify a custom mongod path with
 ```
 $ mongod --dbpath C:/path/to/your/database/directory/
 ```
 * open mongo shell and create a database with the same name as in your config file
 ```
 $ mongo
-> use testx
+> use dev
+```
+* now you don't need to populate your database with data to start using, but for demonstration you can do
+```
+$ mongorestore --db dev dump/dev # note that this command restores a sample database called dev from the dump directory
+                                 # if your database path is other than C:/data/db, you also need to use --dbpath C:/path/to/your/database/directory
 ```
 
 ## Run project ##
@@ -105,18 +113,18 @@ rs
 
 * BrowserSync is awesome! Open multiple browsers, i.e. on you phone, table and desktop and navigate to the app and watch BrowserSync show off!
 
-## Deployment on modulus ##
-* go grab an account on [Modulus](https://modulus.io)
+## Deployment (on modulus hosting) ##
+* go grab a free account on [Modulus](https://modulus.io)
 * create a Node.js project and a MongoDB instance in your account
 * install modulus with npm, follow the instructions on modulus
 ```
 npm install -g modulus
 ```
 * change the host and mongo uri in the ``config.js`` file
-* type ``modulus login`` and provide credentials
+* type ``modulus login`` and provide modulus account credentials
 * navigate to project root folder and type 
 ```
-npm run build   #concat and build application scripts
+npm run build   #concat and build application scripts for deployment
 modulus deploy  #deploy to modulus
 ```
 
@@ -136,25 +144,25 @@ modulus deploy  #deploy to modulus
 ## User guide ##
 ### Printer setup ###
 * buy a thermal receipt printer and install its driver, buy a 80mm width type
-* open you web browser (try to use Chrome lads)
+* open you web browser (best Chrome)
 * CTRL+P to open print dialog and set printer to the thermal printer
 * change margins to none and you're good to go
 
 ### Barcode scanner setup ###
-* plug you scanner to a free USB port
+* plug you bar code scanner to a free USB port and that's it
 
 ### Accounts ###
-* register an account
+* register an account in the web app
 * login with that account
-* open cash register with "Admin" and PIN "0000"
 * go to settings and create a new employee
+* if more than one person work with the POS then employees will be required to login
 
 ### Sale ###
-* use you keyboard to enter prices, you can tap Numpad Enter to call price input, then use sale group buttons to add it to checkout
-* use virtual keyboard to enter prices, then use sale group buttons to add it to checkout
-* use quick sale buttons to instantly register a common item
+* use you keyboard to enter prices, you can use Numpad to use price input directly, then use sale group buttons to add it to checkout
+* use virtual keyboard (touch screen) to enter prices, then use sale group buttons to add it to checkout
+* use quick sale buttons to instantly register a common item in quick sale tabs
 * use barcode scanner to instantly register an item from the catalog
-* once done registering click on Pay and then enter the amount tendered and click DONE or click Print first then click DONE
+* once done registering click on Pay (or hit SPACE) and then enter the amount tendered and click DONE (or hit SPACE) or click Print first then click DONE
 
 ### Catalog ###
 * go to settings and open Edit PLU
@@ -162,12 +170,23 @@ modulus deploy  #deploy to modulus
 * you can use the search button to look for codes, existing codes are highlighted blue, and non-existing codes are highlighted green
 
 ### Checkout ###
-* you can manipulate the checkout by clicking on each item to change their name, price and quantity
+* you can change the registered items in the checkout by clicking on each item to change their name, price and quantity
 
 ### Quick Sale Buttons ###
-* go to settings quick sale buttons and set your quick sale tabs up
-* each item is referenced from the catalog, so you must use items you have already created in the catalog
+* go to settings quick sale buttons and create or delete your quick sale tabs 
+* each quick sale item is referenced from the catalog, so you must use items you have already created in the catalog
 * you can have max 5 tabs
 
 ### Daily stats ###
-* this is not the best but you can see your daily sale takings aggregates 
+* this is not the best but you can see your daily sale takings aggregates
+
+### Warehouse management ###
+* this is still immature, only shows articles' balance in the warehouse
+
+### Customer display setup ###
+* the manual is on our development google drive
+
+### Thermal Receipt Printer setup ###
+* the manual is on our development google drive
+
+
