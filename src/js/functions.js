@@ -871,18 +871,18 @@ App.simulateEnterKeyup = function () {
 // binds events to virtual keyboard
 App.bindKeyboard = function () {
     App.keyboardKeys = {
-        _0: $("#btn0"),
-        _1: $("#btn1"),
-        _2: $("#btn2"),
-        _3: $("#btn3"),
-        _4: $("#btn4"),
-        _5: $("#btn5"),
-        _6: $("#btn6"),
-        _7: $("#btn7"),
-        _8: $("#btn8"),
-        _9: $("#btn9"),
+        btn0: $("#btn0"),
+        btn1: $("#btn1"),
+        btn2: $("#btn2"),
+        btn3: $("#btn3"),
+        btn4: $("#btn4"),
+        btn5: $("#btn5"),
+        btn6: $("#btn6"),
+        btn7: $("#btn7"),
+        btn8: $("#btn8"),
+        btn9: $("#btn9"),
         dot: $("#btndot"),
-        c: $("#btnc"),
+        clear: $("#btnc"),
         neg: $("#btnn"),
         mul: $("#btnm"),
         plu: $("#btnp"),
@@ -957,7 +957,10 @@ App.bindKeyboard = function () {
                     }
                     break;
                 default: //numbers
-                    if ((p + t.text()).length <= inputMaxlength) {
+                    if (activeInput.attr("id") === "cash-input" && /^\d+\.\d{2}$/.test(p)) {
+                        activeInput.val("");
+                        activeInput.val(t.text());
+                    } else if ((p + t.text()).length <= inputMaxlength) {
                         activeInput.val(p + t.text());
                     }
             }
@@ -1055,8 +1058,8 @@ App.init = function () {
             if (App.jControlPanel && !App.jControlPanel.hasClass("visible")) { // if control panel is not active
                 activeElement.blur();
                 App.jPriceInput.blur();
-                if (App.jCashInput){
-                        App.jCashInput.blur();
+                if (App.jCashInput) {
+                    App.jCashInput.blur();
                 }
             }
         } else if (e.keyCode === App.key.F10) { // F10 = open cash drawer
@@ -1074,7 +1077,7 @@ App.init = function () {
         } else {
             if (App.jControlPanel && !App.jControlPanel.hasClass("visible")) {
                 if (e.keyCode >= 96 && e.keyCode <= 105) { // 96=num0, 105=num9
-                    App.keyboardKeys["_" + (e.keyCode - 96)].click();
+                    App.keyboardKeys["btn" + (e.keyCode - 96)].click();
                 } else {
                     switch (e.keyCode) {
                         case App.key.NUMPAD_ASTERISK: // 106=num*
@@ -1087,7 +1090,7 @@ App.init = function () {
                             App.keyboardKeys.dot.click();
                             break;
                         case App.key.NUMPAD_SLASH: // 111=num/
-                            App.keyboardKeys.c.click();
+                            App.keyboardKeys.clear.click();
                             break;
                         case App.key.BACKSPACE: // 8=backspace
                             App.keyboardKeys.back.click();
@@ -1567,28 +1570,30 @@ App.renderWebRegister = function () {
         paymentKeyboard.find("button").click(function () {
             var t = $(this);
             var id = t.attr("id");
-            var currentInput = App.jCashInput.val();
-            var decimalPointIndex = currentInput.indexOf(".");
+            var currentInputVal = App.jCashInput.val();
+            var decimalPointIndex = currentInputVal.indexOf(".");
             switch (id) {
                 case "pbtndot":
-                    if (currentInput.length > 0 && decimalPointIndex < 0) {
-                        App.jCashInput.val(currentInput + ".");
-                    }
+                    //if (currentInputVal.length > 0 && decimalPointIndex < 0) {
+                        //App.jCashInput.val(currentInputVal + ".");
+                    App.keyboardKeys.dot.click();
+                    //}
                     break;
                 case "pbtnok":
                     App.jCashInput.blur();
                     break;
                 case "pbtnb":
-                    App.jCashInput.val(currentInput.slice(0, currentInput.length - 1));
+                    //App.jCashInput.val(currentInputVal.slice(0, currentInputVal.length - 1));
+                    App.keyboardKeys.back.click();
                     break;
                 default:
-                    if (decimalPointIndex > 0) {
-                        if (currentInput.length - decimalPointIndex < 3) {
-                            App.jCashInput.val(currentInput + t.text());
+                    /*if (decimalPointIndex > 0) {
+                        if (currentInputVal.length - decimalPointIndex < 3) {
+                            App.keyboardKeys["btn" + t.text()].click();
                         }
-                    } else {
-                        App.jCashInput.val(currentInput + t.text());
-                    }
+                    } else {*/
+                        App.keyboardKeys["btn" + t.text()].click();
+                    //}
             }
         });
         paymentKeyboard.appendTo(payment);
@@ -1603,6 +1608,7 @@ App.renderWebRegister = function () {
 
         var cashConfirm = $("<button>").attr("id", "cash-confirm").text(App.lang.pay_confirm).click(function () {
             var t = $(this);
+            App.jCashInput.blur();
             if (!t.hasClass("disabled")) {
                 t.off();
                 clearInterval(App._receiptTimeInterval);

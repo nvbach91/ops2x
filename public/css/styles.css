@@ -93,7 +93,7 @@ form {
 }
 form, .mod-form {
     background-color: #fff;
-    padding: 0px 20px;
+    padding: 0 20px;
     width: 100%;
     max-width: 640px;
     flex-direction: column;
@@ -133,7 +133,7 @@ select#employee-username {
     background-position: 20px;
     background-repeat: no-repeat;
     background-size: 20px;
-    padding: 15px 0px;
+    padding: 15px 0;
     text-indent: 56px;
 }
 form [type="password"] {
@@ -545,7 +545,7 @@ div#logout {
     padding: 10px 0;
     flex-grow: 1;
     text-align: center;
-    margin: 0px;
+    margin: 0;
     max-width: 200px;
     min-width: 100px;
     width: 100%;    
@@ -861,7 +861,7 @@ button:disabled {
 #sale-groups button, .qs-item {
     white-space: nowrap;
     width: 33.33333%;
-    margin: 0px;
+    margin: 0;
     display: inline-block;
     position: relative;
 }
@@ -1423,6 +1423,7 @@ div#taxes-label {
     max-width: 460px;
     margin: 0 auto;
     min-height: 80px;
+    border: 1px solid #CACACA
 }
 #pk-toggle {
     position: absolute;
@@ -1516,6 +1517,7 @@ div#taxes-label {
     width: 33.33333%;
     margin: 0;
     font-size: 16px;
+    border-radius: 0;
 }
 .cash-total {
     line-height: 60px;
