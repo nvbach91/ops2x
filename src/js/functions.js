@@ -9,11 +9,12 @@ App.key = {
     SPACE: 32,
     BACKSPACE: 8,
     TAB: 9,
-    NUMPAD_MINUS: 109,
     MINUS_UNDERSCORE: 189,
     FIREFOX_MINUS_UNDERSCORE: 173,
+    NUMPAD_MINUS: 109,
     NUMPAD_ASTERISK: 106,
-    NUMPAD_DOT_DEL: 110
+    NUMPAD_DOT_DEL: 110,
+    NUMPAD_SLASH: 111
 };
 
 // returns current window width for animations
@@ -860,9 +861,27 @@ App.simulateEnterKeyup = function () {
 
 // binds events to virtual keyboard
 App.bindKeyboard = function () {
+    App.keyboardKeys = {
+        _0: $("#btn0"),
+        _1: $("#btn1"),
+        _2: $("#btn2"),
+        _3: $("#btn3"),
+        _4: $("#btn4"),
+        _5: $("#btn5"),
+        _6: $("#btn6"),
+        _7: $("#btn7"),
+        _8: $("#btn8"),
+        _9: $("#btn9"),
+        dot: $("#btndot"),
+        c: $("#btnc"),
+        neg: $("#btnn"),
+        mul: $("#btnm"),
+        plu: $("#btnp"),
+        back: $("#btnb")
+    };
     App.keyboard = $("#keyboard");
-    var btnPLU = App.keyboard.find("#btnp");
-    var btnMul = App.keyboard.find("#btnm");
+    var btnPLU = App.keyboardKeys.plu;
+    var btnMul = App.keyboardKeys.mul;
     App.keyboard.find("button").each(function () {
         var t = $(this);
         App.bindClickEffect(t);
@@ -874,6 +893,10 @@ App.bindKeyboard = function () {
             var id = t.attr("id");
             var isPluActive = btnPLU.hasClass("activePLU");
             var activeInput = isPluActive ? App.jPluSearchBox : App.jPriceInput;
+            var cashInput = $("#cash-input");
+            if (cashInput.size()) {
+                activeInput = cashInput;
+            }
             var inputMaxlength = isPluActive ? 13 : 9;
             var p = activeInput.val();
             switch (id) {
@@ -1016,20 +1039,24 @@ App.init = function () {
     App._timeBetweenConsecutiveScannings = 2000;
     // esc to remove curtain, focus price input after hitting enter if price input is not yet focused
     $(document).keydown(function (e) {
+        var activeElement = $(document.activeElement);
         if (e.keyCode === App.key.ESC) {
             App.closeCurtain();
         } else if (e.keyCode === App.key.ENTER) {
-            if (App.jControlPanel && !App.jControlPanel.hasClass("visible")) { // if control panel is not active
-                if (!App.curtain && App.jPriceInput /*&& !App.justUsedScanner*/) {
-                    App.jPriceInput.focus();
-                } else if (App.jCashInput) {
-                    App.jCashInput.focus();
+            if (!App.jControlPanel.hasClass("visible")) { // if control panel is not active
+                activeElement.blur();
+                App.jPriceInput.blur();
+                if (App.jCashInput){
+                    if(App.jCashInput.is(":focus")) {
+                        App.jCashInput.blur();
+                    } else {
+                        App.jCashInput.focus();
+                    }
                 }
             }
         } else if (e.keyCode === App.key.F10) { // F10 = open cash drawer
             App.openCashDrawer();
         } else if (e.keyCode === App.key.SPACE) { // space = proceed to payment and then confirm payment
-            var activeElement = $(document.activeElement);
             if (!activeElement.is("input") && !App.jControlPanel.hasClass("visible")) {
                 activeElement.blur();
                 var cashConf = $("#cash-confirm");
@@ -1039,6 +1066,20 @@ App.init = function () {
                     App.jPay.click();
                 }
             };
+        } else {
+            if (!App.jControlPanel.hasClass("visible")) {
+                if (e.keyCode >= 96 && e.keyCode <= 105) { // 96=num0, 105=num9
+                    App.keyboardKeys["_" + (e.keyCode - 96)].click();
+                } else if (e.keyCode === App.key.NUMPAD_ASTERISK) { // 106=num*
+                    App.keyboardKeys.mul.click();
+                } else if (e.keyCode === App.key.NUMPAD_MINUS) { // 109=num-
+                    App.keyboardKeys.neg.click();
+                } else if (e.keyCode === App.key.NUMPAD_DOT_DEL) { // 110=num.            
+                    App.keyboardKeys.dot.click();
+                } else if (e.keyCode === App.key.NUMPAD_SLASH) { // 110=num.
+                    App.keyboardKeys.c.click();
+                }
+            }
         }
         return true;
     });
