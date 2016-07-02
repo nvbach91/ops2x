@@ -1056,11 +1056,7 @@ App.init = function () {
                 activeElement.blur();
                 App.jPriceInput.blur();
                 if (App.jCashInput){
-                    if(App.jCashInput.is(":focus")) {
                         App.jCashInput.blur();
-                    } else {
-                        App.jCashInput.focus();
-                    }
                 }
             }
         } else if (e.keyCode === App.key.F10) { // F10 = open cash drawer
