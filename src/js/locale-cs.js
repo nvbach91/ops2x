@@ -77,7 +77,7 @@ App.GLocalCS = {
     receipt_tin                : "IČO:",
     receipt_vat                : "DIČ:",
     receipt_receipt            : "Daňový doklad ",
-    receipt_total_items        : "Celkem položek:",
+    receipt_total_items        : "Počet položek:",
     receipt_subtotal           : "Mezisoučet:",
     receipt_round              : "Zaokrouhlení:",
     receipt_total_amount       : "Celkem:",
@@ -156,7 +156,7 @@ App.GLocalCS = {
     history_print              : "Vytisknout účtenku",
     
     customer_display_name      : "Zákaznický displej",
-    customer_display_welcome   : "***   Vítejte   ***",
+    customer_display_welcome   : function () {return "***   Vítejte   ***\n    " + App.getDate();},
     
     info_close_register        : "Tip: Vyberte den pro generování finanční zprávy",
     info_use_br                : "Tip: Použijte '&lt;br&gt;' jako nový řádek",

@@ -330,9 +330,9 @@ div#logout {
     background-size: 30px;
     line-height: 50px;
     /*----ATTENTION----*/
-    text-indent: 30px;
+    text-indent: -9999px;
     position: absolute;
-    width: 120px;
+    width: 50px;
     top: 0;
     left: 0;
     background-color: transparent;
@@ -552,6 +552,9 @@ div#logout {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+.hr-col:nth-child(3), .hr-col:nth-child(4), .hr-col:nth-child(6) {
+    display: none;
 }
 .hr-header .hr-col {
     padding: 0;
@@ -1703,6 +1706,13 @@ div#taxes-label {
         font-size: 14px;
         padding: 0 5px;
     }
+    #go-back {
+        text-indent: 30px;
+        width: 120px;
+    }
+    .hr-col:nth-child(3) {
+        display: initial;
+    }
 }
 
 @media screen and (min-width: 520px){
@@ -1726,6 +1736,12 @@ div#taxes-label {
     }
     .pc-label {
         font-size: 28px;
+    }
+}
+
+@media screen and (min-width: 640px) {
+    .hr-col:nth-child(4), .hr-col:nth-child(6) {
+        display: initial;
     }
 }
 

@@ -54,6 +54,15 @@ Array.prototype.binaryIndexOf = function (field, needle) {
     return -1;
 };
 
+App.findPluInCatalogByEan = function (ean) {
+    var articleIndex = App.catalog.articles.binaryIndexOf("ean", ean);
+    return articleIndex >= 0 ? App.catalog.articles[articleIndex] : null;
+};
+
+App.catalogHasEan = function (ean) {
+    return App.findPluInCatalogByEan(ean) ? true : false;
+};
+
 App.binaryInsert = function (value, array, compareField, startVal, endVal) {
 
     var length = array.length;
@@ -1043,7 +1052,7 @@ App.init = function () {
         if (e.keyCode === App.key.ESC) {
             App.closeCurtain();
         } else if (e.keyCode === App.key.ENTER) {
-            if (!App.jControlPanel.hasClass("visible")) { // if control panel is not active
+            if (App.jControlPanel && !App.jControlPanel.hasClass("visible")) { // if control panel is not active
                 activeElement.blur();
                 App.jPriceInput.blur();
                 if (App.jCashInput){
@@ -1067,7 +1076,7 @@ App.init = function () {
                 }
             };
         } else {
-            if (!App.jControlPanel.hasClass("visible")) {
+            if (App.jControlPanel && !App.jControlPanel.hasClass("visible")) {
                 if (e.keyCode >= 96 && e.keyCode <= 105) { // 96=num0, 105=num9
                     App.keyboardKeys["_" + (e.keyCode - 96)].click();
                 } else {
@@ -1119,7 +1128,6 @@ App.renderSaleGroupsButtons = function () {
 };
 
 App.renderQuickSales = function () {
-    var articles = App.catalog.articles;
     var tabsContainer = $("#tabs").empty();
     var tabNavsContainer = $("#tab-navs").empty();
     var tabs = App.buttons.tabs;
@@ -1132,7 +1140,7 @@ App.renderQuickSales = function () {
                 + '">';
         for (var j = 0; j < quickSales.length; j++) {
             var qs = quickSales[j];
-            var item = articles[articles.binaryIndexOf("ean", qs.ean)];
+            var item = App.findPluInCatalogByEan(qs.ean);
             if (item) {
                 tabsContent +=
                         '<div class="qs-item">' +
@@ -1408,7 +1416,7 @@ App.renderWebRegister = function () {
     // bind pay button to proceed to payment, generate payment box
     App.jPay.click(function () {
         if (App.jSaleList.find(".sale-item").size() < 1) {
-            App.showOnCustomerDisplay(App.lang.customer_display_welcome);
+            App.showOnCustomerDisplay(App.lang.customer_display_welcome());
             return false;
         }
         App.jPriceInput.val("");
@@ -1643,12 +1651,12 @@ App.renderWebRegister = function () {
                         emailReceipt.appendTo(payment);
                         //payment.append(paymentComplete);
                         /*var donePayment = $("<button>").attr("id", "done-payment").text(App.lang.pay_done).click(function () {
-                            App.showOnCustomerDisplay(App.lang.customer_display_welcome);
+                            App.showOnCustomerDisplay(App.lang.customer_display_welcome());
                             App.closeCurtain();
                         }).appendTo(payment);
                         App.bindClickEffect(donePayment);*/
                         cashConfirm.text(App.lang.pay_done).click(function(){                            
-                            App.showOnCustomerDisplay(App.lang.customer_display_welcome);
+                            App.showOnCustomerDisplay(App.lang.customer_display_welcome());
                             App.closeCurtain();
                         });
                         App.lastReceipt = resp.msg;
@@ -1683,11 +1691,11 @@ App.renderWebRegister = function () {
                     $("<div>").addClass("pc-label").html(App.lang.pay_sync_failed).prependTo(payment);
                     //payment.append(paymentComplete);
                     /*$("<button>").attr("id", "done-payment").text(App.lang.pay_done).click(function () {
-                        App.showOnCustomerDisplay(App.lang.customer_display_welcome);
+                        App.showOnCustomerDisplay(App.lang.customer_display_welcome());
                         App.closeCurtain();
                     }).appendTo(payment);*/
                     cashConfirm.text(App.lang.pay_done).click(function(){                            
-                            App.showOnCustomerDisplay(App.lang.customer_display_welcome);
+                            App.showOnCustomerDisplay(App.lang.customer_display_welcome());
                             App.closeCurtain();
                         });
                         App.lastReceipt = resp.msg;
@@ -1812,11 +1820,10 @@ App.translateCzeckKeys = function (s) {
     return res;
 };
 
-App.addPluItem = function (ean) {
+App.addPluItem = function (mainEan) {
     var jPluSearchBox = App.jPluSearchBox;
-    var mainItemIndex = App.catalog.articles.binaryIndexOf("ean", ean);
-    if (mainItemIndex >= 0) {
-        var mainItem = App.catalog.articles[mainItemIndex];
+    var mainItem = App.findPluInCatalogByEan(mainEan);
+    if (mainItem) {
         var mult = App.getMultiplicationNumber();
         App.addItemToCheckout(mainItem, mult);
         jPluSearchBox.removeClass("not-found");
@@ -1825,19 +1832,18 @@ App.addPluItem = function (ean) {
         App.isInRegistrySession = false/*.text("0")*/;
         App.jPriceInput.blur();
         App.jPriceInput.val(mainItem.price);
-        var linkIndex = App.pluLinks.binaryIndexOf("main", ean);
+        var linkIndex = App.pluLinks.binaryIndexOf("main", mainEan);
         if (linkIndex >= 0) {
             var sideEAN = App.pluLinks[linkIndex].side;
-            var sideItemIndex = App.catalog.articles.binaryIndexOf("ean", sideEAN);
-            if (sideItemIndex >= 0) {
-                var sideItem = App.catalog.articles[sideItemIndex];
+            var sideItem = App.findPluInCatalogByEan(sideEAN);
+            if (sideItem) {
                 App.addItemToCheckout(sideItem, mult);
             }
         }
     } else {
         //t.addClass("not-found");
         jPluSearchBox.attr("placeholder", App.lang.misc_plu_not_found);
-        App.showWarning(App.lang.misc_plu_not_found + ": <strong>" + ean + "</strong>");
+        App.showWarning(App.lang.misc_plu_not_found + ": <strong>" + mainEan + "</strong>");
         App.beep(App.longBeeper);
     }
     jPluSearchBox.val("");
@@ -2457,11 +2463,11 @@ App.requestModifyItem = function (url, data, button) {
                     var articleIndex = articles.binaryIndexOf("ean", resp.msg.ean);
                     if (isSaveRequestType) {
                         if (articleIndex >= 0) {
-                            updatedArticle.id = articles[articleIndex].id;
-                            articles[articleIndex] = updatedArticle;
+                            updatedStockArticle.id = articles[articleIndex].id;
+                            articles[articleIndex] = updatedStockArticle;
                         } else {
-                            updatedArticle.id = articles.length;
-                            App.binaryInsert(updatedArticle, articles, 'ean');
+                            updatedStockArticle.id = articles.length;
+                            App.binaryInsert(updatedStockArticle, articles, 'ean');
                             var modItem = button.parents().eq(2);
                             modItem.find("input[placeholder='EAN']").prop("disabled", true);
                             modItem.find(".mi-header").removeClass("new-item");
@@ -2483,23 +2489,24 @@ App.requestModifyItem = function (url, data, button) {
                     App.renderQuickSales();
                     break;
                 case "/mod/plulinks" :
-                    App.pluLinks = resp.msg;                    
-                    var modItem = button.parents().eq(2);
-                    modItem.find("input[placeholder='MAIN']").prop("disabled", true);
+                    App.pluLinks = resp.msg;
+                    App.renderPluLinksSettings();
+                    /*var modItem = button.parents().eq(2);
+                    modItem.find("input[placeholder='MAIN']").prop("disabled", true);*/
                     break;
                 case "/mod/updatestock" :              
-                    var updatedArticle = resp.msg;      
-                    var articles = App.stock.articles;
-                    var articleIndex = articles.binaryIndexOf("ean", updatedArticle.ean);
+                    var updatedStockArticle = resp.msg;      
+                    var stockArticles = App.stock.articles;
+                    var stockArticleIndex = stockArticles.binaryIndexOf("ean", updatedStockArticle.ean);
                     if (isSaveRequestType) {
-                        if (articleIndex >= 0) {
-                            articles[articleIndex].balance = updatedArticle.balance;
+                        if (stockArticleIndex >= 0) {
+                            stockArticles[stockArticleIndex].balance = updatedStockArticle.balance;
                         } else {
-                            App.binaryInsert(updatedArticle, articles, 'ean');
+                            App.binaryInsert(updatedStockArticle, stockArticles, 'ean');
                         }
                     } else {
-                        if (articleIndex >= 0) {
-                            articles.splice(articleIndex, 1);
+                        if (stockArticleIndex >= 0) {
+                            stockArticles.splice(stockArticleIndex, 1);
                         }
                     }
                     break;
@@ -2611,10 +2618,14 @@ App.generateModItemFormDOM = function (type, item) {
     if (isSG) {
         header = item.group ? item.group.value : header;
     } else if (isQS) {
-        var eanItem = App.catalog.articles[App.catalog.articles.binaryIndexOf("ean", item.ean.value)];
-        header = item.ean.value + (eanItem ? (" - " + eanItem.name) : "");        
+        var eanItem = App.findPluInCatalogByEan(item.ean.value);
+        header = item.ean.value + " - " + (eanItem ? eanItem.name : App.lang.misc_plu_not_found);        
     } else if (type === "plulinks") {
-        header = "[" + item.main.value + "] → [" + item.side.value + "]";
+        var mainEanItem = App.findPluInCatalogByEan(item.main.value);
+        var sideEanItem = App.findPluInCatalogByEan(item.side.value);
+        header = "[" + (mainEanItem ? mainEanItem.name : " ... ") 
+                + "] → [" 
+                + (sideEanItem ? sideEanItem.name : " ... ") + "]";
     }
 
     var keys = Object.keys(item);
@@ -2751,17 +2762,17 @@ App.bindModSettings = function (modFormContainer, modifyUrl) {
         if (submitted.requestType === "save") {
             if (submitted.dataFunction === App.getMiQuickSalesUpdateData) {
                 var theEan = submitted.button.parents().eq(1).find("input[placeholder='EAN']").val();
-                if (App.catalog.articles.binaryIndexOf("ean", theEan) === -1) {
+                if (!App.catalogHasEan(theEan)) {
                     App.showWarning(App.lang.misc_plu_not_found);
                     return false;
                 }
             } else if (submitted.dataFunction === App.getMiPluLinksUpdateData) {
                 var mainEAN = submitted.button.parents().eq(1).find("input[placeholder='MAIN']").val();
                 var sideEAN = submitted.button.parents().eq(1).find("input[placeholder='SIDE']").val();
-                if (App.catalog.articles.binaryIndexOf("ean", mainEAN) === -1) {
+                if (!App.catalogHasEan(mainEAN)) {
                     App.showWarning(App.lang.misc_plu_not_found + ": " + mainEAN);
                     return false;
-                } else if (App.catalog.articles.binaryIndexOf("ean", sideEAN) === -1) {
+                } else if (!App.catalogHasEan(sideEAN)) {
                     App.showWarning(App.lang.misc_plu_not_found + ": " + sideEAN);
                     return false;
                 }
@@ -2917,10 +2928,10 @@ App.bindModSettings = function (modFormContainer, modifyUrl) {
                     if (submitted.requestType === "save") {
                         var mainEAN = submitted.button.parents().eq(1).find("input[placeholder='MAIN']").val();
                         var sideEAN = submitted.button.parents().eq(1).find("input[placeholder='SIDE']").val();
-                        if (App.catalog.articles.binaryIndexOf("ean", mainEAN) === -1) {                        
+                        if (!App.catalogHasEan(mainEAN)) {                        
                             App.showWarning(App.lang.misc_plu_not_found + ": " + mainEAN);
                             return false;
-                        } else if (App.catalog.articles.binaryIndexOf("ean", sideEAN) === -1) {
+                        } else if (!App.catalogHasEan(sideEAN)) {
                             App.showWarning(App.lang.misc_plu_not_found + ": " + sideEAN);
                             return false;
                         }
@@ -2959,8 +2970,9 @@ App.bindModSettings = function (modFormContainer, modifyUrl) {
                 }));
                 modItem.submit(function (e) {
                     e.preventDefault();
+                    var submittedEan = submitted.button.parents().eq(1).find("input[placeholder='EAN']").val();
                     if (submitted.dataFunction === App.getMiQuickSalesUpdateData
-                            && App.catalog.articles.binaryIndexOf("ean", submitted.button.parents().eq(1).find("input[placeholder='EAN']").val()) === -1
+                            && !App.catalogHasEan(submittedEan)
                             && submitted.requestType === "save") {
                         App.showWarning(App.lang.misc_plu_not_found);
                     } else {
@@ -3272,10 +3284,9 @@ App.renderPLUSettings = function () {
         var searchEAN = pluInput.val();
         pluInput.val("");
         if (searchEAN) {
-            var i = App.catalog.articles.binaryIndexOf("ean", searchEAN);
+            var item = App.findPluInCatalogByEan(searchEAN);
             modifier.empty();
-            if (i >= 0) {
-                var item = App.catalog.articles[i];
+            if (item) {
                 var modItem = $(App.generateModItemFormDOM("plu", {
                     ean: {title: "1-13 digits", valid : /^\d{1,13}$/, value: item.ean},
                     name: {title: "1-128 characters", valid : /^[^"]{1,128}$/, value: item.name},
@@ -3411,17 +3422,16 @@ App.renderStockSettings = function () {
         var searchEAN = pluInput.val();
         pluInput.val("");
         if (searchEAN) {
-            var i = App.catalog.articles.binaryIndexOf("ean", searchEAN);
             modifier.empty();
-            if (i >= 0) {
-                var catalogItem = App.catalog.articles[i];
+            var catalogItem = App.findPluInCatalogByEan(searchEAN);
+            if (catalogItem) {
                 var stockArticle = {
                     ean: catalogItem.ean,
                     balance: 0
                 };
-                var k = App.stock.articles.binaryIndexOf("ean", searchEAN);
-                if (k >= 0) {
-                    stockArticle = App.stock.articles[k];
+                var stockArticleIndex = App.stock.articles.binaryIndexOf("ean", searchEAN);
+                if (stockArticleIndex >= 0) {
+                    stockArticle = App.stock.articles[stockArticleIndex];
                 }
                 var modItem = $(App.generateModItemFormDOM("stock", {
                     ean: {title: "1-13 digits", valid : /^\d{1,13}$/, value: catalogItem.ean},
@@ -3631,6 +3641,7 @@ App.renderOffHistory = function () {
         offlineReceipt.items = JSON.parse(offlineReceipt.items);
     }
     var receiptListDOM = '<div class="history-receipt hr-header">\
+                            <div class="hr-col hr-index"></div>\
                             <div class="hr-col">' + App.lang.history_number + '</div>\
                             <div class="hr-col">' + App.lang.history_date + '</div>\
                             <div class="hr-col">' + App.lang.history_employee + '</div>\
@@ -3689,6 +3700,7 @@ App.renderSaleHistory = function () {
     var container = App.cpBody.find("#sale-history-container");
     var receipts = App.sales.receipts;
     var receiptListDOM = '<div class="history-receipt hr-header">\
+                            <div class="hr-col hr-index"></div>\
                             <div class="hr-col">' + App.lang.history_number + '</div>\
                             <div class="hr-col">' + App.lang.history_date + '</div>\
                             <div class="hr-col">' + App.lang.history_employee + '</div>\
