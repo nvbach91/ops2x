@@ -1639,8 +1639,8 @@ App.renderWebRegister = function () {
                             window.print();
                             receiptPrinted = true;
                         }).prependTo(payment);
-                        //var emailReceipt = App.generateEmailReceipt(currentReceiptObj);
-                        //emailReceipt.appendTo(payment);
+                        var emailReceipt = App.generateEmailReceipt(currentReceiptObj);
+                        emailReceipt.appendTo(payment);
                         //payment.append(paymentComplete);
                         /*var donePayment = $("<button>").attr("id", "done-payment").text(App.lang.pay_done).click(function () {
                             App.showOnCustomerDisplay(App.lang.customer_display_welcome);
