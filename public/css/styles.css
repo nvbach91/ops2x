@@ -780,13 +780,13 @@ button:disabled {
     height: 40px;
 }
 #checkout-btns button {
-    margin: 2px 8px;
+    margin: 2px 5px;
     color: #353535;
     line-height: 35px;
     flex-grow: 0;
-    font-size: 16px;
+    font-size: 12px;
     text-align: right;
-    padding: 0 5px;
+    padding: 0 2px;
     border: 1px solid transparent;
     text-indent: 25px;
     background-size: 18px;
@@ -856,7 +856,7 @@ button:disabled {
     display: none;
 }
 #sale-groups button, .qs-item {
-    white-space: normal;
+    white-space: nowrap;
     width: 33.33333%;
     margin: 0px;
     display: inline-block;
@@ -1696,6 +1696,11 @@ div#taxes-label {
     }
     #sale-list input.si-quantity, #sale-list, .sale-item-main div, input.si-name {
         font-size: 14px;
+    }
+    #checkout-btns button {
+        margin: 2px 5px;
+        font-size: 14px;
+        padding: 0 5px;
     }
 }
 

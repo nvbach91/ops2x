@@ -1070,16 +1070,25 @@ App.init = function () {
             if (!App.jControlPanel.hasClass("visible")) {
                 if (e.keyCode >= 96 && e.keyCode <= 105) { // 96=num0, 105=num9
                     App.keyboardKeys["_" + (e.keyCode - 96)].click();
-                } else if (e.keyCode === App.key.NUMPAD_ASTERISK) { // 106=num*
-                    App.keyboardKeys.mul.click();
-                } else if (e.keyCode === App.key.NUMPAD_MINUS) { // 109=num-
-                    App.keyboardKeys.neg.click();
-                } else if (e.keyCode === App.key.NUMPAD_DOT_DEL) { // 110=num.            
-                    App.keyboardKeys.dot.click();
-                } else if (e.keyCode === App.key.NUMPAD_SLASH) { // 110=num.
-                    App.keyboardKeys.c.click();
-                } else if (e.keyCode === App.key.BACKSPACE) { // 110=num.
-                    App.keyboardKeys.back.click();
+                } else {
+                    switch (e.keyCode) {
+                        case App.key.NUMPAD_ASTERISK: // 106=num*
+                            App.keyboardKeys.mul.click();
+                            break;
+                        case App.key.NUMPAD_MINUS: // 109=num-
+                            App.keyboardKeys.neg.click();
+                            break;
+                        case App.key.NUMPAD_DOT_DEL: // 110=num.
+                            App.keyboardKeys.dot.click();
+                            break;
+                        case App.key.NUMPAD_SLASH: // 111=num/
+                            App.keyboardKeys.c.click();
+                            break;
+                        case App.key.BACKSPACE: // 8=backspace
+                            App.keyboardKeys.back.click();
+                            break;
+                        default:                         
+                    }
                 }
             }
         }
@@ -1128,11 +1137,8 @@ App.renderQuickSales = function () {
                 tabsContent +=
                         '<div class="qs-item">' +
                         '<button style="background-color:#' + qs.bg + '">' + item.name + '</button>' +
-                        /*'<div class="qs-id">qs-t' + (i + 1) + "-" + j + '</div>\*/
                         '<div class="qs-ean">' + item.ean + '</div>' +
                         '<div class="qs-price">' + item.price + ' ' + App.settings.currency.symbol + '</div>' +
-                        /*<div class="qs-group">' + item.group + '</div>\
-                        <div class="qs-tax">' + item.tax + '</div>\*/
                     '</div>';
             }
         }
