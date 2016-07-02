@@ -1078,6 +1078,8 @@ App.init = function () {
                     App.keyboardKeys.dot.click();
                 } else if (e.keyCode === App.key.NUMPAD_SLASH) { // 110=num.
                     App.keyboardKeys.c.click();
+                } else if (e.keyCode === App.key.BACKSPACE) { // 110=num.
+                    App.keyboardKeys.back.click();
                 }
             }
         }
