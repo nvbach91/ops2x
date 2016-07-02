@@ -956,12 +956,17 @@ App.bindKeyboard = function () {
                         activeInput.val(p + ".");
                     }
                     break;
-                default: //numbers
-                    if (activeInput.attr("id") === "cash-input" && /^\d+\.\d{2}$/.test(p)) {
+                default: //numbers 0-9 numpad
+                    if (/^\d+\.\d{2}$/.test(p)) {
                         activeInput.val("");
                         activeInput.val(t.text());
                     } else if ((p + t.text()).length <= inputMaxlength) {
-                        activeInput.val(p + t.text());
+                        activeInput.val(p + t.text());                        
+                        if (/^\d+\.\d{2}$/.test(activeInput.val())) {
+                            if (activeInput.attr("id") === "cash-input") {
+                                activeInput.blur();
+                            }
+                        }
                     }
             }
             App.beep(App.beeper);
