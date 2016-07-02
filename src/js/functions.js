@@ -2606,6 +2606,8 @@ App.generateModItemFormDOM = function (type, item) {
     } else if (isQS) {
         var eanItem = App.catalog.articles[App.catalog.articles.binaryIndexOf("ean", item.ean.value)];
         header = item.ean.value + (eanItem ? (" - " + eanItem.name) : "");        
+    } else if (type === "plulinks") {
+        header = "[" + item.main.value + "] → [" + item.side.value + "]";
     }
 
     var keys = Object.keys(item);
