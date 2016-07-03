@@ -15,7 +15,7 @@ var config = {
         auth: {
             // this should be changed, create your own gmail account then enable less secure apps on that account
             user: 'etherealcz@gmail.com',
-            pass: 'ttrello2015'
+            pass: ''
         }
     }
 };
