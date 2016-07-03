@@ -151,6 +151,11 @@ App.getDate = function (s) {
     return d.day + " " + d.date + "/" + d.month + "/" + d.year + " " + d.hh + ":" + d.mm + ":" + d.ss;
 };
 
+App.getDateOnly = function () {
+    var d = App.createDateObject();
+    return d.day + " " + d.date + "/" + d.month + "/" + d.year;    
+};
+
 App.getDatePrefix = function (s) {
     var d = App.createDateObject(s);
     return d.year + "" + d.month + "" + d.date;
