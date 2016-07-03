@@ -156,7 +156,7 @@ App.GLocalVI = {
     history_print              : "Print this receipt",
     
     customer_display_name      : "Customer Display",
-    customer_display_welcome   : function () {return "***   Welcome   ***\n    " + App.getDateOnly();},
+    customer_display_welcome   : function () {return "***   Welcome   ***\n   " + App.getDateOnly();},
     
     info_close_register        : "Tip: Choose a day to generate report",
     info_use_br                : "Tip: Use '&lt;br&gt;' to add new lines",
