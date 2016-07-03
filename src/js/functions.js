@@ -2470,11 +2470,11 @@ App.requestModifyItem = function (url, data, button) {
                     var articleIndex = articles.binaryIndexOf("ean", resp.msg.ean);
                     if (isSaveRequestType) {
                         if (articleIndex >= 0) {
-                            updatedStockArticle.id = articles[articleIndex].id;
-                            articles[articleIndex] = updatedStockArticle;
+                            updatedArticle.id = articles[articleIndex].id;
+                            articles[articleIndex] = updatedArticle;
                         } else {
-                            updatedStockArticle.id = articles.length;
-                            App.binaryInsert(updatedStockArticle, articles, 'ean');
+                            updatedArticle.id = articles.length;
+                            App.binaryInsert(updatedArticle, articles, 'ean');
                             var modItem = button.parents().eq(2);
                             modItem.find("input[placeholder='EAN']").prop("disabled", true);
                             modItem.find(".mi-header").removeClass("new-item");
